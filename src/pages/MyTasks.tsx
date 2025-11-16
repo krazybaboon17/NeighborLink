@@ -23,7 +23,9 @@ export default function MyTasks() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [posted, setPosted] = useState<TaskRow[]>([]);
+  const [postedWithPendingOffers, setPostedWithPendingOffers] = useState<TaskRow[]>([]);
   const [applied, setApplied] = useState<TaskRow[]>([]);
+  const [appliedPending, setAppliedPending] = useState<TaskRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,10 +53,25 @@ export default function MyTasks() {
       console.log('Posted tasks:', postedData);
       setPosted(postedData as any || []);
 
+      // Posted tasks with pending offers
+      const { data: pendingOffersData, error: pendingOffersErr } = await supabase
+        .from('offers')
+        .select('task_id')
+        .eq('status', 'pending')
+        .in('task_id', (postedData || []).map((t: any) => t.id));
+      
+      if (pendingOffersErr) {
+        console.error('Error fetching pending offers:', pendingOffersErr);
+      } else {
+        const taskIdsWithPendingOffers = [...new Set((pendingOffersData || []).map((o: any) => o.task_id))];
+        const postedWithPending = (postedData || []).filter((t: any) => taskIdsWithPendingOffers.includes(t.id));
+        setPostedWithPendingOffers(postedWithPending);
+      }
+
       // tasks user has applied for (via offers)
       const { data: offersData, error: offersErr } = await supabase
         .from('offers')
-        .select('task_id')
+        .select('task_id, status')
         .eq('helper_id', user!.id);
       
       if (offersErr) {
@@ -64,7 +81,9 @@ export default function MyTasks() {
 
       console.log('Offers data:', offersData);
       const taskIds = (offersData || []).map((o: any) => o.task_id);
+      const pendingTaskIds = (offersData || []).filter((o: any) => o.status === 'pending').map((o: any) => o.task_id);
       let appliedTasks: any[] = [];
+      let appliedPendingTasks: any[] = [];
       
       if (taskIds.length > 0) {
         console.log('Fetching tasks for offers:', taskIds);
@@ -81,9 +100,11 @@ export default function MyTasks() {
         
         console.log('Applied tasks:', tdata);
         appliedTasks = tdata || [];
+        appliedPendingTasks = (tdata || []).filter((t: any) => pendingTaskIds.includes(t.id));
       }
       
       setApplied(appliedTasks);
+      setAppliedPending(appliedPendingTasks);
     } catch (err: any) {
       console.error('Error fetching my tasks:', err);
       // More detailed error message
@@ -110,7 +131,63 @@ export default function MyTasks() {
           </div>
 
           <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Tasks You Posted</h2>
+            <h2 className="text-xl font-semibold mb-4">Your Posted Tasks with Pending Applications</h2>
+            {loading ? (
+              <p>Loading…</p>
+            ) : postedWithPendingOffers.length === 0 ? (
+              <Card className="py-8 text-center">
+                <CardContent>
+                  <p className="text-muted-foreground">No pending applications on your tasks.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {postedWithPendingOffers.map((t) => (
+                  <Card key={t.id} onClick={() => navigate(`/tasks/${t.id}`)} className="cursor-pointer">
+                    <CardHeader>
+                      <CardTitle>{t.title}</CardTitle>
+                      <CardDescription className="line-clamp-2">{t.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-muted-foreground">{t.category} • {t.location}</div>
+                      <div className="mt-2 font-medium">${t.budget_min} - ${t.budget_max}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">Your Applications Awaiting Approval</h2>
+            {loading ? (
+              <p>Loading…</p>
+            ) : appliedPending.length === 0 ? (
+              <Card className="py-8 text-center">
+                <CardContent>
+                  <p className="text-muted-foreground">No pending applications.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {appliedPending.map((t) => (
+                  <Card key={t.id} onClick={() => navigate(`/tasks/${t.id}`)} className="cursor-pointer">
+                    <CardHeader>
+                      <CardTitle>{t.title}</CardTitle>
+                      <CardDescription className="line-clamp-2">{t.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-muted-foreground">{t.category} • {t.location}</div>
+                      <div className="mt-2 font-medium">${t.budget_min} - ${t.budget_max}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">All Tasks You Posted</h2>
             {loading ? (
               <p>Loading…</p>
             ) : posted.length === 0 ? (
@@ -138,7 +215,7 @@ export default function MyTasks() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-4">Tasks You Applied For</h2>
+            <h2 className="text-xl font-semibold mb-4">All Tasks You Applied For</h2>
             {loading ? (
               <p>Loading…</p>
             ) : applied.length === 0 ? (
