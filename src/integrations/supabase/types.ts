@@ -180,7 +180,7 @@ export type Database = {
           id: string
           id_image: string | null
           selfie_image: string | null
-          status: string
+          status: string | null
           user_id: string
         }
         Insert: {
@@ -188,7 +188,7 @@ export type Database = {
           id?: string
           id_image?: string | null
           selfie_image?: string | null
-          status?: string
+          status?: string | null
           user_id: string
         }
         Update: {
@@ -196,7 +196,7 @@ export type Database = {
           id?: string
           id_image?: string | null
           selfie_image?: string | null
-          status?: string
+          status?: string | null
           user_id?: string
         }
         Relationships: [
@@ -206,7 +206,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       volunteer_hours: {
@@ -233,19 +233,19 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "volunteer_hours_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "volunteer_hours_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "volunteer_hours_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          }
         ]
       }
     }
