@@ -43,13 +43,18 @@ export default function Tasks() {
     setLoading(true);
     try {
       console.log('Fetching tasks...');
+      
+      // Check authentication status for debugging
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user ? `Authenticated as ${user.id}` : 'Anonymous user');
 
       // Query tasks first (without join to avoid relationship issues)
-      // Note: RLS policy allows viewing tasks where status = 'open' OR user is owner
+      // Note: RLS policy should allow anonymous users to view open tasks
       // We'll filter for 'open' status in JavaScript after fetching
       const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
         .select('*')
+        .eq('status', 'open')  // Only fetch open tasks for browse page
         .order('created_at', { ascending: false });
 
       if (tasksError) {
@@ -71,19 +76,10 @@ export default function Tasks() {
         return;
       }
 
-      // Filter for open tasks only (RLS already filtered, but we want only open for browse)
-      const openTasks = tasksData.filter((task: any) => task.status === 'open');
-      console.log('Open tasks after filtering:', openTasks);
-      console.log('Number of open tasks:', openTasks.length);
-
-      if (openTasks.length === 0) {
-        console.log('No open tasks found');
-        setTasks([]);
-        return;
-      }
+      console.log('Open tasks found:', tasksData.length);
 
       // Fetch profiles separately
-      const userIds = [...new Set(openTasks.map((t: any) => t.user_id))];
+      const userIds = [...new Set(tasksData.map((t: any) => t.user_id))];
       console.log('Fetching profiles for user IDs:', userIds);
       
       const { data: profilesData, error: profilesError } = await supabase
@@ -103,7 +99,7 @@ export default function Tasks() {
       );
 
       // Combine tasks with profiles
-      const formattedTasks = openTasks.map((task: any) => ({
+      const formattedTasks = tasksData.map((task: any) => ({
         id: task.id,
         title: task.title,
         description: task.description,
