@@ -253,7 +253,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_has_task_access: { Args: { task_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
