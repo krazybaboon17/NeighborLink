@@ -143,7 +143,6 @@ export const Navbar = () => {
                 <a href="/conversations" className="text-foreground hover:text-primary transition-colors">
                   Chat
                 </a>
-                {/* Verify tab removed temporarily */}
               </>
             )}
           </div>
