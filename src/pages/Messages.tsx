@@ -26,9 +26,9 @@ interface Profile {
 }
 
 export default function Messages() {
-  const { taskId } = useParams();
   const [searchParams] = useSearchParams();
-  const helperId = searchParams.get('helper');
+  const taskId = searchParams.get('task');
+  const otherId = searchParams.get('user');
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -45,13 +45,13 @@ export default function Messages() {
       return;
     }
 
-    if (taskId && helperId) {
+    if (taskId && otherId) {
       fetchTask();
       fetchOtherUser();
       fetchMessages();
       subscribeToMessages();
     }
-  }, [taskId, helperId, user]);
+  }, [taskId, otherId, user]);
 
   useEffect(() => {
     scrollToBottom();
@@ -81,7 +81,7 @@ export default function Messages() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', helperId)
+        .eq('id', otherId)
         .single();
 
       if (error) throw error;
@@ -99,7 +99,7 @@ export default function Messages() {
         .from('messages')
         .select('*')
         .eq('task_id', taskId)
-        .or(`and(sender_id.eq.${user?.id},receiver_id.eq.${helperId}),and(sender_id.eq.${helperId},receiver_id.eq.${user?.id})`)
+        .or(`and(sender_id.eq.${user?.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user?.id})`)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -123,8 +123,8 @@ export default function Messages() {
         (payload) => {
           const newMsg = payload.new as Message;
           if (
-            (newMsg.sender_id === user?.id && newMsg.receiver_id === helperId) ||
-            (newMsg.sender_id === helperId && newMsg.receiver_id === user?.id)
+            (newMsg.sender_id === user?.id && newMsg.receiver_id === otherId) ||
+            (newMsg.sender_id === otherId && newMsg.receiver_id === user?.id)
           ) {
             setMessages((prev) => [...prev, newMsg]);
           }
@@ -147,7 +147,7 @@ export default function Messages() {
         .insert({
           task_id: taskId!,
           sender_id: user.id,
-          receiver_id: helperId!,
+          receiver_id: otherId!,
           content: newMessage.trim(),
         });
 

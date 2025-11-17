@@ -33,8 +33,8 @@ const App = () => (
             <Route path="/tasks/:id" element={<TaskDetail />} />
             <Route path="/post-task" element={<PostTask />} />
             <Route path="/my-tasks" element={<MyTasks />} />
-            <Route path="/messages/:taskId" element={<Messages />} />
             <Route path="/conversations" element={<Conversations />} />
+            <Route path="/messages" element={<Messages />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin/verifications" element={<AdminVerifications />} />
             <Route path="/features" element={<Features />} />

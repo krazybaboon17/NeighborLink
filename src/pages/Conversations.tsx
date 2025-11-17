@@ -79,7 +79,11 @@ export default function Conversations() {
               <p className="text-muted-foreground">No conversations yet</p>
             ) : (
               convos.map((c) => (
-                <div key={`${c.task_id}_${c.other_user_id}`} className="p-3 border rounded-md flex items-center justify-between cursor-pointer" onClick={() => navigate(`/messages/${c.task_id}?helper=${c.other_user_id}`)}>
+                <div 
+                  key={`${c.task_id}_${c.other_user_id}`} 
+                  className="p-3 border rounded-md flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors" 
+                  onClick={() => navigate(`/messages?task=${c.task_id}&user=${c.other_user_id}`)}
+                >
                   <div className="flex items-center space-x-3">
                     <Avatar>
                       <AvatarImage src={c.other_user_avatar || ''} />
@@ -87,7 +91,7 @@ export default function Conversations() {
                     </Avatar>
                     <div>
                       <p className="font-medium">{c.other_user_name}</p>
-                      <p className="text-sm text-muted-foreground">{c.last_message}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">{c.last_message}</p>
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">{new Date(c.updated_at).toLocaleString()}</div>

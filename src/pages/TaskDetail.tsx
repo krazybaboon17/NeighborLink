@@ -254,7 +254,7 @@ export default function TaskDetail() {
   };
 
   const handleStartChat = (helperId: string) => {
-    navigate(`/messages/${id}?helper=${helperId}`);
+    navigate(`/messages?task=${id}&user=${helperId}`);
   };
 
   if (loading) {
