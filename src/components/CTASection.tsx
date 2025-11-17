@@ -23,8 +23,7 @@ export const CTASection = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button 
               size="lg" 
-              variant="accent" 
-              className="text-lg bg-accent hover:bg-accent/90"
+              className="text-lg bg-white text-primary hover:bg-white/90 font-medium"
               onClick={() => window.location.href = '/post-task'}
             >
               Post Your First Task
@@ -33,26 +32,11 @@ export const CTASection = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="text-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground"
+              className="text-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground font-medium"
               onClick={() => window.location.href = '/auth'}
             >
               Start Earning as Helper
             </Button>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-8 pt-12 border-t border-primary-foreground/20">
-            <div>
-              <p className="text-3xl font-bold">1,000+</p>
-              <p className="text-sm text-primary-foreground/80">Active Helpers</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold">5,000+</p>
-              <p className="text-sm text-primary-foreground/80">Tasks Completed</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold">4.9/5</p>
-              <p className="text-sm text-primary-foreground/80">Average Rating</p>
-            </div>
           </div>
         </div>
       </div>
