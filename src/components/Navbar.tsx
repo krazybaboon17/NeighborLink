@@ -116,7 +116,7 @@ export const Navbar = () => {
                   </a>
                 )}
                 <a href="/conversations" className="text-foreground hover:text-primary transition-colors">
-                  Chat
+                  Messages
                 </a>
               </>
             ) : (
@@ -141,7 +141,7 @@ export const Navbar = () => {
                   </a>
                 )}
                 <a href="/conversations" className="text-foreground hover:text-primary transition-colors">
-                  Chat
+                  Messages
                 </a>
               </>
             )}
@@ -273,6 +273,13 @@ export const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   Features
+                </a>
+                <a
+                  href="/conversations"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Messages
                 </a>
                 {user && (
                   <a
