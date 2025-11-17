@@ -96,35 +96,65 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {!isLandingPage && (
+            {isLandingPage ? (
               <>
-                <a href="/tasks" className="text-foreground hover:text-primary transition-colors font-medium">
-                  Browse
+                <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
+                  How It Works
                 </a>
-                <a href="/my-tasks" className="text-foreground hover:text-primary transition-colors font-medium">
-                  My Tasks
+                <a href="#categories" className="text-foreground hover:text-primary transition-colors">
+                  Categories
                 </a>
-                <a href="/conversations" className="text-foreground hover:text-primary transition-colors font-medium">
-                  Messages
+                <a href="#safety" className="text-foreground hover:text-primary transition-colors">
+                  Safety
+                </a>
+                <a href="/features" className="text-foreground hover:text-primary transition-colors">
+                  Features
                 </a>
                 {isAdmin && (
-                  <a href="/admin/verifications" className="text-foreground hover:text-primary transition-colors font-medium">
+                  <a href="/admin/verifications" className="text-foreground hover:text-primary transition-colors">
                     Admin
                   </a>
                 )}
+                <a href="/conversations" className="text-foreground hover:text-primary transition-colors">
+                  Messages
+                </a>
+              </>
+            ) : (
+              <>
+                <a href="/tasks" className="text-foreground hover:text-primary transition-colors">
+                  Browse Tasks
+                </a>
+                <a href="/my-tasks" className="text-foreground hover:text-primary transition-colors">
+                  My Tasks
+                </a>
+                <a href="/features" className="text-foreground hover:text-primary transition-colors">
+                  Features
+                </a>
+                {isAdmin && (
+                  <a href="/admin/verifications" className="text-foreground hover:text-primary transition-colors">
+                    Admin
+                  </a>
+                )}
+                {user && (
+                  <a href="/post-task" className="text-foreground hover:text-primary transition-colors">
+                    Post Task
+                  </a>
+                )}
+                <a href="/conversations" className="text-foreground hover:text-primary transition-colors">
+                  Messages
+                </a>
               </>
             )}
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-3">
+          <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                {!isLandingPage && (
-                  <Button variant="default" onClick={() => navigate('/post-task')} className="font-medium">
-                    Post Task
-                  </Button>
-                )}
+                <Button variant="outline" onClick={() => navigate('/post-task')}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Post Task
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -150,11 +180,11 @@ export const Navbar = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
-                      <User className="w-4 h-4 mr-2" />
-                      Profile
+                      <User className="mr-2 h-4 w-4" />
+                      My Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={signOut}>
-                      <LogOut className="w-4 h-4 mr-2" />
+                      <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -162,12 +192,8 @@ export const Navbar = () => {
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate('/auth')} className="font-medium">
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate('/auth')} className="font-medium">
-                  Get Started
-                </Button>
+                <Button variant="ghost" onClick={() => navigate('/auth')}>Sign In</Button>
+                <Button variant="hero" onClick={() => navigate('/auth')}>Get Started</Button>
               </>
             )}
           </div>
@@ -185,36 +211,83 @@ export const Navbar = () => {
         {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden py-4 space-y-4 border-t border-border">
-            {!isLandingPage && (
+            {isLandingPage ? (
+              <>
+                <a
+                  href="#how-it-works"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  How It Works
+                </a>
+                <a
+                  href="#categories"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Categories
+                </a>
+                <a
+                  href="#safety"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Safety
+                </a>
+                <a
+                  href="/features"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Features
+                </a>
+                {isAdmin && (
+                  <a
+                    href="/admin/verifications"
+                    className="block py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Admin
+                  </a>
+                )}
+              </>
+            ) : (
               <>
                 <a
                   href="/tasks"
-                  className="block py-2 text-foreground hover:text-primary transition-colors font-medium"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  Browse
+                  Browse Tasks
                 </a>
                 <a
                   href="/my-tasks"
-                  className="block py-2 text-foreground hover:text-primary transition-colors font-medium"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   My Tasks
                 </a>
                 <a
+                  href="/features"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Features
+                </a>
+                <a
                   href="/conversations"
-                  className="block py-2 text-foreground hover:text-primary transition-colors font-medium"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   Messages
                 </a>
-                {isAdmin && (
+                {user && (
                   <a
-                    href="/admin/verifications"
-                    className="block py-2 text-foreground hover:text-primary transition-colors font-medium"
+                    href="/post-task"
+                    className="block py-2 text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    Admin
+                    Post Task
                   </a>
                 )}
               </>
@@ -233,22 +306,21 @@ export const Navbar = () => {
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                   </div>
-                  {!isLandingPage && (
-                    <Button className="w-full font-medium" onClick={() => { navigate('/post-task'); setIsOpen(false); }}>
-                      Post Task
-                    </Button>
-                  )}
-                  <Button variant="ghost" className="w-full font-medium" onClick={() => { signOut(); setIsOpen(false); }}>
+                  <Button variant="outline" className="w-full" onClick={() => { navigate('/post-task'); setIsOpen(false); }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Post Task
+                  </Button>
+                  <Button variant="ghost" className="w-full" onClick={() => { signOut(); setIsOpen(false); }}>
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" className="w-full font-medium" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
+                  <Button variant="ghost" className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
                     Sign In
                   </Button>
-                  <Button className="w-full font-medium" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
+                  <Button variant="hero" className="w-full" onClick={() => { navigate('/auth'); setIsOpen(false); }}>
                     Get Started
                   </Button>
                 </>

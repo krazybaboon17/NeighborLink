@@ -4,33 +4,34 @@ import heroImage from "@/assets/hero-image.jpg";
 
 export const Hero = () => {
   return (
-    <section className="relative overflow-hidden bg-background">
-      <div className="container mx-auto px-4 py-24 lg:py-40">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/10">
+      <div className="container mx-auto px-4 py-20 lg:py-32">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8">
             <div className="inline-block">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-foreground text-sm font-medium">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-secondary-foreground text-sm font-medium">
                 <Shield className="w-4 h-4" />
-                Trusted & Verified
+                Trusted & Verified Neighbors
               </span>
             </div>
             
-            <h1 className="text-6xl lg:text-7xl font-semibold tracking-tight leading-tight">
-              Get things done with
-              <span className="block text-primary mt-2">local helpers</span>
+            <h1 className="text-5xl lg:text-6xl font-bold tracking-tight">
+              Get Things Done with
+              <span className="block text-primary mt-2">Local Helpers</span>
             </h1>
             
-            <p className="text-xl text-muted-foreground max-w-xl leading-relaxed">
-              Connect with verified neighbors for lawn care, errands, moving help, and more.
+            <p className="text-xl text-muted-foreground max-w-xl">
+              Connect with verified neighbors for lawn care, errands, moving help, and more. 
+              Safe, simple, and community-focused.
             </p>
             
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="text-lg font-medium h-14 px-8" onClick={() => window.location.href = '/tasks'}>
+            <Button size="lg" variant="hero" className="text-lg" onClick={() => window.location.href = '/tasks'}>
               Find a Helper
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button size="lg" variant="outline" className="text-lg font-medium h-14 px-8" onClick={() => window.location.href = '/auth'}>
+            <Button size="lg" variant="outline" className="text-lg" onClick={() => window.location.href = '/auth'}>
               Become a Helper
             </Button>
           </div>
