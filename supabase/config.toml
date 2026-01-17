@@ -1,0 +1,13 @@
+project_id = "lkkubhripqbltpdlsedh"
+
+[functions.chat]
+verify_jwt = false
+
+[functions.filter-tasks-by-distance]
+verify_jwt = false
+
+[functions.recommend-tasks]
+verify_jwt = false
+
+[functions.check-helper-safety]
+verify_jwt = false
