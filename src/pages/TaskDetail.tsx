@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Navbar } from '@/components/Navbar';
-import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard } from 'lucide-react';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -71,6 +71,7 @@ const offerSchema = z.object({
 
 export default function TaskDetail() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [task, setTask] = useState<Task | null>(null);
@@ -80,6 +81,8 @@ export default function TaskDetail() {
   const [offerPrice, setOfferPrice] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
   const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
 
@@ -95,6 +98,22 @@ export default function TaskDetail() {
       fetchOffers();
     }
   }, [id]);
+
+  // Handle payment success/cancel from URL params
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    const offerId = searchParams.get('offer_id');
+    
+    if (paymentStatus === 'success' && offerId) {
+      toast.success('Payment successful! Now complete the task and rate the helper.');
+      setIsReviewOpen(true);
+      // Clean up URL params
+      navigate(`/task/${id}`, { replace: true });
+    } else if (paymentStatus === 'cancelled') {
+      toast.info('Payment was cancelled');
+      navigate(`/task/${id}`, { replace: true });
+    }
+  }, [searchParams, id, navigate]);
 
   const fetchTask = async () => {
     setLoading(true);
@@ -361,6 +380,56 @@ export default function TaskDetail() {
     }
   };
 
+  // Get accepted offer details
+  const getAcceptedOffer = () => {
+    if (!task?.selected_offer_id) return null;
+    return offers.find(o => o.id === task.selected_offer_id);
+  };
+
+  const handlePaymentClick = () => {
+    setIsPaymentDialogOpen(true);
+  };
+
+  const handleProcessPayment = async () => {
+    const acceptedOffer = getAcceptedOffer();
+    if (!acceptedOffer) {
+      toast.error('No accepted offer found');
+      return;
+    }
+
+    // If it's a volunteer (free) task, skip payment and go straight to review
+    if (acceptedOffer.price === 0) {
+      setIsPaymentDialogOpen(false);
+      setIsReviewOpen(true);
+      return;
+    }
+
+    setProcessingPayment(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-task-payment', {
+        body: {
+          taskId: task!.id,
+          offerId: acceptedOffer.id,
+          amount: acceptedOffer.price,
+          helperName: acceptedOffer.profiles?.full_name || 'Helper',
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error: any) {
+      console.error('Error creating payment:', error);
+      toast.error(error.message || 'Error processing payment');
+    } finally {
+      setProcessingPayment(false);
+      setIsPaymentDialogOpen(false);
+    }
+  };
+
   const handleSubmitReview = async () => {
     if (!task?.selected_offer_id) return;
 
@@ -612,18 +681,38 @@ export default function TaskDetail() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {task.status === 'assigned' ? (
-                      <>
-                        <p className="text-sm text-muted-foreground">
-                          The task is currently assigned. Once the work is done, mark it as completed and rate the helper.
-                        </p>
-                        <Button
-                          className="w-full bg-green-600 hover:bg-green-700"
-                          onClick={() => setIsReviewOpen(true)}
-                          disabled={submitting}
-                        >
-                          Mark as Completed
-                        </Button>
-                      </>
+                      (() => {
+                        const acceptedOffer = getAcceptedOffer();
+                        const isVolunteer = acceptedOffer?.price === 0;
+                        return (
+                          <>
+                            <p className="text-sm text-muted-foreground">
+                              The task is currently assigned. Once the work is done, {isVolunteer ? 'mark it as completed' : 'pay the helper and mark it as completed'}.
+                            </p>
+                            {acceptedOffer && !isVolunteer && (
+                              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                                <span className="text-sm font-medium">Amount to Pay</span>
+                                <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
+                              </div>
+                            )}
+                            <Button
+                              className="w-full bg-green-600 hover:bg-green-700"
+                              onClick={handlePaymentClick}
+                              disabled={submitting || processingPayment}
+                            >
+                              {processingPayment && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                              {isVolunteer ? (
+                                'Mark as Completed'
+                              ) : (
+                                <>
+                                  <CreditCard className="mr-2 h-4 w-4" />
+                                  Pay & Complete Task
+                                </>
+                              )}
+                            </Button>
+                          </>
+                        );
+                      })()
                     ) : (
                       <>
                         <p className="text-sm text-muted-foreground">
@@ -715,6 +804,74 @@ export default function TaskDetail() {
             <Button onClick={handleSubmitReview} disabled={submitting}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Submit Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Confirmation Dialog */}
+      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              Confirm Payment
+            </DialogTitle>
+            <DialogDescription>
+              You're about to pay the helper for completing this task.
+            </DialogDescription>
+          </DialogHeader>
+          {(() => {
+            const acceptedOffer = getAcceptedOffer();
+            const isVolunteer = acceptedOffer?.price === 0;
+            return (
+              <div className="space-y-4 py-4">
+                {acceptedOffer && (
+                  <>
+                    <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={acceptedOffer.profiles?.avatar_url || ''} />
+                        <AvatarFallback>{acceptedOffer.profiles?.full_name?.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-semibold">{acceptedOffer.profiles?.full_name}</p>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
+                          {acceptedOffer.profiles?.rating?.toFixed(1) || '0.0'} ({acceptedOffer.profiles?.completed_tasks || 0} tasks)
+                        </div>
+                      </div>
+                    </div>
+                    {!isVolunteer && (
+                      <div className="flex items-center justify-between p-4 border-2 border-primary rounded-lg">
+                        <span className="text-lg font-medium">Payment Amount</span>
+                        <span className="text-2xl font-bold text-primary">${acceptedOffer.price}</span>
+                      </div>
+                    )}
+                    {isVolunteer && (
+                      <p className="text-sm text-muted-foreground text-center">
+                        This was a volunteer task. No payment required!
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })()}
+          <DialogFooter className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsPaymentDialogOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleProcessPayment} 
+              disabled={processingPayment}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              {processingPayment && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {getAcceptedOffer()?.price === 0 ? 'Continue to Review' : 'Proceed to Payment'}
             </Button>
           </DialogFooter>
         </DialogContent>
