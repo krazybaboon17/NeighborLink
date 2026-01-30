@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatWidget } from "@/components/ChatWidget";
 import { GlobalWaves } from "@/components/ui/GlobalWaves";
+import { VerificationPrompt } from "@/components/VerificationPrompt";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Tasks from "./pages/Tasks";
@@ -19,6 +20,7 @@ import Profile from "./pages/Profile";
 import AdminVerifications from "./pages/AdminVerifications";
 import ServiceHours from "./pages/ServiceHours";
 import NotFound from "./pages/NotFound";
+import Verify from "./pages/Verify";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <VerificationPrompt />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -41,6 +44,7 @@ const App = () => (
             <Route path="/conversations" element={<Conversations />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/verify" element={<Verify />} />
             <Route path="/admin/verifications" element={<AdminVerifications />} />
             <Route path="/features" element={<Features />} />
             <Route path="/service-hours" element={<ServiceHours />} />
