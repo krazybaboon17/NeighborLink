@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.check-helper-safety]
 verify_jwt = false
+
+[functions.verify-age]
+verify_jwt = false
