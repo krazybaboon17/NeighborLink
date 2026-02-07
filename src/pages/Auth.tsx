@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { OnboardingQuestions } from '@/components/OnboardingQuestions';
-import { lovable } from '@/integrations/lovable/index';
+import { lovable } from '@/integrations/lovable';
 
 const signUpSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address').max(255),
