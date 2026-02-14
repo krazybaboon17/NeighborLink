@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { motion } from "framer-motion";
 
 export const Footer = () => {
   return (
@@ -10,27 +11,26 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <motion.div
+                className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 500 }}
+              >
                 <span className="text-primary-foreground font-bold text-lg">N</span>
-              </div>
+              </motion.div>
               <span className="text-xl font-bold">NeighborLink</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Connecting communities through trusted, local task services.
             </p>
             <div className="flex space-x-3">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Instagram className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Linkedin className="h-4 w-4" />
-              </Button>
+              {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+                <motion.div key={i} whileHover={{ scale: 1.15, y: -2 }} whileTap={{ scale: 0.9 }}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Icon className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+              ))}
             </div>
           </div>
 
@@ -38,10 +38,11 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">For Requesters</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Post a Task</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Browse Helpers</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">How Pricing Works</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Safety Tips</a></li>
+              {["Post a Task", "Browse Helpers", "How Pricing Works", "Safety Tips"].map((item) => (
+                <li key={item}>
+                  <a href="#" className="hover:text-primary transition-colors">{item}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -49,10 +50,11 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">For Helpers</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">Become a Helper</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Helper Guidelines</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Pro Membership</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Payment Info</a></li>
+              {["Become a Helper", "Helper Guidelines", "Pro Membership", "Payment Info"].map((item) => (
+                <li key={item}>
+                  <a href="#" className="hover:text-primary transition-colors">{item}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -63,14 +65,8 @@ export const Footer = () => {
               Get the latest updates and special offers.
             </p>
             <div className="flex gap-2">
-              <Input 
-                type="email" 
-                placeholder="Your email" 
-                className="flex-1"
-              />
-              <Button variant="hero" size="sm">
-                Subscribe
-              </Button>
+              <Input type="email" placeholder="Your email" className="flex-1" />
+              <Button variant="hero" size="sm">Subscribe</Button>
             </div>
           </div>
         </div>
@@ -78,12 +74,12 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 NeighborLink. All rights reserved.
+            © 2025 NeighborLink. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-primary transition-colors">Contact Us</a>
+            {["Privacy Policy", "Terms of Service", "Contact Us"].map((item) => (
+              <a key={item} href="#" className="hover:text-primary transition-colors">{item}</a>
+            ))}
           </div>
         </div>
       </div>

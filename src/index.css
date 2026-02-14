@@ -135,12 +135,12 @@ All colors MUST be HSL.
   }
 
   .btn-bubbly:hover {
-    transform: scale(1.02);
+    transform: scale(1.04);
   }
 
   .btn-bubbly:active {
-    transform: scale(0.96);
-    transition-duration: 100ms;
+    transform: scale(0.94);
+    transition-duration: 80ms;
   }
 
   .card-interactive {
@@ -148,12 +148,79 @@ All colors MUST be HSL.
   }
 
   .card-interactive:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px) scale(1.01);
     box-shadow: var(--card-shadow-hover);
   }
 
   .card-interactive:active {
-    transform: translateY(0) scale(0.98);
+    transform: translateY(0) scale(0.97);
     transition-duration: 100ms;
   }
+
+  /* Glassmorphism */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px hsl(190 40% 20% / 0.08);
+  }
+
+  /* Floating animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .float-delayed {
+    animation: float 6s ease-in-out 2s infinite;
+  }
+
+  .float-slow {
+    animation: float 8s ease-in-out 1s infinite;
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    background: linear-gradient(
+      110deg,
+      transparent 33%,
+      hsl(195 70% 45% / 0.08) 50%,
+      transparent 67%
+    );
+    background-size: 300% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* Glow pulse */
+  .glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px hsl(195 70% 45% / 0.15); }
+  50% { box-shadow: 0 0 40px hsl(195 70% 45% / 0.3); }
+}
+
+@keyframes bubble-rise {
+  0% { transform: translateY(100%) scale(0); opacity: 0; }
+  20% { opacity: 0.6; }
+  100% { transform: translateY(-120vh) scale(1); opacity: 0; }
 }
