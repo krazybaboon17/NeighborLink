@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { FileText, UserCheck, CreditCard, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const steps = [
   {
@@ -33,6 +34,18 @@ const steps = [
   }
 ];
 
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.15 }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } }
+};
+
 export const HowItWorks = () => {
   const navigate = useNavigate();
 
@@ -40,45 +53,56 @@ export const HowItWorks = () => {
     <section className="py-20 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-            How It Works
-          </h2>
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Getting help from your neighbors is simple, safe, and fast.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+        >
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={index} className="relative">
-                <Card
-                  onClick={() => navigate(step.path)}
-                  className="p-8 h-full bg-card border-2 card-interactive hover:border-primary/30"
+              <motion.div key={index} className="relative" variants={cardVariants}>
+                <motion.div
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  {/* Step Number */}
-                  <div className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold shadow-lg">
-                    {step.step}
-                  </div>
+                  <Card
+                    onClick={() => navigate(step.path)}
+                    className="p-8 h-full glass-card border-2 cursor-pointer hover:border-primary/30 transition-colors"
+                  >
+                    <motion.div
+                      className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold shadow-lg"
+                      whileHover={{ scale: 1.15, rotate: 10 }}
+                      transition={{ type: "spring", stiffness: 500 }}
+                    >
+                      {step.step}
+                    </motion.div>
 
-                  {/* Icon */}
-                  <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6 mt-4">
-                    <Icon className="w-8 h-8 text-primary" />
-                  </div>
+                    <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6 mt-4">
+                      <Icon className="w-8 h-8 text-primary" />
+                    </div>
 
-                  <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-                  <p className="text-muted-foreground">{step.description}</p>
-                </Card>
+                    <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                    <p className="text-muted-foreground">{step.description}</p>
+                  </Card>
+                </motion.div>
 
-                {/* Connector Arrow */}
                 {index < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-primary/30" />
                 )}
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
