@@ -25,6 +25,7 @@ export default function AdminVerifications() {
   const [items, setItems] = useState<VerificationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -68,7 +69,25 @@ export default function AdminVerifications() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems((data as VerificationRow[]) || []);
+      const rows = (data as VerificationRow[]) || [];
+      setItems(rows);
+
+      // Generate signed URLs for all images
+      const urls: Record<string, string> = {};
+      for (const v of rows) {
+        for (const key of ['id_image', 'selfie_image'] as const) {
+          const path = v[key];
+          if (path) {
+            const { data: signedData } = await supabase.storage
+              .from('verifications')
+              .createSignedUrl(path, 3600);
+            if (signedData?.signedUrl) {
+              urls[path] = signedData.signedUrl;
+            }
+          }
+        }
+      }
+      setSignedUrls(urls);
     } catch (err) {
       console.error('Error fetching verifications:', err);
       toast.error('Error fetching verifications');
@@ -156,9 +175,9 @@ export default function AdminVerifications() {
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-muted-foreground">ID Image</p>
-                      {v.id_image ? (
+                      {v.id_image && signedUrls[v.id_image] ? (
                         <img
-                          src={supabase.storage.from('verifications').getPublicUrl(v.id_image).data.publicUrl}
+                          src={signedUrls[v.id_image]}
                           alt="id"
                           className="w-full max-h-64 object-contain rounded"
                         />
@@ -169,9 +188,9 @@ export default function AdminVerifications() {
 
                     <div>
                       <p className="text-sm text-muted-foreground">Selfie</p>
-                      {v.selfie_image ? (
+                      {v.selfie_image && signedUrls[v.selfie_image] ? (
                         <img
-                          src={supabase.storage.from('verifications').getPublicUrl(v.selfie_image).data.publicUrl}
+                          src={signedUrls[v.selfie_image]}
                           alt="selfie"
                           className="w-full max-h-64 object-contain rounded"
                         />
