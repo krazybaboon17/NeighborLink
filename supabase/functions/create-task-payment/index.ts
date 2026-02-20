@@ -43,6 +43,29 @@ serve(async (req) => {
     }
     logStep("Request parsed", { taskId, offerId, amount, helperName });
 
+    // Verify task ownership
+    const { data: task, error: taskError } = await supabaseClient
+      .from('tasks')
+      .select('user_id, status, selected_offer_id')
+      .eq('id', taskId)
+      .single();
+
+    if (taskError || !task) throw new Error("Task not found");
+    if (task.user_id !== user.id) throw new Error("Unauthorized: Not task owner");
+    if (task.selected_offer_id !== offerId) throw new Error("Offer not selected for this task");
+
+    // Verify offer amount and status
+    const { data: offer, error: offerError } = await supabaseClient
+      .from('offers')
+      .select('price, status')
+      .eq('id', offerId)
+      .single();
+
+    if (offerError || !offer) throw new Error("Offer not found");
+    if (offer.status !== 'accepted') throw new Error("Offer must be accepted");
+    if (offer.price !== amount) throw new Error("Amount mismatch");
+    logStep("Authorization verified");
+
     // Initialize Stripe
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
