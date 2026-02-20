@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const logStep = (step: string, details?: any) => {
@@ -83,7 +83,14 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    // Create a one-time payment session with dynamic pricing
+    // Calculate 15% platform fee
+    const PLATFORM_FEE_PERCENT = 0.15;
+    const helperAmountCents = Math.round(amount * 100);
+    const platformFeeCents = Math.round(helperAmountCents * PLATFORM_FEE_PERCENT);
+    const totalAmountCents = helperAmountCents + platformFeeCents;
+    logStep("Fee calculated", { helperAmountCents, platformFeeCents, totalAmountCents });
+
+    // Create a one-time payment session with platform fee
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -95,7 +102,18 @@ serve(async (req) => {
               name: `Task Payment to ${helperName || 'Helper'}`,
               description: `Payment for completed task`,
             },
-            unit_amount: Math.round(amount * 100), // Convert to cents
+            unit_amount: helperAmountCents,
+          },
+          quantity: 1,
+        },
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Platform Service Fee (15%)",
+              description: "NeighborLink platform fee",
+            },
+            unit_amount: platformFeeCents,
           },
           quantity: 1,
         },
@@ -107,6 +125,7 @@ serve(async (req) => {
         task_id: taskId,
         offer_id: offerId,
         payer_id: user.id,
+        platform_fee_cents: platformFeeCents.toString(),
       },
     });
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
