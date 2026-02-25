@@ -6,23 +6,23 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const categories = [
-  { icon: Sprout, title: "Lawn Care", description: "Mowing, trimming, weeding", gradient: "from-emerald-500/10 to-green-500/5" },
-  { icon: Snowflake, title: "Snow Removal", description: "Shoveling, plowing, de-icing", gradient: "from-sky-500/10 to-blue-500/5" },
-  { icon: Package, title: "Moving Help", description: "Furniture, boxes, loading", gradient: "from-orange-500/10 to-amber-500/5" },
-  { icon: ShoppingCart, title: "Grocery Runs", description: "Shopping, pickup, delivery", gradient: "from-violet-500/10 to-purple-500/5" },
-  { icon: Home, title: "Home Repairs", description: "Small fixes, assembly, painting", gradient: "from-amber-500/10 to-yellow-500/5" },
-  { icon: Baby, title: "Babysitting", description: "Childcare, tutoring", gradient: "from-pink-500/10 to-rose-500/5" },
-  { icon: Wrench, title: "Handyman", description: "Installation, repairs", gradient: "from-slate-500/10 to-gray-500/5" },
-  { icon: Car, title: "Errands", description: "Pick-ups, deliveries, tasks", gradient: "from-indigo-500/10 to-blue-500/5" },
+  { icon: Sprout, title: "Lawn Care", description: "Mowing, trimming, weeding", color: "bg-emerald-500/8" },
+  { icon: Snowflake, title: "Snow Removal", description: "Shoveling, plowing, de-icing", color: "bg-sky-500/8" },
+  { icon: Package, title: "Moving Help", description: "Furniture, boxes, loading", color: "bg-orange-500/8" },
+  { icon: ShoppingCart, title: "Grocery Runs", description: "Shopping, pickup, delivery", color: "bg-violet-500/8" },
+  { icon: Home, title: "Home Repairs", description: "Small fixes, assembly, painting", color: "bg-amber-500/8" },
+  { icon: Baby, title: "Babysitting", description: "Childcare, tutoring", color: "bg-pink-500/8" },
+  { icon: Wrench, title: "Handyman", description: "Installation, repairs", color: "bg-slate-500/8" },
+  { icon: Car, title: "Errands", description: "Pick-ups, deliveries, tasks", color: "bg-indigo-500/8" },
 ];
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } }
+  visible: { transition: { staggerChildren: 0.06 } }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.9 },
+  hidden: { opacity: 0, y: 24, scale: 0.95 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } }
 };
 
@@ -34,17 +34,23 @@ export const TaskCategories = () => {
   };
 
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Browse Task Categories</h2>
+        <motion.div
+          className="text-center mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <span className="text-sm font-medium text-primary uppercase tracking-wider">Categories</span>
+          <h2 className="text-3xl lg:text-5xl font-bold mt-2 mb-4">Browse Task Categories</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Find the right helper for any task. From seasonal work to daily errands.
           </p>
-        </div>
+        </motion.div>
         
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -61,17 +67,15 @@ export const TaskCategories = () => {
                 >
                   <Card 
                     onClick={() => handleCategoryClick(category.title)}
-                    className={`p-6 cursor-pointer border-2 hover:border-primary/50 bg-gradient-to-br ${category.gradient} glass-card`}
+                    className="p-5 lg:p-6 cursor-pointer border-2 hover:border-primary/40 glass-card transition-all group"
                   >
                     <motion.div
-                      className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4"
-                      whileHover={{ rotate: 10, scale: 1.1 }}
-                      transition={{ type: "spring", stiffness: 500 }}
+                      className={`w-12 h-12 rounded-2xl ${category.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
                     >
                       <Icon className="w-6 h-6 text-primary" />
                     </motion.div>
-                    <h3 className="text-lg font-semibold mb-2">{category.title}</h3>
-                    <p className="text-sm text-muted-foreground">{category.description}</p>
+                    <h3 className="text-base lg:text-lg font-semibold mb-1">{category.title}</h3>
+                    <p className="text-xs lg:text-sm text-muted-foreground">{category.description}</p>
                   </Card>
                 </motion.div>
               </motion.div>

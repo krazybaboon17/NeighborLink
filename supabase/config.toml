@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.verify-age]
 verify_jwt = false
+
+[functions.ai-assist]
+verify_jwt = false
+
+[functions.create-task-payment]
+verify_jwt = false
