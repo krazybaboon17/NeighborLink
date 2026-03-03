@@ -4,6 +4,7 @@ import { Hero } from "@/components/Hero";
 import { TaskCategories } from "@/components/TaskCategories";
 import { HowItWorks } from "@/components/HowItWorks";
 import { TrustSafety } from "@/components/TrustSafety";
+import { Testimonials } from "@/components/Testimonials";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 
@@ -33,6 +34,10 @@ const Index = () => {
             <TrustSafety />
           </ScrollReveal>
         </div>
+
+        <ScrollReveal delay={0.2}>
+          <Testimonials />
+        </ScrollReveal>
 
         <ScrollReveal delay={0.2}>
           <CTASection />
