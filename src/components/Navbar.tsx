@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import logoImg from "@/assets/logo.jpeg";
+import { Logo } from "@/components/ui/Logo";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,15 +108,8 @@ export const Navbar = () => {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <motion.img
-              src={logoImg}
-              alt="NeighborLink logo"
-              className="h-9 w-auto object-contain"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 500 }}
-            />
+          <Link to="/" className="flex items-center">
+            <Logo size="sm" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -131,7 +124,6 @@ export const Navbar = () => {
                 </span>
               </NavLink>
             )}
-            <NavLink href="/features">Features</NavLink>
             {isAdmin && (
               <NavLink href="/admin/verifications">
                 <span className="flex items-center gap-1.5">
@@ -231,7 +223,6 @@ export const Navbar = () => {
                   <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Service Hours</span>
                 </NavLink>
               )}
-              <NavLink href="/features" onClick={() => setIsOpen(false)}>Features</NavLink>
               <NavLink href="/conversations" onClick={() => setIsOpen(false)}>Messages</NavLink>
               {isAdmin && (
                 <NavLink href="/admin/verifications" onClick={() => setIsOpen(false)}>

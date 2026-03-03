@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Logo } from "@/components/ui/Logo";
 
 export const Footer = () => {
   return (
@@ -11,15 +12,8 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center space-x-2">
-              <motion.div
-                className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 500 }}
-              >
-                <span className="text-primary-foreground font-bold text-lg">N</span>
-              </motion.div>
-              <span className="text-xl font-bold">NeighborLink</span>
+            <Link to="/" className="inline-block">
+              <Logo size="sm" />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               AI-powered community marketplace connecting neighbors for trusted, local task services.
