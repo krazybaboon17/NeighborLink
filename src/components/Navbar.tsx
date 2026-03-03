@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import logoImg from "@/assets/logo.jpeg";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,15 +109,14 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2.5 group">
-            <motion.div
-              className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center"
-              whileHover={{ scale: 1.1, rotate: 5 }}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <motion.img
+              src={logoImg}
+              alt="NeighborLink logo"
+              className="h-9 w-auto object-contain"
+              whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 500 }}
-            >
-              <span className="text-primary-foreground font-bold text-lg">N</span>
-            </motion.div>
-            <span className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">NeighborLink</span>
+            />
           </Link>
 
           {/* Desktop Navigation */}
