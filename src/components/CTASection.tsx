@@ -61,9 +61,9 @@ export const CTASection = () => {
             transition={{ delay: 0.3 }}
           >
             {[
-              { value: "1,000+", label: "Active Helpers" },
-              { value: "5,000+", label: "Tasks Completed" },
-              { value: "4.9/5", label: "Average Rating" },
+              { value: "0", label: "Active Helpers" },
+              { value: "0", label: "Tasks Completed" },
+              { value: "N/A", label: "Average Rating" },
             ].map((stat, i) => (
               <motion.div
                 key={i}
