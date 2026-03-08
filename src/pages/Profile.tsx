@@ -55,6 +55,7 @@ export default function ProfilePage() {
       setIsYoungNeighbor(data?.is_young_neighbor || false);
       setBio(data?.bio || '');
       setSkills(data?.skills || []);
+      setPaypalId((data as any)?.paypal_id || '');
     } catch (err: any) {
       console.error('Error loading profile:', err);
       toast.error('Error loading profile');
