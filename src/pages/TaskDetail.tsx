@@ -920,6 +920,24 @@ export default function TaskDetail() {
           onCancel={handleCancelAccept}
         />
       )}
+
+      {/* PayPal QR Code Dialog */}
+      {helperPayPalId && (() => {
+        const acceptedOffer = getAcceptedOffer();
+        return (
+          <PayPalQRCode
+            open={showPayPalQR}
+            onOpenChange={setShowPayPalQR}
+            paypalId={helperPayPalId}
+            amount={acceptedOffer?.price || 0}
+            helperName={acceptedOffer?.profiles?.full_name || 'Helper'}
+            onPaymentDone={() => {
+              setShowPayPalQR(false);
+              setIsReviewOpen(true);
+            }}
+          />
+        );
+      })()}
     </>
   );
 }
