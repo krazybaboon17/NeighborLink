@@ -44,11 +44,11 @@ export default function Auth() {
       if (user && !showOnboarding) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('age, current_state')
+          .select('age, current_state, paypal_id')
           .eq('id', user.id)
           .single();
 
-        if (profile && !profile.age && !profile.current_state) {
+        if (profile && (!profile.age || !profile.current_state || !(profile as any).paypal_id)) {
           setNewUserId(user.id);
           setShowOnboarding(true);
         } else {
