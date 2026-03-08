@@ -388,8 +388,34 @@ export default function TaskDetail() {
     return offers.find(o => o.id === task.selected_offer_id);
   };
 
-  const handlePaymentClick = () => {
-    setIsPaymentDialogOpen(true);
+  const handlePaymentClick = async () => {
+    const acceptedOffer = getAcceptedOffer();
+    if (!acceptedOffer) return;
+
+    // For volunteer tasks, skip payment
+    if (acceptedOffer.price === 0) {
+      setIsReviewOpen(true);
+      return;
+    }
+
+    // Fetch helper's PayPal ID
+    try {
+      const { data: helperProfile } = await supabase
+        .from('profiles')
+        .select('paypal_id')
+        .eq('id', acceptedOffer.helper_id)
+        .single();
+
+      const paypalId = (helperProfile as any)?.paypal_id;
+      if (paypalId) {
+        setHelperPayPalId(paypalId);
+        setShowPayPalQR(true);
+      } else {
+        toast.error('Helper has not set up their PayPal ID. Contact them to arrange payment.');
+      }
+    } catch {
+      toast.error('Could not fetch helper payment info');
+    }
   };
 
   const handleProcessPayment = async () => {
