@@ -35,6 +35,7 @@ export default function ProfilePage() {
   const [completedTasks, setCompletedTasks] = useState<number>(0);
   const [isYoungNeighbor, setIsYoungNeighbor] = useState<boolean>(false);
   const [skills, setSkills] = useState<string[]>([]);
+  const [paypalId, setPaypalId] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
