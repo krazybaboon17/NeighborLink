@@ -117,8 +117,9 @@ export default function ProfilePage() {
       const { error } = await supabase.from('profiles').update({
         full_name: validation.data.fullName,
         avatar_url: publicUrl,
-        bio
-      }).eq('id', user.id);
+        bio,
+        paypal_id: paypalId.trim() || null,
+      } as any).eq('id', user.id);
 
       if (error) throw error;
       toast.success('Profile updated');
