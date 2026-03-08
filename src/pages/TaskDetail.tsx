@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { useHelperSafetyCheck } from '@/hooks/useHelperSafetyCheck';
 import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
+import { PayPalQRCode } from '@/components/PayPalQRCode';
 
 interface Task {
   id: string;
@@ -85,7 +86,8 @@ export default function TaskDetail() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
-
+  const [showPayPalQR, setShowPayPalQR] = useState(false);
+  const [helperPayPalId, setHelperPayPalId] = useState<string | null>(null);
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
@@ -386,8 +388,34 @@ export default function TaskDetail() {
     return offers.find(o => o.id === task.selected_offer_id);
   };
 
-  const handlePaymentClick = () => {
-    setIsPaymentDialogOpen(true);
+  const handlePaymentClick = async () => {
+    const acceptedOffer = getAcceptedOffer();
+    if (!acceptedOffer) return;
+
+    // For volunteer tasks, skip payment
+    if (acceptedOffer.price === 0) {
+      setIsReviewOpen(true);
+      return;
+    }
+
+    // Fetch helper's PayPal ID
+    try {
+      const { data: helperProfile } = await supabase
+        .from('profiles')
+        .select('paypal_id')
+        .eq('id', acceptedOffer.helper_id)
+        .single();
+
+      const paypalId = (helperProfile as any)?.paypal_id;
+      if (paypalId) {
+        setHelperPayPalId(paypalId);
+        setShowPayPalQR(true);
+      } else {
+        toast.error('Helper has not set up their PayPal ID. Contact them to arrange payment.');
+      }
+    } catch {
+      toast.error('Could not fetch helper payment info');
+    }
   };
 
   const handleProcessPayment = async () => {
@@ -892,6 +920,24 @@ export default function TaskDetail() {
           onCancel={handleCancelAccept}
         />
       )}
+
+      {/* PayPal QR Code Dialog */}
+      {helperPayPalId && (() => {
+        const acceptedOffer = getAcceptedOffer();
+        return (
+          <PayPalQRCode
+            open={showPayPalQR}
+            onOpenChange={setShowPayPalQR}
+            paypalId={helperPayPalId}
+            amount={acceptedOffer?.price || 0}
+            helperName={acceptedOffer?.profiles?.full_name || 'Helper'}
+            onPaymentDone={() => {
+              setShowPayPalQR(false);
+              setIsReviewOpen(true);
+            }}
+          />
+        );
+      })()}
     </>
   );
 }

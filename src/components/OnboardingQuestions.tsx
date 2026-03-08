@@ -40,6 +40,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
   const [age, setAge] = useState('');
   const [currentState, setCurrentState] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [paypalId, setPaypalId] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSkillToggle = (skill: string) => {
@@ -51,7 +52,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
   };
 
   const handleSubmit = async () => {
-    if (!age || !currentState) {
+    if (!age || !currentState || !paypalId.trim()) {
       toast.error('Please answer all required questions');
       return;
     }
@@ -73,7 +74,8 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
           current_state: currentState,
           skills: selectedSkills.length > 0 ? selectedSkills : null,
           is_young_neighbor: isYoungNeighbor,
-        })
+          paypal_id: paypalId.trim() || null,
+        } as any)
         .eq('id', userId);
 
       if (error) throw error;
@@ -139,6 +141,23 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
           </RadioGroup>
         </div>
 
+        {/* PayPal ID Question */}
+        <div className="space-y-2">
+          <Label htmlFor="paypalId" className="text-base font-medium">
+            PayPal ID (Email or Username) <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="paypalId"
+            type="text"
+            placeholder="your@email.com or @username"
+            value={paypalId}
+            onChange={(e) => setPaypalId(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Used to receive payments when you complete tasks for others
+          </p>
+        </div>
+
         {/* Skills Question */}
         <div className="space-y-3">
           <Label className="text-base font-medium">
@@ -166,7 +185,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
         <Button 
           onClick={handleSubmit} 
           className="w-full" 
-          disabled={loading || !age || !currentState}
+          disabled={loading || !age || !currentState || !paypalId.trim()}
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Complete Setup

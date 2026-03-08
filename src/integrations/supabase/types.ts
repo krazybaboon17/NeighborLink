@@ -107,6 +107,7 @@ export type Database = {
           is_helper: boolean | null
           is_young_neighbor: boolean | null
           location: string | null
+          paypal_id: string | null
           rating: number | null
           skills: string[] | null
           updated_at: string | null
@@ -124,6 +125,7 @@ export type Database = {
           is_helper?: boolean | null
           is_young_neighbor?: boolean | null
           location?: string | null
+          paypal_id?: string | null
           rating?: number | null
           skills?: string[] | null
           updated_at?: string | null
@@ -141,6 +143,7 @@ export type Database = {
           is_helper?: boolean | null
           is_young_neighbor?: boolean | null
           location?: string | null
+          paypal_id?: string | null
           rating?: number | null
           skills?: string[] | null
           updated_at?: string | null
