@@ -52,7 +52,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
   };
 
   const handleSubmit = async () => {
-    if (!age || !currentState) {
+    if (!age || !currentState || !paypalId.trim()) {
       toast.error('Please answer all required questions');
       return;
     }
