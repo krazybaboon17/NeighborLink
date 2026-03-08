@@ -141,6 +141,23 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
           </RadioGroup>
         </div>
 
+        {/* PayPal ID Question */}
+        <div className="space-y-2">
+          <Label htmlFor="paypalId" className="text-base font-medium">
+            PayPal ID (Email or Username) <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="paypalId"
+            type="text"
+            placeholder="your@email.com or @username"
+            value={paypalId}
+            onChange={(e) => setPaypalId(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Used to receive payments when you complete tasks for others
+          </p>
+        </div>
+
         {/* Skills Question */}
         <div className="space-y-3">
           <Label className="text-base font-medium">
