@@ -40,6 +40,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
   const [age, setAge] = useState('');
   const [currentState, setCurrentState] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [paypalId, setPaypalId] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSkillToggle = (skill: string) => {
