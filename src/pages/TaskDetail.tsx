@@ -86,7 +86,8 @@ export default function TaskDetail() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
-
+  const [showPayPalQR, setShowPayPalQR] = useState(false);
+  const [helperPayPalId, setHelperPayPalId] = useState<string | null>(null);
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
