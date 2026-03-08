@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { useHelperSafetyCheck } from '@/hooks/useHelperSafetyCheck';
 import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
+import { PayPalQRCode } from '@/components/PayPalQRCode';
 
 interface Task {
   id: string;
