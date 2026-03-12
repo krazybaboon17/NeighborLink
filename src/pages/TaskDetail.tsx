@@ -395,7 +395,23 @@ export default function TaskDetail() {
   };
 
   const handlePaymentClick = async () => {
-    // First, require a completion photo
+    const acceptedOffer = getAcceptedOffer();
+    if (!acceptedOffer) return;
+
+    // Pre-check if helper has PayPal ID (for paid tasks)
+    if (acceptedOffer.price > 0) {
+      const { data: helperProfile } = await supabase
+        .from('profiles')
+        .select('paypal_id')
+        .eq('id', acceptedOffer.helper_id)
+        .single();
+      const paypalId = (helperProfile as any)?.paypal_id;
+      setHelperMissingPayPal(!paypalId);
+      setHelperPayPalInput('');
+    } else {
+      setHelperMissingPayPal(false);
+    }
+
     setShowCompletionPhotoDialog(true);
   };
 
@@ -423,18 +439,19 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // For paid tasks, check helper PayPal ID first
-    if (acceptedOffer.price > 0) {
-      const { data: helperProfile } = await supabase
+    // For paid tasks, ensure we have a PayPal ID (either existing or just entered)
+    if (acceptedOffer.price > 0 && helperMissingPayPal) {
+      if (!helperPayPalInput.trim()) {
+        toast.error("Please enter the helper's PayPal ID to proceed with payment");
+        return;
+      }
+      // Save the PayPal ID to the helper's profile
+      const { error: updateErr } = await supabase
         .from('profiles')
-        .select('paypal_id')
-        .eq('id', acceptedOffer.helper_id)
-        .single();
-
-      const paypalId = (helperProfile as any)?.paypal_id;
-      if (!paypalId) {
-        setHelperMissingPayPal(true);
-        toast.error("The helper hasn't set up their PayPal ID yet. They need to add it in their profile settings.");
+        .update({ paypal_id: helperPayPalInput.trim() } as any)
+        .eq('id', acceptedOffer.helper_id);
+      if (updateErr) {
+        toast.error('Failed to save PayPal ID');
         return;
       }
     }
@@ -1072,10 +1089,21 @@ export default function TaskDetail() {
               </div>
             )}
 
-            {/* Helper missing PayPal warning */}
+            {/* PayPal ID input if helper is missing it (paid tasks only) */}
             {helperMissingPayPal && (
-              <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-sm text-destructive">
-                The helper hasn't added their PayPal ID yet. Please ask them to update it in their profile settings before you can complete payment.
+              <div className="space-y-2">
+                <Separator />
+                <Label htmlFor="helper-paypal">Helper's PayPal ID</Label>
+                <p className="text-xs text-muted-foreground">
+                  The helper hasn't added their PayPal ID yet. Enter it here so you can pay them.
+                </p>
+                <Input
+                  id="helper-paypal"
+                  type="text"
+                  placeholder="PayPal email or username"
+                  value={helperPayPalInput}
+                  onChange={(e) => setHelperPayPalInput(e.target.value)}
+                />
               </div>
             )}
           </div>
@@ -1085,7 +1113,7 @@ export default function TaskDetail() {
             </Button>
             <Button
               onClick={handleCompletionPhotoSubmit}
-              disabled={!completionPhoto || uploadingPhoto || helperMissingPayPal}
+              disabled={!completionPhoto || uploadingPhoto || (helperMissingPayPal && !helperPayPalInput.trim())}
             >
               {uploadingPhoto && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Continue
