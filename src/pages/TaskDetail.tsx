@@ -393,17 +393,60 @@ export default function TaskDetail() {
   };
 
   const handlePaymentClick = async () => {
-    const acceptedOffer = getAcceptedOffer();
-    if (!acceptedOffer) return;
+    // First, require a completion photo
+    setShowCompletionPhotoDialog(true);
+  };
 
-    // For volunteer tasks, skip payment
-    if (acceptedOffer.price === 0) {
-      setIsReviewOpen(true);
+  const handleCompletionPhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be under 10MB');
+      return;
+    }
+    setCompletionPhoto(file);
+    setCompletionPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleCompletionPhotoSubmit = async () => {
+    if (!completionPhoto || !user || !id) {
+      toast.error('Please upload a photo of the completed task');
       return;
     }
 
-    // Fetch helper's PayPal ID
+    setUploadingPhoto(true);
     try {
+      const fileExt = completionPhoto.name.split('.').pop();
+      const filePath = `${user.id}/${id}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('completion-photos')
+        .upload(filePath, completionPhoto, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Save the path to the task
+      await supabase
+        .from('tasks')
+        .update({ completion_photo_url: filePath } as any)
+        .eq('id', id);
+
+      setShowCompletionPhotoDialog(false);
+
+      // Now proceed with normal payment flow
+      const acceptedOffer = getAcceptedOffer();
+      if (!acceptedOffer) return;
+
+      if (acceptedOffer.price === 0) {
+        setIsReviewOpen(true);
+        return;
+      }
+
+      // Fetch helper's PayPal ID
       const { data: helperProfile } = await supabase
         .from('profiles')
         .select('paypal_id')
@@ -417,8 +460,11 @@ export default function TaskDetail() {
       } else {
         toast.error('Helper has not set up their PayPal ID. Contact them to arrange payment.');
       }
-    } catch {
-      toast.error('Could not fetch helper payment info');
+    } catch (error: any) {
+      console.error('Error uploading completion photo:', error);
+      toast.error(error.message || 'Error uploading photo');
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
