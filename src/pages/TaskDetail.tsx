@@ -416,8 +416,27 @@ export default function TaskDetail() {
 
   const handleCompletionPhotoSubmit = async () => {
     if (!completionPhoto || !user || !id) {
-      toast.error('Please upload a photo of the completed task');
+      toast.error('Please upload or take a photo of the completed task');
       return;
+    }
+
+    const acceptedOffer = getAcceptedOffer();
+    if (!acceptedOffer) return;
+
+    // For paid tasks, check helper PayPal ID first
+    if (acceptedOffer.price > 0) {
+      const { data: helperProfile } = await supabase
+        .from('profiles')
+        .select('paypal_id')
+        .eq('id', acceptedOffer.helper_id)
+        .single();
+
+      const paypalId = (helperProfile as any)?.paypal_id;
+      if (!paypalId) {
+        setHelperMissingPayPal(true);
+        toast.error("The helper hasn't set up their PayPal ID yet. They need to add it in their profile settings.");
+        return;
+      }
     }
 
     setUploadingPhoto(true);
@@ -431,7 +450,6 @@ export default function TaskDetail() {
 
       if (uploadError) throw uploadError;
 
-      // Save the path to the task
       await supabase
         .from('tasks')
         .update({ completion_photo_url: filePath } as any)
@@ -439,16 +457,11 @@ export default function TaskDetail() {
 
       setShowCompletionPhotoDialog(false);
 
-      // Now proceed with normal payment flow
-      const acceptedOffer = getAcceptedOffer();
-      if (!acceptedOffer) return;
-
       if (acceptedOffer.price === 0) {
         setIsReviewOpen(true);
         return;
       }
 
-      // Fetch helper's PayPal ID
       const { data: helperProfile } = await supabase
         .from('profiles')
         .select('paypal_id')
