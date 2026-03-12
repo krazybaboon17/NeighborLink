@@ -1089,10 +1089,21 @@ export default function TaskDetail() {
               </div>
             )}
 
-            {/* Helper missing PayPal warning */}
+            {/* PayPal ID input if helper is missing it (paid tasks only) */}
             {helperMissingPayPal && (
-              <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-sm text-destructive">
-                The helper hasn't added their PayPal ID yet. Please ask them to update it in their profile settings before you can complete payment.
+              <div className="space-y-2">
+                <Separator />
+                <Label htmlFor="helper-paypal">Helper's PayPal ID</Label>
+                <p className="text-xs text-muted-foreground">
+                  The helper hasn't added their PayPal ID yet. Enter it here so you can pay them.
+                </p>
+                <Input
+                  id="helper-paypal"
+                  type="text"
+                  placeholder="PayPal email or username"
+                  value={helperPayPalInput}
+                  onChange={(e) => setHelperPayPalInput(e.target.value)}
+                />
               </div>
             )}
           </div>
