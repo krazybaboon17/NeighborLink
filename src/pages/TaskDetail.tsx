@@ -92,6 +92,8 @@ export default function TaskDetail() {
   const [completionPhotoPreview, setCompletionPhotoPreview] = useState<string | null>(null);
   const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [helperMissingPayPal, setHelperMissingPayPal] = useState(false);
+  const [helperPayPalInput, setHelperPayPalInput] = useState('');
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
