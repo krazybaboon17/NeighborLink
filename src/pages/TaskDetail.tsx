@@ -988,6 +988,67 @@ export default function TaskDetail() {
           />
         );
       })()}
+
+      {/* Completion Photo Dialog */}
+      <Dialog open={showCompletionPhotoDialog} onOpenChange={setShowCompletionPhotoDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-primary" />
+              Upload Completion Photo
+            </DialogTitle>
+            <DialogDescription>
+              Please upload a photo showing the completed task as proof of completion.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {completionPhotoPreview ? (
+              <div className="relative">
+                <img
+                  src={completionPhotoPreview}
+                  alt="Completion preview"
+                  className="w-full h-64 object-cover rounded-lg border border-border"
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute bottom-2 right-2"
+                  onClick={() => {
+                    setCompletionPhoto(null);
+                    setCompletionPhotoPreview(null);
+                  }}
+                >
+                  Change Photo
+                </Button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-muted-foreground/30 rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/30">
+                <ImageIcon className="h-12 w-12 text-muted-foreground mb-3" />
+                <span className="text-sm font-medium text-muted-foreground">Click to upload a photo</span>
+                <span className="text-xs text-muted-foreground mt-1">JPG, PNG up to 10MB</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCompletionPhotoSelected}
+                />
+              </label>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCompletionPhotoDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCompletionPhotoSubmit}
+              disabled={!completionPhoto || uploadingPhoto}
+            >
+              {uploadingPhoto && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
