@@ -1005,15 +1005,21 @@ export default function TaskDetail() {
       })()}
 
       {/* Completion Photo Dialog */}
-      <Dialog open={showCompletionPhotoDialog} onOpenChange={setShowCompletionPhotoDialog}>
+      <Dialog open={showCompletionPhotoDialog} onOpenChange={(open) => {
+        setShowCompletionPhotoDialog(open);
+        if (!open) {
+          setHelperMissingPayPal(false);
+          setHelperPayPalInput('');
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-primary" />
-              Upload Completion Photo
+              Completion Photo
             </DialogTitle>
             <DialogDescription>
-              Please upload a photo showing the completed task as proof of completion.
+              Take a photo or upload one showing the completed task as proof.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -1037,17 +1043,40 @@ export default function TaskDetail() {
                 </Button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-muted-foreground/30 rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/30">
-                <ImageIcon className="h-12 w-12 text-muted-foreground mb-3" />
-                <span className="text-sm font-medium text-muted-foreground">Click to upload a photo</span>
-                <span className="text-xs text-muted-foreground mt-1">JPG, PNG up to 10MB</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleCompletionPhotoSelected}
-                />
-              </label>
+              <div className="space-y-3">
+                {/* Take Photo (camera capture) */}
+                <label className="flex items-center justify-center gap-2 w-full h-14 border-2 border-dashed border-primary/40 rounded-lg cursor-pointer hover:border-primary/70 hover:bg-primary/5 transition-colors">
+                  <Camera className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">Take a Photo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handleCompletionPhotoSelected}
+                  />
+                </label>
+
+                {/* Upload from gallery */}
+                <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-muted-foreground/30 rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/30">
+                  <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
+                  <span className="text-sm font-medium text-muted-foreground">Upload from Gallery</span>
+                  <span className="text-xs text-muted-foreground mt-1">JPG, PNG up to 10MB</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCompletionPhotoSelected}
+                  />
+                </label>
+              </div>
+            )}
+
+            {/* Helper missing PayPal warning */}
+            {helperMissingPayPal && (
+              <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-sm text-destructive">
+                The helper hasn't added their PayPal ID yet. Please ask them to update it in their profile settings before you can complete payment.
+              </div>
             )}
           </div>
           <DialogFooter>
@@ -1056,7 +1085,7 @@ export default function TaskDetail() {
             </Button>
             <Button
               onClick={handleCompletionPhotoSubmit}
-              disabled={!completionPhoto || uploadingPhoto}
+              disabled={!completionPhoto || uploadingPhoto || helperMissingPayPal}
             >
               {uploadingPhoto && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Continue
