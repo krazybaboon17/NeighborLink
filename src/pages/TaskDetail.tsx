@@ -88,6 +88,10 @@ export default function TaskDetail() {
   const [reviewComment, setReviewComment] = useState('');
   const [showPayPalQR, setShowPayPalQR] = useState(false);
   const [helperPayPalId, setHelperPayPalId] = useState<string | null>(null);
+  const [completionPhoto, setCompletionPhoto] = useState<File | null>(null);
+  const [completionPhotoPreview, setCompletionPhotoPreview] = useState<string | null>(null);
+  const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
