@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Navbar } from '@/components/Navbar';
-import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard, Camera, ImageIcon } from 'lucide-react';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
