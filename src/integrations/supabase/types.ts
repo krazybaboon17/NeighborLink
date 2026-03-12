@@ -194,6 +194,7 @@ export type Database = {
           budget_max: number
           budget_min: number
           category: string
+          completion_photo_url: string | null
           created_at: string | null
           description: string
           id: string
@@ -208,6 +209,7 @@ export type Database = {
           budget_max: number
           budget_min: number
           category: string
+          completion_photo_url?: string | null
           created_at?: string | null
           description: string
           id?: string
@@ -222,6 +224,7 @@ export type Database = {
           budget_max?: number
           budget_min?: number
           category?: string
+          completion_photo_url?: string | null
           created_at?: string | null
           description?: string
           id?: string

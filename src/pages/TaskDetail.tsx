@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Navbar } from '@/components/Navbar';
-import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard, Camera, ImageIcon } from 'lucide-react';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -88,6 +88,10 @@ export default function TaskDetail() {
   const [reviewComment, setReviewComment] = useState('');
   const [showPayPalQR, setShowPayPalQR] = useState(false);
   const [helperPayPalId, setHelperPayPalId] = useState<string | null>(null);
+  const [completionPhoto, setCompletionPhoto] = useState<File | null>(null);
+  const [completionPhotoPreview, setCompletionPhotoPreview] = useState<string | null>(null);
+  const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
@@ -389,17 +393,60 @@ export default function TaskDetail() {
   };
 
   const handlePaymentClick = async () => {
-    const acceptedOffer = getAcceptedOffer();
-    if (!acceptedOffer) return;
+    // First, require a completion photo
+    setShowCompletionPhotoDialog(true);
+  };
 
-    // For volunteer tasks, skip payment
-    if (acceptedOffer.price === 0) {
-      setIsReviewOpen(true);
+  const handleCompletionPhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image must be under 10MB');
+      return;
+    }
+    setCompletionPhoto(file);
+    setCompletionPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleCompletionPhotoSubmit = async () => {
+    if (!completionPhoto || !user || !id) {
+      toast.error('Please upload a photo of the completed task');
       return;
     }
 
-    // Fetch helper's PayPal ID
+    setUploadingPhoto(true);
     try {
+      const fileExt = completionPhoto.name.split('.').pop();
+      const filePath = `${user.id}/${id}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('completion-photos')
+        .upload(filePath, completionPhoto, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Save the path to the task
+      await supabase
+        .from('tasks')
+        .update({ completion_photo_url: filePath } as any)
+        .eq('id', id);
+
+      setShowCompletionPhotoDialog(false);
+
+      // Now proceed with normal payment flow
+      const acceptedOffer = getAcceptedOffer();
+      if (!acceptedOffer) return;
+
+      if (acceptedOffer.price === 0) {
+        setIsReviewOpen(true);
+        return;
+      }
+
+      // Fetch helper's PayPal ID
       const { data: helperProfile } = await supabase
         .from('profiles')
         .select('paypal_id')
@@ -413,8 +460,11 @@ export default function TaskDetail() {
       } else {
         toast.error('Helper has not set up their PayPal ID. Contact them to arrange payment.');
       }
-    } catch {
-      toast.error('Could not fetch helper payment info');
+    } catch (error: any) {
+      console.error('Error uploading completion photo:', error);
+      toast.error(error.message || 'Error uploading photo');
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -938,6 +988,67 @@ export default function TaskDetail() {
           />
         );
       })()}
+
+      {/* Completion Photo Dialog */}
+      <Dialog open={showCompletionPhotoDialog} onOpenChange={setShowCompletionPhotoDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-primary" />
+              Upload Completion Photo
+            </DialogTitle>
+            <DialogDescription>
+              Please upload a photo showing the completed task as proof of completion.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {completionPhotoPreview ? (
+              <div className="relative">
+                <img
+                  src={completionPhotoPreview}
+                  alt="Completion preview"
+                  className="w-full h-64 object-cover rounded-lg border border-border"
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute bottom-2 right-2"
+                  onClick={() => {
+                    setCompletionPhoto(null);
+                    setCompletionPhotoPreview(null);
+                  }}
+                >
+                  Change Photo
+                </Button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-muted-foreground/30 rounded-lg cursor-pointer hover:border-primary/50 transition-colors bg-muted/30">
+                <ImageIcon className="h-12 w-12 text-muted-foreground mb-3" />
+                <span className="text-sm font-medium text-muted-foreground">Click to upload a photo</span>
+                <span className="text-xs text-muted-foreground mt-1">JPG, PNG up to 10MB</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCompletionPhotoSelected}
+                />
+              </label>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCompletionPhotoDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCompletionPhotoSubmit}
+              disabled={!completionPhoto || uploadingPhoto}
+            >
+              {uploadingPhoto && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
