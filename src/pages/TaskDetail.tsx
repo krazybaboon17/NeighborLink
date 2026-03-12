@@ -439,18 +439,19 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // For paid tasks, check helper PayPal ID first
-    if (acceptedOffer.price > 0) {
-      const { data: helperProfile } = await supabase
+    // For paid tasks, ensure we have a PayPal ID (either existing or just entered)
+    if (acceptedOffer.price > 0 && helperMissingPayPal) {
+      if (!helperPayPalInput.trim()) {
+        toast.error("Please enter the helper's PayPal ID to proceed with payment");
+        return;
+      }
+      // Save the PayPal ID to the helper's profile
+      const { error: updateErr } = await supabase
         .from('profiles')
-        .select('paypal_id')
-        .eq('id', acceptedOffer.helper_id)
-        .single();
-
-      const paypalId = (helperProfile as any)?.paypal_id;
-      if (!paypalId) {
-        setHelperMissingPayPal(true);
-        toast.error("The helper hasn't set up their PayPal ID yet. They need to add it in their profile settings.");
+        .update({ paypal_id: helperPayPalInput.trim() } as any)
+        .eq('id', acceptedOffer.helper_id);
+      if (updateErr) {
+        toast.error('Failed to save PayPal ID');
         return;
       }
     }
