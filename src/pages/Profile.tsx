@@ -118,7 +118,7 @@ export default function ProfilePage() {
         full_name: validation.data.fullName,
         avatar_url: publicUrl,
         bio,
-        paypal_id: paypalId.trim() || null,
+        zelle_id: zelleId.trim() || null,
       } as any).eq('id', user.id);
 
       if (error) throw error;
