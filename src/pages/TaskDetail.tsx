@@ -1003,18 +1003,18 @@ export default function TaskDetail() {
         />
       )}
 
-      {/* PayPal QR Code Dialog */}
-      {helperPayPalId && (() => {
+      {/* Zelle Payment Dialog */}
+      {helperZelleId && (() => {
         const acceptedOffer = getAcceptedOffer();
         return (
-          <PayPalQRCode
-            open={showPayPalQR}
-            onOpenChange={setShowPayPalQR}
-            paypalId={helperPayPalId}
+          <ZellePayment
+            open={showZellePayment}
+            onOpenChange={setShowZellePayment}
+            zelleId={helperZelleId}
             amount={acceptedOffer?.price || 0}
             helperName={acceptedOffer?.profiles?.full_name || 'Helper'}
             onPaymentDone={() => {
-              setShowPayPalQR(false);
+              setShowZellePayment(false);
               setIsReviewOpen(true);
             }}
           />
