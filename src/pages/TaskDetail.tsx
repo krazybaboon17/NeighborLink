@@ -453,11 +453,12 @@ export default function TaskDetail() {
         toast.error("Please enter the helper's Zelle ID to proceed with payment");
         return;
       }
-      // Save the Zelle ID to the helper's profile
-      const { error: updateErr } = await supabase
-        .from('profiles')
-        .update({ zelle_id: helperZelleInput.trim() } as any)
-        .eq('id', acceptedOffer.helper_id);
+      // Save the Zelle ID to the helper's profile via secure RPC
+      const { error: updateErr } = await supabase.rpc('set_helper_zelle_id' as any, {
+        p_task_id: id,
+        p_helper_id: acceptedOffer.helper_id,
+        p_zelle_id: helperZelleInput.trim()
+      });
       if (updateErr) {
         toast.error('Failed to save Zelle ID');
         return;
