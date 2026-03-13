@@ -35,7 +35,7 @@ export default function ProfilePage() {
   const [completedTasks, setCompletedTasks] = useState<number>(0);
   const [isYoungNeighbor, setIsYoungNeighbor] = useState<boolean>(false);
   const [skills, setSkills] = useState<string[]>([]);
-  const [paypalId, setPaypalId] = useState('');
+  const [zelleId, setZelleId] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, paypal_id').eq('id', user!.id).single();
+      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, zelle_id').eq('id', user!.id).single();
       if (error) throw error;
       setFullName(data?.full_name || '');
       setAvatarUrl(data?.avatar_url || null);
@@ -55,7 +55,7 @@ export default function ProfilePage() {
       setIsYoungNeighbor(data?.is_young_neighbor || false);
       setBio(data?.bio || '');
       setSkills(data?.skills || []);
-      setPaypalId((data as any)?.paypal_id || '');
+      setZelleId((data as any)?.zelle_id || '');
     } catch (err: any) {
       console.error('Error loading profile:', err);
       toast.error('Error loading profile');
@@ -118,7 +118,7 @@ export default function ProfilePage() {
         full_name: validation.data.fullName,
         avatar_url: publicUrl,
         bio,
-        paypal_id: paypalId.trim() || null,
+        zelle_id: zelleId.trim() || null,
       } as any).eq('id', user.id);
 
       if (error) throw error;
@@ -220,8 +220,8 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="paypalId">PayPal ID</Label>
-                    <Input id="paypalId" placeholder="your@email.com or @username" value={paypalId} onChange={(e) => setPaypalId(e.target.value)} />
+                    <Label htmlFor="zelleId">Zelle ID</Label>
+                    <Input id="zelleId" placeholder="your@email.com or (555) 123-4567" value={zelleId} onChange={(e) => setZelleId(e.target.value)} />
                     <p className="text-xs text-muted-foreground">Used to receive payments when you complete tasks</p>
                   </div>
 

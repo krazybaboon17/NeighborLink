@@ -40,7 +40,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
   const [age, setAge] = useState('');
   const [currentState, setCurrentState] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [paypalId, setPaypalId] = useState('');
+  const [zelleId, setZelleId] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSkillToggle = (skill: string) => {
@@ -52,7 +52,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
   };
 
   const handleSubmit = async () => {
-    if (!age || !currentState || !paypalId.trim()) {
+    if (!age || !currentState || !zelleId.trim()) {
       toast.error('Please answer all required questions');
       return;
     }
@@ -74,7 +74,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
           current_state: currentState,
           skills: selectedSkills.length > 0 ? selectedSkills : null,
           is_young_neighbor: isYoungNeighbor,
-          paypal_id: paypalId.trim() || null,
+          zelle_id: zelleId.trim() || null,
         } as any)
         .eq('id', userId);
 
@@ -141,17 +141,17 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
           </RadioGroup>
         </div>
 
-        {/* PayPal ID Question */}
+        {/* Zelle ID Question */}
         <div className="space-y-2">
-          <Label htmlFor="paypalId" className="text-base font-medium">
-            PayPal ID (Email or Username) <span className="text-destructive">*</span>
+          <Label htmlFor="zelleId" className="text-base font-medium">
+            Zelle ID (Email or Phone) <span className="text-destructive">*</span>
           </Label>
           <Input
-            id="paypalId"
+            id="zelleId"
             type="text"
-            placeholder="your@email.com or @username"
-            value={paypalId}
-            onChange={(e) => setPaypalId(e.target.value)}
+            placeholder="your@email.com or (555) 123-4567"
+            value={zelleId}
+            onChange={(e) => setZelleId(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
             Used to receive payments when you complete tasks for others
@@ -185,7 +185,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
         <Button 
           onClick={handleSubmit} 
           className="w-full" 
-          disabled={loading || !age || !currentState || !paypalId.trim()}
+          disabled={loading || !age || !currentState || !zelleId.trim()}
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Complete Setup

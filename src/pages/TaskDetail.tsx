@@ -26,7 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { useHelperSafetyCheck } from '@/hooks/useHelperSafetyCheck';
 import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
-import { PayPalQRCode } from '@/components/PayPalQRCode';
+import { ZellePayment } from '@/components/ZellePayment';
 
 interface Task {
   id: string;
@@ -86,14 +86,14 @@ export default function TaskDetail() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
-  const [showPayPalQR, setShowPayPalQR] = useState(false);
-  const [helperPayPalId, setHelperPayPalId] = useState<string | null>(null);
+  const [showZellePayment, setShowZellePayment] = useState(false);
+  const [helperZelleId, setHelperZelleId] = useState<string | null>(null);
   const [completionPhoto, setCompletionPhoto] = useState<File | null>(null);
   const [completionPhotoPreview, setCompletionPhotoPreview] = useState<string | null>(null);
   const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [helperMissingPayPal, setHelperMissingPayPal] = useState(false);
-  const [helperPayPalInput, setHelperPayPalInput] = useState('');
+  const [helperMissingZelle, setHelperMissingZelle] = useState(false);
+  const [helperZelleInput, setHelperZelleInput] = useState('');
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
@@ -398,18 +398,18 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // Pre-check if helper has PayPal ID (for paid tasks)
+    // Pre-check if helper has Zelle ID (for paid tasks)
     if (acceptedOffer.price > 0) {
       const { data: helperProfile } = await supabase
         .from('profiles')
-        .select('paypal_id')
+        .select('zelle_id')
         .eq('id', acceptedOffer.helper_id)
         .single();
-      const paypalId = (helperProfile as any)?.paypal_id;
-      setHelperMissingPayPal(!paypalId);
-      setHelperPayPalInput('');
+      const zelleId = (helperProfile as any)?.zelle_id;
+      setHelperMissingZelle(!zelleId);
+      setHelperZelleInput('');
     } else {
-      setHelperMissingPayPal(false);
+      setHelperMissingZelle(false);
     }
 
     setShowCompletionPhotoDialog(true);
@@ -439,19 +439,19 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // For paid tasks, ensure we have a PayPal ID (either existing or just entered)
-    if (acceptedOffer.price > 0 && helperMissingPayPal) {
-      if (!helperPayPalInput.trim()) {
-        toast.error("Please enter the helper's PayPal ID to proceed with payment");
+    // For paid tasks, ensure we have a Zelle ID (either existing or just entered)
+    if (acceptedOffer.price > 0 && helperMissingZelle) {
+      if (!helperZelleInput.trim()) {
+        toast.error("Please enter the helper's Zelle ID to proceed with payment");
         return;
       }
-      // Save the PayPal ID to the helper's profile
+      // Save the Zelle ID to the helper's profile
       const { error: updateErr } = await supabase
         .from('profiles')
-        .update({ paypal_id: helperPayPalInput.trim() } as any)
+        .update({ zelle_id: helperZelleInput.trim() } as any)
         .eq('id', acceptedOffer.helper_id);
       if (updateErr) {
-        toast.error('Failed to save PayPal ID');
+        toast.error('Failed to save Zelle ID');
         return;
       }
     }
@@ -481,16 +481,16 @@ export default function TaskDetail() {
 
       const { data: helperProfile } = await supabase
         .from('profiles')
-        .select('paypal_id')
+        .select('zelle_id')
         .eq('id', acceptedOffer.helper_id)
         .single();
 
-      const paypalId = (helperProfile as any)?.paypal_id;
-      if (paypalId) {
-        setHelperPayPalId(paypalId);
-        setShowPayPalQR(true);
+      const zelleId = (helperProfile as any)?.zelle_id;
+      if (zelleId) {
+        setHelperZelleId(zelleId);
+        setShowZellePayment(true);
       } else {
-        toast.error('Helper has not set up their PayPal ID. Contact them to arrange payment.');
+        toast.error('Helper has not set up their Zelle ID. Contact them to arrange payment.');
       }
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
@@ -1003,18 +1003,18 @@ export default function TaskDetail() {
         />
       )}
 
-      {/* PayPal QR Code Dialog */}
-      {helperPayPalId && (() => {
+      {/* Zelle Payment Dialog */}
+      {helperZelleId && (() => {
         const acceptedOffer = getAcceptedOffer();
         return (
-          <PayPalQRCode
-            open={showPayPalQR}
-            onOpenChange={setShowPayPalQR}
-            paypalId={helperPayPalId}
+          <ZellePayment
+            open={showZellePayment}
+            onOpenChange={setShowZellePayment}
+            zelleId={helperZelleId}
             amount={acceptedOffer?.price || 0}
             helperName={acceptedOffer?.profiles?.full_name || 'Helper'}
             onPaymentDone={() => {
-              setShowPayPalQR(false);
+              setShowZellePayment(false);
               setIsReviewOpen(true);
             }}
           />
@@ -1025,8 +1025,8 @@ export default function TaskDetail() {
       <Dialog open={showCompletionPhotoDialog} onOpenChange={(open) => {
         setShowCompletionPhotoDialog(open);
         if (!open) {
-          setHelperMissingPayPal(false);
-          setHelperPayPalInput('');
+          setHelperMissingZelle(false);
+          setHelperZelleInput('');
         }
       }}>
         <DialogContent className="sm:max-w-md">
@@ -1089,20 +1089,20 @@ export default function TaskDetail() {
               </div>
             )}
 
-            {/* PayPal ID input if helper is missing it (paid tasks only) */}
-            {helperMissingPayPal && (
+            {/* Zelle ID input if helper is missing it (paid tasks only) */}
+            {helperMissingZelle && (
               <div className="space-y-2">
                 <Separator />
-                <Label htmlFor="helper-paypal">Helper's PayPal ID</Label>
+                <Label htmlFor="helper-zelle">Helper's Zelle ID</Label>
                 <p className="text-xs text-muted-foreground">
-                  The helper hasn't added their PayPal ID yet. Enter it here so you can pay them.
+                  The helper hasn't added their Zelle ID yet. Enter it here so you can pay them.
                 </p>
                 <Input
-                  id="helper-paypal"
+                  id="helper-zelle"
                   type="text"
-                  placeholder="PayPal email or username"
-                  value={helperPayPalInput}
-                  onChange={(e) => setHelperPayPalInput(e.target.value)}
+                  placeholder="Email or phone number"
+                  value={helperZelleInput}
+                  onChange={(e) => setHelperZelleInput(e.target.value)}
                 />
               </div>
             )}
@@ -1113,7 +1113,7 @@ export default function TaskDetail() {
             </Button>
             <Button
               onClick={handleCompletionPhotoSubmit}
-              disabled={!completionPhoto || uploadingPhoto || (helperMissingPayPal && !helperPayPalInput.trim())}
+              disabled={!completionPhoto || uploadingPhoto || (helperMissingZelle && !helperZelleInput.trim())}
             >
               {uploadingPhoto && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Continue
