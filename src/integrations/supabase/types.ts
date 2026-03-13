@@ -420,6 +420,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      set_helper_zelle_id: {
+        Args: { p_helper_id: string; p_task_id: string; p_zelle_id: string }
+        Returns: boolean
+      }
       submit_review: {
         Args: {
           p_comment?: string
