@@ -220,8 +220,8 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="paypalId">PayPal ID</Label>
-                    <Input id="paypalId" placeholder="your@email.com or @username" value={paypalId} onChange={(e) => setPaypalId(e.target.value)} />
+                    <Label htmlFor="zelleId">Zelle ID</Label>
+                    <Input id="zelleId" placeholder="your@email.com or (555) 123-4567" value={zelleId} onChange={(e) => setZelleId(e.target.value)} />
                     <p className="text-xs text-muted-foreground">Used to receive payments when you complete tasks</p>
                   </div>
 

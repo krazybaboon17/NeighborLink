@@ -185,7 +185,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
         <Button 
           onClick={handleSubmit} 
           className="w-full" 
-          disabled={loading || !age || !currentState || !paypalId.trim()}
+          disabled={loading || !age || !currentState || !zelleId.trim()}
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Complete Setup
