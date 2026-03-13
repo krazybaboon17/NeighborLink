@@ -86,14 +86,14 @@ export default function TaskDetail() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
-  const [showPayPalQR, setShowPayPalQR] = useState(false);
-  const [helperPayPalId, setHelperPayPalId] = useState<string | null>(null);
+  const [showZellePayment, setShowZellePayment] = useState(false);
+  const [helperZelleId, setHelperZelleId] = useState<string | null>(null);
   const [completionPhoto, setCompletionPhoto] = useState<File | null>(null);
   const [completionPhotoPreview, setCompletionPhotoPreview] = useState<string | null>(null);
   const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [helperMissingPayPal, setHelperMissingPayPal] = useState(false);
-  const [helperPayPalInput, setHelperPayPalInput] = useState('');
+  const [helperMissingZelle, setHelperMissingZelle] = useState(false);
+  const [helperZelleInput, setHelperZelleInput] = useState('');
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
