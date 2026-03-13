@@ -74,7 +74,7 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
           current_state: currentState,
           skills: selectedSkills.length > 0 ? selectedSkills : null,
           is_young_neighbor: isYoungNeighbor,
-          paypal_id: paypalId.trim() || null,
+          zelle_id: zelleId.trim() || null,
         } as any)
         .eq('id', userId);
 
