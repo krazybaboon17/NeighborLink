@@ -1089,20 +1089,20 @@ export default function TaskDetail() {
               </div>
             )}
 
-            {/* PayPal ID input if helper is missing it (paid tasks only) */}
-            {helperMissingPayPal && (
+            {/* Zelle ID input if helper is missing it (paid tasks only) */}
+            {helperMissingZelle && (
               <div className="space-y-2">
                 <Separator />
-                <Label htmlFor="helper-paypal">Helper's PayPal ID</Label>
+                <Label htmlFor="helper-zelle">Helper's Zelle ID</Label>
                 <p className="text-xs text-muted-foreground">
-                  The helper hasn't added their PayPal ID yet. Enter it here so you can pay them.
+                  The helper hasn't added their Zelle ID yet. Enter it here so you can pay them.
                 </p>
                 <Input
-                  id="helper-paypal"
+                  id="helper-zelle"
                   type="text"
-                  placeholder="PayPal email or username"
-                  value={helperPayPalInput}
-                  onChange={(e) => setHelperPayPalInput(e.target.value)}
+                  placeholder="Email or phone number"
+                  value={helperZelleInput}
+                  onChange={(e) => setHelperZelleInput(e.target.value)}
                 />
               </div>
             )}
