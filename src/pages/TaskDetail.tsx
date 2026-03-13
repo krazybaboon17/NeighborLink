@@ -1113,7 +1113,7 @@ export default function TaskDetail() {
             </Button>
             <Button
               onClick={handleCompletionPhotoSubmit}
-              disabled={!completionPhoto || uploadingPhoto || (helperMissingPayPal && !helperPayPalInput.trim())}
+              disabled={!completionPhoto || uploadingPhoto || (helperMissingZelle && !helperZelleInput.trim())}
             >
               {uploadingPhoto && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Continue

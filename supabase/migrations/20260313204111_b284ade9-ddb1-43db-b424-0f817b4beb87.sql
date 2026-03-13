@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles RENAME COLUMN paypal_id TO zelle_id;
