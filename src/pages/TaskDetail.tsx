@@ -487,13 +487,11 @@ export default function TaskDetail() {
         return;
       }
 
-      const { data: helperProfile } = await supabase
-        .from('profiles')
-        .select('zelle_id')
-        .eq('id', acceptedOffer.helper_id)
-        .single();
+      const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
+        p_task_id: id,
+        p_helper_id: acceptedOffer.helper_id
+      });
 
-      const zelleId = (helperProfile as any)?.zelle_id;
       if (zelleId) {
         setHelperZelleId(zelleId);
         setShowZellePayment(true);
