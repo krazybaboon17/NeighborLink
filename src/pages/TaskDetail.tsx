@@ -334,10 +334,7 @@ export default function TaskDetail() {
             hours: 2,
           });
 
-          const { data: profile } = await supabase.from('public_profiles' as any).select('completed_tasks').eq('id', offerData.helper_id).single();
-          const completed = ((profile as any)?.completed_tasks || 0) + 1;
-          // completed_tasks is updated via submit_review RPC; this is a fallback for volunteers
-          await supabase.from('profiles').update({ completed_tasks: completed } as any).eq('id', offerData.helper_id);
+          // completed_tasks is handled by submit_review RPC at task completion
         }
       } catch (innerErr) {
         console.error('Error recording volunteer hours:', innerErr);
