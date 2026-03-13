@@ -64,7 +64,7 @@ export default function AdminVerifications() {
     try {
       const { data, error } = await supabase
         .from('verifications')
-        .select(`*, profiles ( full_name, avatar_url )`)
+        .select(`*`)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 

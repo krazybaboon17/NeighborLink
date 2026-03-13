@@ -53,7 +53,7 @@ export default function Conversations() {
       // fetch user info for each other_user
       const entries = Object.values(grouped);
       await Promise.all(entries.map(async (c) => {
-        const { data: profile } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', c.other_user_id).single();
+        const { data: profile } = await supabase.from('public_profiles' as any).select('full_name, avatar_url').eq('id', c.other_user_id).single();
         if (profile) {
           c.other_user_name = profile.full_name || c.other_user_name;
           c.other_user_avatar = profile.avatar_url || null;

@@ -169,23 +169,33 @@ export default function TaskDetail() {
 
   const fetchOffers = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch offers without join (profiles base table is restricted)
+      const { data: offersData, error } = await supabase
         .from('offers')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            avatar_url,
-            rating,
-            completed_tasks,
-            is_young_neighbor
-          )
-        `)
+        .select('*')
         .eq('task_id', id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOffers(data as any || []);
+      if (!offersData) { setOffers([]); return; }
+
+      // Fetch public profiles for each helper
+      const helperIds = [...new Set(offersData.map(o => o.helper_id))];
+      const { data: profilesData } = await supabase
+        .from('public_profiles' as any)
+        .select('id, full_name, avatar_url, rating, completed_tasks, is_young_neighbor, verified')
+        .in('id', helperIds);
+
+      const profileMap = new Map((profilesData || []).map((p: any) => [p.id, p]));
+
+      const enrichedOffers = offersData.map(o => ({
+        ...o,
+        profiles: profileMap.get(o.helper_id) || {
+          full_name: 'Anonymous', avatar_url: null, rating: 0, completed_tasks: 0, is_young_neighbor: false, verified: false
+        }
+      }));
+
+      setOffers(enrichedOffers as any || []);
     } catch (error) {
       console.error('Error fetching offers:', error);
     }
