@@ -1025,8 +1025,8 @@ export default function TaskDetail() {
       <Dialog open={showCompletionPhotoDialog} onOpenChange={(open) => {
         setShowCompletionPhotoDialog(open);
         if (!open) {
-          setHelperMissingPayPal(false);
-          setHelperPayPalInput('');
+          setHelperMissingZelle(false);
+          setHelperZelleInput('');
         }
       }}>
         <DialogContent className="sm:max-w-md">
