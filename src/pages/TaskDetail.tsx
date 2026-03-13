@@ -145,7 +145,7 @@ export default function TaskDetail() {
       let profileData = null;
       try {
         const { data: p, error: pErr } = await supabase
-          .from('profiles')
+          .from('public_profiles' as any)
           .select('full_name, avatar_url, rating, completed_tasks')
           .eq('id', taskOnly.user_id)
           .single();
@@ -169,23 +169,33 @@ export default function TaskDetail() {
 
   const fetchOffers = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch offers without join (profiles base table is restricted)
+      const { data: offersData, error } = await supabase
         .from('offers')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            avatar_url,
-            rating,
-            completed_tasks,
-            is_young_neighbor
-          )
-        `)
+        .select('*')
         .eq('task_id', id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOffers(data as any || []);
+      if (!offersData) { setOffers([]); return; }
+
+      // Fetch public profiles for each helper
+      const helperIds = [...new Set(offersData.map(o => o.helper_id))];
+      const { data: profilesData } = await supabase
+        .from('public_profiles' as any)
+        .select('id, full_name, avatar_url, rating, completed_tasks, is_young_neighbor, verified')
+        .in('id', helperIds);
+
+      const profileMap = new Map((profilesData || []).map((p: any) => [p.id, p]));
+
+      const enrichedOffers = offersData.map(o => ({
+        ...o,
+        profiles: profileMap.get(o.helper_id) || {
+          full_name: 'Anonymous', avatar_url: null, rating: 0, completed_tasks: 0, is_young_neighbor: false, verified: false
+        }
+      }));
+
+      setOffers(enrichedOffers as any || []);
     } catch (error) {
       console.error('Error fetching offers:', error);
     }
@@ -324,9 +334,7 @@ export default function TaskDetail() {
             hours: 2,
           });
 
-          const { data: profile } = await supabase.from('profiles').select('completed_tasks').eq('id', offerData.helper_id).single();
-          const completed = (profile?.completed_tasks || 0) + 1;
-          await supabase.from('profiles').update({ completed_tasks: completed }).eq('id', offerData.helper_id);
+          // completed_tasks is handled by submit_review RPC at task completion
         }
       } catch (innerErr) {
         console.error('Error recording volunteer hours:', innerErr);
@@ -398,14 +406,12 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // Pre-check if helper has Zelle ID (for paid tasks)
+    // Pre-check if helper has Zelle ID (for paid tasks) using secure RPC
     if (acceptedOffer.price > 0) {
-      const { data: helperProfile } = await supabase
-        .from('profiles')
-        .select('zelle_id')
-        .eq('id', acceptedOffer.helper_id)
-        .single();
-      const zelleId = (helperProfile as any)?.zelle_id;
+      const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
+        p_task_id: id,
+        p_helper_id: acceptedOffer.helper_id
+      });
       setHelperMissingZelle(!zelleId);
       setHelperZelleInput('');
     } else {
@@ -445,11 +451,12 @@ export default function TaskDetail() {
         toast.error("Please enter the helper's Zelle ID to proceed with payment");
         return;
       }
-      // Save the Zelle ID to the helper's profile
-      const { error: updateErr } = await supabase
-        .from('profiles')
-        .update({ zelle_id: helperZelleInput.trim() } as any)
-        .eq('id', acceptedOffer.helper_id);
+      // Save the Zelle ID to the helper's profile via secure RPC
+      const { error: updateErr } = await supabase.rpc('set_helper_zelle_id' as any, {
+        p_task_id: id,
+        p_helper_id: acceptedOffer.helper_id,
+        p_zelle_id: helperZelleInput.trim()
+      });
       if (updateErr) {
         toast.error('Failed to save Zelle ID');
         return;
@@ -479,13 +486,11 @@ export default function TaskDetail() {
         return;
       }
 
-      const { data: helperProfile } = await supabase
-        .from('profiles')
-        .select('zelle_id')
-        .eq('id', acceptedOffer.helper_id)
-        .single();
+      const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
+        p_task_id: id,
+        p_helper_id: acceptedOffer.helper_id
+      });
 
-      const zelleId = (helperProfile as any)?.zelle_id;
       if (zelleId) {
         setHelperZelleId(zelleId);
         setShowZellePayment(true);

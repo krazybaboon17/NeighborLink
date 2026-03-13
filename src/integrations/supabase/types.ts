@@ -86,6 +86,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "offers_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "offers_task_id_fkey"
             columns: ["task_id"]
             isOneToOne: false
@@ -291,6 +298,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "verifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       volunteer_hours: {
@@ -330,11 +344,59 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "volunteer_hours_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          completed_tasks: number | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          is_helper: boolean | null
+          is_young_neighbor: boolean | null
+          rating: number | null
+          skills: string[] | null
+          verified: boolean | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          completed_tasks?: number | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_helper?: boolean | null
+          is_young_neighbor?: boolean | null
+          rating?: number | null
+          skills?: string[] | null
+          verified?: boolean | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          completed_tasks?: number | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_helper?: boolean | null
+          is_young_neighbor?: boolean | null
+          rating?: number | null
+          skills?: string[] | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_approve_verification: {
@@ -346,6 +408,10 @@ export type Database = {
         Returns: boolean
       }
       check_is_admin: { Args: never; Returns: boolean }
+      get_helper_zelle_id: {
+        Args: { p_helper_id: string; p_task_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -354,6 +420,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      set_helper_zelle_id: {
+        Args: { p_helper_id: string; p_task_id: string; p_zelle_id: string }
+        Returns: boolean
+      }
       submit_review: {
         Args: {
           p_comment?: string

@@ -64,12 +64,25 @@ export default function AdminVerifications() {
     try {
       const { data, error } = await supabase
         .from('verifications')
-        .select(`*, profiles ( full_name, avatar_url )`)
+        .select(`*`)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      const rows = (data as VerificationRow[]) || [];
+      const rawRows = data || [];
+
+      // Admins can read profiles directly via admin RLS policy
+      const userIds = [...new Set(rawRows.map((r: any) => r.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds);
+      const profileMap = new Map((profilesData || []).map((p: any) => [p.id, p]));
+
+      const rows: VerificationRow[] = rawRows.map((r: any) => ({
+        ...r,
+        profiles: profileMap.get(r.user_id) || { full_name: null, avatar_url: null }
+      }));
       setItems(rows);
 
       // Generate signed URLs for all images
