@@ -398,18 +398,18 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // Pre-check if helper has PayPal ID (for paid tasks)
+    // Pre-check if helper has Zelle ID (for paid tasks)
     if (acceptedOffer.price > 0) {
       const { data: helperProfile } = await supabase
         .from('profiles')
-        .select('paypal_id')
+        .select('zelle_id')
         .eq('id', acceptedOffer.helper_id)
         .single();
-      const paypalId = (helperProfile as any)?.paypal_id;
-      setHelperMissingPayPal(!paypalId);
-      setHelperPayPalInput('');
+      const zelleId = (helperProfile as any)?.zelle_id;
+      setHelperMissingZelle(!zelleId);
+      setHelperZelleInput('');
     } else {
-      setHelperMissingPayPal(false);
+      setHelperMissingZelle(false);
     }
 
     setShowCompletionPhotoDialog(true);
