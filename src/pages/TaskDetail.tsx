@@ -439,19 +439,19 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // For paid tasks, ensure we have a PayPal ID (either existing or just entered)
-    if (acceptedOffer.price > 0 && helperMissingPayPal) {
-      if (!helperPayPalInput.trim()) {
-        toast.error("Please enter the helper's PayPal ID to proceed with payment");
+    // For paid tasks, ensure we have a Zelle ID (either existing or just entered)
+    if (acceptedOffer.price > 0 && helperMissingZelle) {
+      if (!helperZelleInput.trim()) {
+        toast.error("Please enter the helper's Zelle ID to proceed with payment");
         return;
       }
-      // Save the PayPal ID to the helper's profile
+      // Save the Zelle ID to the helper's profile
       const { error: updateErr } = await supabase
         .from('profiles')
-        .update({ paypal_id: helperPayPalInput.trim() } as any)
+        .update({ zelle_id: helperZelleInput.trim() } as any)
         .eq('id', acceptedOffer.helper_id);
       if (updateErr) {
-        toast.error('Failed to save PayPal ID');
+        toast.error('Failed to save Zelle ID');
         return;
       }
     }
@@ -481,16 +481,16 @@ export default function TaskDetail() {
 
       const { data: helperProfile } = await supabase
         .from('profiles')
-        .select('paypal_id')
+        .select('zelle_id')
         .eq('id', acceptedOffer.helper_id)
         .single();
 
-      const paypalId = (helperProfile as any)?.paypal_id;
-      if (paypalId) {
-        setHelperPayPalId(paypalId);
-        setShowPayPalQR(true);
+      const zelleId = (helperProfile as any)?.zelle_id;
+      if (zelleId) {
+        setHelperZelleId(zelleId);
+        setShowZellePayment(true);
       } else {
-        toast.error('Helper has not set up their PayPal ID. Contact them to arrange payment.');
+        toast.error('Helper has not set up their Zelle ID. Contact them to arrange payment.');
       }
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
