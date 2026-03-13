@@ -81,7 +81,7 @@ export default function Tasks() {
 
       const userIds = [...new Set(tasksData.map((t: any) => t.user_id))];
       const { data: profilesData } = await supabase
-        .from('profiles')
+        .from('public_profiles' as any)
         .select('id, full_name')
         .in('id', userIds);
 

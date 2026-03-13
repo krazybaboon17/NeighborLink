@@ -84,8 +84,8 @@ export default function Messages() {
   const fetchOtherUser = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
+        .from('public_profiles' as any)
+        .select('id, full_name, avatar_url, rating, completed_tasks, is_young_neighbor, verified')
         .eq('id', otherId)
         .single();
 
