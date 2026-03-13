@@ -145,7 +145,7 @@ export default function TaskDetail() {
       let profileData = null;
       try {
         const { data: p, error: pErr } = await supabase
-          .from('profiles')
+          .from('public_profiles' as any)
           .select('full_name, avatar_url, rating, completed_tasks')
           .eq('id', taskOnly.user_id)
           .single();
