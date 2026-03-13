@@ -408,14 +408,12 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // Pre-check if helper has Zelle ID (for paid tasks)
+    // Pre-check if helper has Zelle ID (for paid tasks) using secure RPC
     if (acceptedOffer.price > 0) {
-      const { data: helperProfile } = await supabase
-        .from('profiles')
-        .select('zelle_id')
-        .eq('id', acceptedOffer.helper_id)
-        .single();
-      const zelleId = (helperProfile as any)?.zelle_id;
+      const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
+        p_task_id: id,
+        p_helper_id: acceptedOffer.helper_id
+      });
       setHelperMissingZelle(!zelleId);
       setHelperZelleInput('');
     } else {
