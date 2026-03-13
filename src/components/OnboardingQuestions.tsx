@@ -141,17 +141,17 @@ export function OnboardingQuestions({ userId, onComplete }: OnboardingQuestionsP
           </RadioGroup>
         </div>
 
-        {/* PayPal ID Question */}
+        {/* Zelle ID Question */}
         <div className="space-y-2">
-          <Label htmlFor="paypalId" className="text-base font-medium">
-            PayPal ID (Email or Username) <span className="text-destructive">*</span>
+          <Label htmlFor="zelleId" className="text-base font-medium">
+            Zelle ID (Email or Phone) <span className="text-destructive">*</span>
           </Label>
           <Input
-            id="paypalId"
+            id="zelleId"
             type="text"
-            placeholder="your@email.com or @username"
-            value={paypalId}
-            onChange={(e) => setPaypalId(e.target.value)}
+            placeholder="your@email.com or (555) 123-4567"
+            value={zelleId}
+            onChange={(e) => setZelleId(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">
             Used to receive payments when you complete tasks for others
