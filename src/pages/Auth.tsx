@@ -48,7 +48,7 @@ export default function Auth() {
           .eq('id', user.id)
           .single();
 
-        if (profile && (!profile.age || !profile.current_state || !(profile as any).paypal_id)) {
+        if (profile && (!profile.age || !profile.current_state || !(profile as any).zelle_id)) {
           setNewUserId(user.id);
           setShowOnboarding(true);
         } else {
