@@ -983,9 +983,26 @@ export default function TaskDetail() {
                           <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium">Coming Soon</span>
                         </button>
 
-                        {/* Zelle option */}
                         <button
-                          onClick={handlePaymentClick}
+                          onClick={async () => {
+                            const offer = getAcceptedOffer();
+                            if (!offer) return;
+                            setIsPaymentDialogOpen(false);
+                            try {
+                              const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
+                                p_task_id: id,
+                                p_helper_id: offer.helper_id
+                              });
+                              if (zelleId) {
+                                setHelperZelleId(zelleId);
+                                setShowZellePayment(true);
+                              } else {
+                                toast.error('Helper has not set up their Zelle ID. Contact them to arrange payment.');
+                              }
+                            } catch (err: any) {
+                              toast.error(err.message || 'Error fetching payment info');
+                            }
+                          }}
                           className="w-full flex items-center gap-3 p-4 rounded-lg border-2 border-primary/60 hover:border-primary bg-primary/5 transition-colors"
                         >
                           <DollarSign className="h-6 w-6 text-primary" />
