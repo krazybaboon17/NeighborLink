@@ -486,17 +486,8 @@ export default function TaskDetail() {
         return;
       }
 
-      const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
-        p_task_id: id,
-        p_helper_id: acceptedOffer.helper_id
-      });
-
-      if (zelleId) {
-        setHelperZelleId(zelleId);
-        setShowZellePayment(true);
-      } else {
-        toast.error('Helper has not set up their Zelle ID. Contact them to arrange payment.');
-      }
+      // Show payment method chooser for paid tasks
+      setIsPaymentDialogOpen(true);
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
       toast.error(error.message || 'Error uploading photo');
@@ -926,16 +917,16 @@ export default function TaskDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Payment Confirmation Dialog */}
+      {/* Payment Method Chooser Dialog */}
       <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-primary" />
-              Confirm Payment
+              Choose Payment Method
             </DialogTitle>
             <DialogDescription>
-              You're about to pay the helper for completing this task.
+              Select how you'd like to pay the helper for this task.
             </DialogDescription>
           </DialogHeader>
           {(() => {
@@ -969,6 +960,60 @@ export default function TaskDetail() {
                         This was a volunteer task. No payment required!
                       </p>
                     )}
+
+                    {!isVolunteer && (
+                      <div className="space-y-3">
+                        <p className="text-sm font-medium text-muted-foreground">Select payment method:</p>
+
+                        {/* Stripe option - coming soon */}
+                        <button
+                          onClick={() => {
+                            toast.info(
+                              'Stripe payments are coming soon! Please use Zelle for now.',
+                              { duration: 5000 }
+                            );
+                          }}
+                          className="w-full flex items-center gap-3 p-4 rounded-lg border border-border hover:border-primary/40 transition-colors opacity-70 relative"
+                        >
+                          <CreditCard className="h-6 w-6 text-muted-foreground" />
+                          <div className="flex-1 text-left">
+                            <p className="font-medium text-foreground">Pay with Card (Stripe)</p>
+                            <p className="text-xs text-muted-foreground">Credit/debit card payment</p>
+                          </div>
+                          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium">Coming Soon</span>
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            const offer = getAcceptedOffer();
+                            if (!offer) return;
+                            setIsPaymentDialogOpen(false);
+                            try {
+                              const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
+                                p_task_id: id,
+                                p_helper_id: offer.helper_id
+                              });
+                              if (zelleId) {
+                                setHelperZelleId(zelleId);
+                                setShowZellePayment(true);
+                              } else {
+                                toast.error('Helper has not set up their Zelle ID. Contact them to arrange payment.');
+                              }
+                            } catch (err: any) {
+                              toast.error(err.message || 'Error fetching payment info');
+                            }
+                          }}
+                          className="w-full flex items-center gap-3 p-4 rounded-lg border-2 border-primary/60 hover:border-primary bg-primary/5 transition-colors"
+                        >
+                          <DollarSign className="h-6 w-6 text-primary" />
+                          <div className="flex-1 text-left">
+                            <p className="font-medium text-foreground">Pay with Zelle</p>
+                            <p className="text-xs text-muted-foreground">Send via your banking app</p>
+                          </div>
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Recommended</span>
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -978,18 +1023,20 @@ export default function TaskDetail() {
             <Button 
               variant="outline" 
               onClick={() => setIsPaymentDialogOpen(false)}
-              className="flex-1"
+              className="w-full"
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleProcessPayment} 
-              disabled={processingPayment}
-              className="flex-1 bg-green-600 hover:bg-green-700"
-            >
-              {processingPayment && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {getAcceptedOffer()?.price === 0 ? 'Continue to Review' : 'Proceed to Payment'}
-            </Button>
+            {getAcceptedOffer()?.price === 0 && (
+              <Button 
+                onClick={handleProcessPayment} 
+                disabled={processingPayment}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {processingPayment && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Continue to Review
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
