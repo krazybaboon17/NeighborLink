@@ -15,7 +15,7 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
       <motion.svg
         width={dims}
         height={dims}
-        viewBox="0 0 120 120"
+        viewBox="-2 -2 124 124"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         whileHover={{ scale: 1.08, rotate: 3 }}
