@@ -486,8 +486,21 @@ export default function TaskDetail() {
         return;
       }
 
-      // Show payment method chooser for paid tasks
-      setIsPaymentDialogOpen(true);
+      // Go straight to Zelle payment for paid tasks
+      try {
+        const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
+          p_task_id: id,
+          p_helper_id: acceptedOffer.helper_id
+        });
+        if (zelleId) {
+          setHelperZelleId(zelleId);
+          setShowZellePayment(true);
+        } else {
+          toast.error('Helper has not set up their Zelle ID. Contact them to arrange payment.');
+        }
+      } catch (err: any) {
+        toast.error(err.message || 'Error fetching payment info');
+      }
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
       toast.error(error.message || 'Error uploading photo');
