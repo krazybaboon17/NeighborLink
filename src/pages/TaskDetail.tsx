@@ -930,9 +930,6 @@ export default function TaskDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Payment Method Chooser Dialog removed - using Zelle directly */}
-        </DialogContent>
-      </Dialog>
 
       {/* Safety Warning Dialog */}
       {safetyResult && (
