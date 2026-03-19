@@ -23,6 +23,7 @@ import ServiceHours from "./pages/ServiceHours";
 import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
 import ResetPassword from "./pages/ResetPassword";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/admin/verifications" element={<ProtectedRoute><AdminVerifications /></ProtectedRoute>} />
             <Route path="/features" element={<Features />} />
             <Route path="/service-hours" element={<ProtectedRoute><ServiceHours /></ProtectedRoute>} />
+            <Route path="/contact" element={<Contact />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
