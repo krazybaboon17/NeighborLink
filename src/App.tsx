@@ -23,6 +23,7 @@ import ServiceHours from "./pages/ServiceHours";
 import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
 import ResetPassword from "./pages/ResetPassword";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 

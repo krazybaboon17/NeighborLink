@@ -82,9 +82,9 @@ export const Footer = () => {
             © 2025 NeighborLink. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
-            {["Privacy Policy", "Terms of Service", "Contact Us"].map((item) => (
-              <a key={item} href="#" className="hover:text-primary transition-colors">{item}</a>
-            ))}
+            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+            <Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link>
           </div>
         </div>
       </div>
