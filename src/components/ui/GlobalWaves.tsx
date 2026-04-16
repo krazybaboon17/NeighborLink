@@ -34,7 +34,7 @@ export const GlobalWaves = () => {
                 {/* Wave 2 - Middle Layer (Blue Tint) */}
                 <motion.div
                     style={{ y: y2, x: x2 }}
-                    className="absolute w-[200%] h-full opacity-15 text-primary flex items-center"
+                    className="absolute w-[200%] h-full opacity-[0.06] text-primary flex items-center"
                 >
                     <svg viewBox="0 0 1440 600" preserveAspectRatio="none" className="w-full h-full fill-current">
                         <path d="M0,300 C480,150 960,450 1440,300 V900 H0 V300 Z" />
