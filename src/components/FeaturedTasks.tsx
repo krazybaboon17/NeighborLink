@@ -106,9 +106,11 @@ export const FeaturedTasks = () => {
                   </span>
                   <span className="flex items-center gap-1 font-medium text-foreground">
                     <DollarSign className="w-3.5 h-3.5" />
-                    {task.budget_min === task.budget_max
-                      ? `$${task.budget_min}`
-                      : `$${task.budget_min}–$${task.budget_max}`}
+                    {(() => {
+                      const lo = Math.min(task.budget_min, task.budget_max);
+                      const hi = Math.max(task.budget_min, task.budget_max);
+                      return lo === hi ? `$${lo}` : `$${lo}–$${hi}`;
+                    })()}
                   </span>
                 </div>
               </Card>
