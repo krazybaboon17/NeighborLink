@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Hero } from "@/components/Hero";
-import { TaskCategories } from "@/components/TaskCategories";
+import { FeaturedTasks } from "@/components/FeaturedTasks";
 import { HowItWorks } from "@/components/HowItWorks";
 import { TrustSafety } from "@/components/TrustSafety";
 import { CTASection } from "@/components/CTASection";
@@ -22,9 +22,9 @@ const Index = () => {
           </ScrollReveal>
         </div>
 
-        <div id="categories">
+        <div id="featured-tasks">
           <ScrollReveal delay={0.2}>
-            <TaskCategories />
+            <FeaturedTasks />
           </ScrollReveal>
         </div>
 
