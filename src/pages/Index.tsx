@@ -5,6 +5,7 @@ import { FeaturedTasks } from "@/components/FeaturedTasks";
 import { HowItWorks } from "@/components/HowItWorks";
 import { TrustSafety } from "@/components/TrustSafety";
 import { CTASection } from "@/components/CTASection";
+import { MailingListSection } from "@/components/MailingListSection";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
@@ -36,6 +37,10 @@ const Index = () => {
 
         <ScrollReveal delay={0.2}>
           <CTASection />
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.2}>
+          <MailingListSection />
         </ScrollReveal>
       </main>
       <Footer />
