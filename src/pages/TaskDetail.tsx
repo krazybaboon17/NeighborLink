@@ -100,6 +100,10 @@ export default function TaskDetail() {
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
   const [pendingOfferHelper, setPendingOfferHelper] = useState<string>('');
   const [showSafetyWarning, setShowSafetyWarning] = useState(false);
+  // Terms of Service agreement (must be re-checked for every offer / acceptance)
+  const [agreeOffer, setAgreeOffer] = useState(false);
+  const [agreeVolunteer, setAgreeVolunteer] = useState(false);
+  const [acceptingAgreement, setAcceptingAgreement] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (id) {
