@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
 import ResetPassword from "./pages/ResetPassword";
 import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/features" element={<Features />} />
             <Route path="/service-hours" element={<ProtectedRoute><ServiceHours /></ProtectedRoute>} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/terms" element={<Terms />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

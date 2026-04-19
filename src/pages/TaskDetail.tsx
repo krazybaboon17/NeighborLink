@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Navbar } from '@/components/Navbar';
 import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard, Camera, ImageIcon } from 'lucide-react';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
@@ -99,6 +100,10 @@ export default function TaskDetail() {
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
   const [pendingOfferHelper, setPendingOfferHelper] = useState<string>('');
   const [showSafetyWarning, setShowSafetyWarning] = useState(false);
+  // Terms of Service agreement (must be re-checked for every offer / acceptance)
+  const [agreeOffer, setAgreeOffer] = useState(false);
+  const [agreeVolunteer, setAgreeVolunteer] = useState(false);
+  const [acceptingAgreement, setAcceptingAgreement] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (id) {
@@ -208,6 +213,10 @@ export default function TaskDetail() {
       navigate('/auth');
       return;
     }
+    if (!agreeOffer) {
+      toast.error('Please agree to the Terms of Service to send an offer');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -238,6 +247,7 @@ export default function TaskDetail() {
       toast.success('Offer submitted successfully!');
       setOfferPrice('');
       setOfferMessage('');
+      setAgreeOffer(false);
       fetchOffers();
     } catch (error: any) {
       toast.error(error.message || 'Error submitting offer');
@@ -250,6 +260,10 @@ export default function TaskDetail() {
     if (!user) {
       toast.error('Please sign in to volunteer');
       navigate('/auth');
+      return;
+    }
+    if (!agreeVolunteer) {
+      toast.error('Please agree to the Terms of Service to volunteer');
       return;
     }
 
@@ -267,6 +281,7 @@ export default function TaskDetail() {
       if (error) throw error;
 
       toast.success('Volunteer offer submitted!');
+      setAgreeVolunteer(false);
       fetchOffers();
     } catch (error: any) {
       console.error('Error submitting volunteer offer:', error);
@@ -277,6 +292,10 @@ export default function TaskDetail() {
   };
 
   const handleAcceptOfferClick = async (offer: Offer) => {
+    if (!acceptingAgreement[offer.id]) {
+      toast.error('Please agree to the Terms of Service before accepting this offer');
+      return;
+    }
     setSubmitting(true);
 
     // Perform AI safety check
@@ -709,30 +728,61 @@ export default function TaskDetail() {
                         {offer.message && (
                           <p className="text-sm text-muted-foreground mt-3">{offer.message}</p>
                         )}
-                        <div className="flex gap-2 mt-4">
-                          {isTaskOwner && offer.status === 'pending' && task.status === 'open' && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleAcceptOfferClick(offer)}
-                              disabled={submitting || isChecking}
-                            >
-                              {isChecking && pendingOfferId === offer.id ? (
-                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                              ) : null}
-                              Accept Offer
-                            </Button>
+                        {isTaskOwner && offer.status === 'pending' && task.status === 'open' && (
+                          <div className="mt-4 space-y-3 rounded-md border border-border p-3 bg-muted/30">
+                            <div className="flex items-start gap-2">
+                              <Checkbox
+                                id={`agree-accept-${offer.id}`}
+                                checked={!!acceptingAgreement[offer.id]}
+                                onCheckedChange={(checked) =>
+                                  setAcceptingAgreement((prev) => ({ ...prev, [offer.id]: checked === true }))
+                                }
+                              />
+                              <Label htmlFor={`agree-accept-${offer.id}`} className="text-xs leading-snug cursor-pointer">
+                                I agree to the{' '}
+                                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                                  Terms of Service
+                                </a>{' '}
+                                and accept responsibility for this engagement.
+                              </Label>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleAcceptOfferClick(offer)}
+                                disabled={submitting || isChecking || !acceptingAgreement[offer.id]}
+                              >
+                                {isChecking && pendingOfferId === offer.id ? (
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                ) : null}
+                                Accept Offer
+                              </Button>
+                              {(isTaskOwner || offer.helper_id === user?.id) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleStartChat(offer.helper_id)}
+                                >
+                                  <MessageCircle className="w-4 h-4 mr-1" />
+                                  Message
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {!(isTaskOwner && offer.status === 'pending' && task.status === 'open') &&
+                          (isTaskOwner || offer.helper_id === user?.id) && (
+                            <div className="flex gap-2 mt-4">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStartChat(offer.helper_id)}
+                              >
+                                <MessageCircle className="w-4 h-4 mr-1" />
+                                Message
+                              </Button>
+                            </div>
                           )}
-                          {(isTaskOwner || offer.helper_id === user?.id) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleStartChat(offer.helper_id)}
-                            >
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              Message
-                            </Button>
-                          )}
-                        </div>
                       </div>
                     ))
                   )}
@@ -779,11 +829,47 @@ export default function TaskDetail() {
                         />
                       </div>
 
-                      <Button type="submit" className="w-full" disabled={submitting}>
+                      <div className="flex items-start gap-2 rounded-md border border-border p-3 bg-muted/30">
+                        <Checkbox
+                          id="agree-offer"
+                          checked={agreeOffer}
+                          onCheckedChange={(c) => setAgreeOffer(c === true)}
+                        />
+                        <Label htmlFor="agree-offer" className="text-xs leading-snug cursor-pointer">
+                          I agree to the{' '}
+                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                            Terms of Service
+                          </a>{' '}
+                          for sending this paid offer.
+                        </Label>
+                      </div>
+
+                      <Button type="submit" className="w-full" disabled={submitting || !agreeOffer}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Submit Offer
                       </Button>
-                      <Button type="button" className="w-full mt-2" variant="outline" onClick={handleVolunteerOffer} disabled={submitting}>
+
+                      <div className="flex items-start gap-2 rounded-md border border-border p-3 bg-muted/30 mt-4">
+                        <Checkbox
+                          id="agree-volunteer"
+                          checked={agreeVolunteer}
+                          onCheckedChange={(c) => setAgreeVolunteer(c === true)}
+                        />
+                        <Label htmlFor="agree-volunteer" className="text-xs leading-snug cursor-pointer">
+                          I agree to the{' '}
+                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                            Terms of Service
+                          </a>{' '}
+                          for volunteering this task.
+                        </Label>
+                      </div>
+                      <Button
+                        type="button"
+                        className="w-full mt-2"
+                        variant="outline"
+                        onClick={handleVolunteerOffer}
+                        disabled={submitting || !agreeVolunteer}
+                      >
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Volunteer (Free)
                       </Button>
