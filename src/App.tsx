@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
 import ResetPassword from "./pages/ResetPassword";
 import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
