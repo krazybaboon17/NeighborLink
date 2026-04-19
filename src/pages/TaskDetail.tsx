@@ -262,6 +262,10 @@ export default function TaskDetail() {
       navigate('/auth');
       return;
     }
+    if (!agreeVolunteer) {
+      toast.error('Please agree to the Terms of Service to volunteer');
+      return;
+    }
 
     setSubmitting(true);
     try {
