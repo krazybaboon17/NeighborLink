@@ -829,11 +829,47 @@ export default function TaskDetail() {
                         />
                       </div>
 
-                      <Button type="submit" className="w-full" disabled={submitting}>
+                      <div className="flex items-start gap-2 rounded-md border border-border p-3 bg-muted/30">
+                        <Checkbox
+                          id="agree-offer"
+                          checked={agreeOffer}
+                          onCheckedChange={(c) => setAgreeOffer(c === true)}
+                        />
+                        <Label htmlFor="agree-offer" className="text-xs leading-snug cursor-pointer">
+                          I agree to the{' '}
+                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                            Terms of Service
+                          </a>{' '}
+                          for sending this paid offer.
+                        </Label>
+                      </div>
+
+                      <Button type="submit" className="w-full" disabled={submitting || !agreeOffer}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Submit Offer
                       </Button>
-                      <Button type="button" className="w-full mt-2" variant="outline" onClick={handleVolunteerOffer} disabled={submitting}>
+
+                      <div className="flex items-start gap-2 rounded-md border border-border p-3 bg-muted/30 mt-4">
+                        <Checkbox
+                          id="agree-volunteer"
+                          checked={agreeVolunteer}
+                          onCheckedChange={(c) => setAgreeVolunteer(c === true)}
+                        />
+                        <Label htmlFor="agree-volunteer" className="text-xs leading-snug cursor-pointer">
+                          I agree to the{' '}
+                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                            Terms of Service
+                          </a>{' '}
+                          for volunteering this task.
+                        </Label>
+                      </div>
+                      <Button
+                        type="button"
+                        className="w-full mt-2"
+                        variant="outline"
+                        onClick={handleVolunteerOffer}
+                        disabled={submitting || !agreeVolunteer}
+                      >
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Volunteer (Free)
                       </Button>
