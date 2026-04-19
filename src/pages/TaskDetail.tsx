@@ -213,6 +213,10 @@ export default function TaskDetail() {
       navigate('/auth');
       return;
     }
+    if (!agreeOffer) {
+      toast.error('Please agree to the Terms of Service to send an offer');
+      return;
+    }
 
     setSubmitting(true);
     try {
