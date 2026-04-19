@@ -292,6 +292,10 @@ export default function TaskDetail() {
   };
 
   const handleAcceptOfferClick = async (offer: Offer) => {
+    if (!acceptingAgreement[offer.id]) {
+      toast.error('Please agree to the Terms of Service before accepting this offer');
+      return;
+    }
     setSubmitting(true);
 
     // Perform AI safety check
