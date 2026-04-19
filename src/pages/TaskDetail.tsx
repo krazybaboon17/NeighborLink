@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Navbar } from '@/components/Navbar';
 import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard, Camera, ImageIcon } from 'lucide-react';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
