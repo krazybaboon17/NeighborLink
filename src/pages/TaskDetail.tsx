@@ -247,6 +247,7 @@ export default function TaskDetail() {
       toast.success('Offer submitted successfully!');
       setOfferPrice('');
       setOfferMessage('');
+      setAgreeOffer(false);
       fetchOffers();
     } catch (error: any) {
       toast.error(error.message || 'Error submitting offer');
