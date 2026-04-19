@@ -281,6 +281,7 @@ export default function TaskDetail() {
       if (error) throw error;
 
       toast.success('Volunteer offer submitted!');
+      setAgreeVolunteer(false);
       fetchOffers();
     } catch (error: any) {
       console.error('Error submitting volunteer offer:', error);
