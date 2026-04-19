@@ -728,30 +728,61 @@ export default function TaskDetail() {
                         {offer.message && (
                           <p className="text-sm text-muted-foreground mt-3">{offer.message}</p>
                         )}
-                        <div className="flex gap-2 mt-4">
-                          {isTaskOwner && offer.status === 'pending' && task.status === 'open' && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleAcceptOfferClick(offer)}
-                              disabled={submitting || isChecking}
-                            >
-                              {isChecking && pendingOfferId === offer.id ? (
-                                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                              ) : null}
-                              Accept Offer
-                            </Button>
+                        {isTaskOwner && offer.status === 'pending' && task.status === 'open' && (
+                          <div className="mt-4 space-y-3 rounded-md border border-border p-3 bg-muted/30">
+                            <div className="flex items-start gap-2">
+                              <Checkbox
+                                id={`agree-accept-${offer.id}`}
+                                checked={!!acceptingAgreement[offer.id]}
+                                onCheckedChange={(checked) =>
+                                  setAcceptingAgreement((prev) => ({ ...prev, [offer.id]: checked === true }))
+                                }
+                              />
+                              <Label htmlFor={`agree-accept-${offer.id}`} className="text-xs leading-snug cursor-pointer">
+                                I agree to the{' '}
+                                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                                  Terms of Service
+                                </a>{' '}
+                                and accept responsibility for this engagement.
+                              </Label>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleAcceptOfferClick(offer)}
+                                disabled={submitting || isChecking || !acceptingAgreement[offer.id]}
+                              >
+                                {isChecking && pendingOfferId === offer.id ? (
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                ) : null}
+                                Accept Offer
+                              </Button>
+                              {(isTaskOwner || offer.helper_id === user?.id) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleStartChat(offer.helper_id)}
+                                >
+                                  <MessageCircle className="w-4 h-4 mr-1" />
+                                  Message
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {!(isTaskOwner && offer.status === 'pending' && task.status === 'open') &&
+                          (isTaskOwner || offer.helper_id === user?.id) && (
+                            <div className="flex gap-2 mt-4">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStartChat(offer.helper_id)}
+                              >
+                                <MessageCircle className="w-4 h-4 mr-1" />
+                                Message
+                              </Button>
+                            </div>
                           )}
-                          {(isTaskOwner || offer.helper_id === user?.id) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleStartChat(offer.helper_id)}
-                            >
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              Message
-                            </Button>
-                          )}
-                        </div>
                       </div>
                     ))
                   )}
