@@ -2,55 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
-
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 220 25% 14%;
+    /* Warm editorial palette */
+    --background: 33 38% 95%;          /* #F9F5F0 warm cream */
+    --foreground: 60 3% 17%;           /* #2C2C2A text dark */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 14%;
+    --card-foreground: 60 3% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 14%;
+    --popover-foreground: 60 3% 17%;
 
-    --primary: 200 80% 44%;
+    --primary: 11 56% 60%;             /* #D4735E terracotta */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 25% 93%;
-    --secondary-foreground: 200 60% 30%;
+    --secondary: 33 30% 92%;
+    --secondary-foreground: 60 3% 17%;
 
-    --muted: 210 15% 94%;
-    --muted-foreground: 215 15% 46%;
+    --muted: 33 25% 90%;
+    --muted-foreground: 60 2% 29%;     /* #4A4A48 warm gray */
 
-    --accent: 25 90% 56%;
+    --accent: 105 11% 56%;             /* #8B9D83 sage */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 65% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 15% 91%;
-    --input: 214 15% 91%;
-    --ring: 200 80% 44%;
+    --border: 33 20% 86%;
+    --input: 33 20% 86%;
+    --ring: 11 56% 60%;
 
-    --radius: 0.75rem;
+    --radius: 1.25rem;
 
-    --hero-gradient: linear-gradient(135deg, hsl(200 30% 96%) 0%, hsl(25 30% 96%) 50%, hsl(200 20% 97%) 100%);
-    --card-shadow: 0 1px 3px hsl(220 25% 14% / 0.04), 0 4px 12px hsl(220 25% 14% / 0.03);
-    --card-shadow-hover: 0 4px 16px hsl(220 25% 14% / 0.08), 0 12px 40px hsl(220 25% 14% / 0.06);
+    --card-shadow: 0 4px 16px hsl(60 3% 17% / 0.04), 0 1px 4px hsl(60 3% 17% / 0.03);
+    --card-shadow-hover: 0 20px 60px hsl(60 3% 17% / 0.12), 0 4px 16px hsl(60 3% 17% / 0.06);
     --transition-smooth: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    --glass-bg: rgba(255, 255, 255, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(249, 245, 240, 0.78);
+    --glass-border: rgba(212, 115, 94, 0.1);
 
-    --sidebar-background: 210 18% 96%;
-    --sidebar-foreground: 220 25% 14%;
-    --sidebar-primary: 200 80% 44%;
+    --sidebar-background: 33 30% 93%;
+    --sidebar-foreground: 60 3% 17%;
+    --sidebar-primary: 11 56% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 30% 92%;
-    --sidebar-accent-foreground: 200 60% 30%;
-    --sidebar-border: 214 15% 91%;
-    --sidebar-ring: 200 80% 44%;
+    --sidebar-accent: 33 25% 88%;
+    --sidebar-accent-foreground: 60 3% 17%;
+    --sidebar-border: 33 20% 86%;
+    --sidebar-ring: 11 56% 60%;
   }
 
   .grain-overlay {
@@ -118,11 +116,21 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "ss01", "cv11";
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-display {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+
+  .font-body {
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 }
 
@@ -202,12 +210,25 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, hsl(200 80% 44%), hsl(25 90% 56%));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    padding-bottom: 0.1em;
+    color: hsl(var(--primary));
+    font-style: italic;
   }
+
+  .editorial-headline {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+
+  .pill-button {
+    border-radius: 100px;
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(-1.2deg); }
 }
 
 @keyframes float {
