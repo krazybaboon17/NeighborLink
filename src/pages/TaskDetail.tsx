@@ -28,6 +28,7 @@ import { z } from 'zod';
 import { useHelperSafetyCheck } from '@/hooks/useHelperSafetyCheck';
 import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
 import { ZellePayment } from '@/components/ZellePayment';
+import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 
 interface Task {
   id: string;
