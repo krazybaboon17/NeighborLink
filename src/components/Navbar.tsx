@@ -99,8 +99,8 @@ export const Navbar = () => {
   return (
     <motion.nav
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
-        scrolled ? "glass border-b border-border/50 shadow-sm" : "bg-transparent border-b border-transparent"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "bg-background/90 backdrop-blur-[10px] border-b border-primary/10"
       )}
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -186,9 +186,8 @@ export const Navbar = () => {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>Sign In</Button>
-                <Button variant="default" size="sm" onClick={() => navigate('/auth')}>
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="rounded-full">Sign In</Button>
+                <Button size="sm" onClick={() => navigate('/auth')} className="rounded-full px-6">
                   Get Started
                 </Button>
               </>

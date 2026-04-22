@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Hero } from "@/components/Hero";
+import { TaskCategories } from "@/components/TaskCategories";
 import { FeaturedTasks } from "@/components/FeaturedTasks";
 import { HowItWorks } from "@/components/HowItWorks";
 import { TrustSafety } from "@/components/TrustSafety";
@@ -10,36 +11,42 @@ import { Footer } from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <main>
+      <main className="pt-20">
         <ScrollReveal>
           <Hero />
         </ScrollReveal>
 
+        <div id="categories">
+          <ScrollReveal delay={0.1}>
+            <TaskCategories />
+          </ScrollReveal>
+        </div>
+
         <div id="how-it-works">
-          <ScrollReveal delay={0.2}>
+          <ScrollReveal delay={0.1}>
             <HowItWorks />
           </ScrollReveal>
         </div>
 
         <div id="featured-tasks">
-          <ScrollReveal delay={0.2}>
+          <ScrollReveal delay={0.1}>
             <FeaturedTasks />
           </ScrollReveal>
         </div>
 
         <div id="safety">
-          <ScrollReveal delay={0.2}>
+          <ScrollReveal delay={0.1}>
             <TrustSafety />
           </ScrollReveal>
         </div>
 
-        <ScrollReveal delay={0.2}>
+        <ScrollReveal delay={0.1}>
           <CTASection />
         </ScrollReveal>
 
-        <ScrollReveal delay={0.2}>
+        <ScrollReveal delay={0.1}>
           <MailingListSection />
         </ScrollReveal>
       </main>
