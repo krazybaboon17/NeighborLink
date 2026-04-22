@@ -186,9 +186,8 @@ export const Navbar = () => {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>Sign In</Button>
-                <Button variant="default" size="sm" onClick={() => navigate('/auth')}>
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="rounded-full">Sign In</Button>
+                <Button size="sm" onClick={() => navigate('/auth')} className="rounded-full px-6">
                   Get Started
                 </Button>
               </>
