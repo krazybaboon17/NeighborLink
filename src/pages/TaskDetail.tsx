@@ -28,6 +28,7 @@ import { z } from 'zod';
 import { useHelperSafetyCheck } from '@/hooks/useHelperSafetyCheck';
 import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
 import { ZellePayment } from '@/components/ZellePayment';
+import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 
 interface Task {
   id: string;
@@ -621,7 +622,8 @@ export default function TaskDetail() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-transparent py-12">
+      <DecorativeCircles />
+      <div className="min-h-screen bg-background pt-28 pb-20">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
