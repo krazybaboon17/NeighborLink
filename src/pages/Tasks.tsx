@@ -2,31 +2,19 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Navbar } from '@/components/Navbar';
-import { MapPin, Clock, Search, Locate, Loader2, Sparkles } from 'lucide-react';
-import { format } from 'date-fns';
+import { Search, Locate, Loader2, Sparkles, MapPin } from 'lucide-react';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
 import { useTaskRecommendations } from '@/hooks/useTaskRecommendations';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { TaskCard, TaskCardData } from '@/components/TaskCard';
+import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
+import { motion } from 'framer-motion';
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  location: string;
-  budget_min: number;
-  budget_max: number;
-  created_at: string;
-  status: string;
-  profiles: {
-    full_name: string;
-  };
+interface Task extends TaskCardData {
+  user_id?: string;
 }
 
 export default function Tasks() {
@@ -39,7 +27,7 @@ export default function Tasks() {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { recommendations, isLoading: isLoadingRecs, getRecommendations } = useTaskRecommendations();
+  const { recommendations, getRecommendations } = useTaskRecommendations();
 
   const {
     isFiltering,
@@ -48,7 +36,7 @@ export default function Tasks() {
     maxMiles,
     setMaxMiles,
     filterTasksByDistance,
-    getUserCurrentLocation
+    getUserCurrentLocation,
   } = useLocationFilter();
 
   useEffect(() => {
@@ -57,7 +45,6 @@ export default function Tasks() {
 
   useEffect(() => {
     applyFilters();
-    // Get AI recommendations when tasks load
     if (user && tasks.length > 0) {
       getRecommendations(user.id, tasks);
     }
@@ -66,13 +53,11 @@ export default function Tasks() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const { data: tasksData, error: tasksError } = await supabase
+      const { data: tasksData } = await supabase
         .from('tasks')
         .select('*')
         .eq('status', 'open')
         .order('created_at', { ascending: false });
-
-      if (tasksError) throw tasksError;
 
       if (!tasksData || tasksData.length === 0) {
         setTasks([]);
@@ -85,26 +70,14 @@ export default function Tasks() {
         .select('id, full_name')
         .in('id', userIds);
 
-      const profilesMap = new Map(
-        (profilesData || []).map((p: any) => [p.id, p.full_name])
-      );
+      const profilesMap = new Map((profilesData || []).map((p: any) => [p.id, p.full_name]));
 
-      const formattedTasks = tasksData.map((task: any) => ({
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        category: task.category,
-        location: task.location,
-        budget_min: task.budget_min,
-        budget_max: task.budget_max,
-        created_at: task.created_at,
-        status: task.status,
-        profiles: {
-          full_name: profilesMap.get(task.user_id) || 'Anonymous'
-        }
+      const formatted = tasksData.map((task: any) => ({
+        ...task,
+        posterName: profilesMap.get(task.user_id) || 'Anonymous',
       }));
 
-      setTasks(formattedTasks);
+      setTasks(formatted);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
@@ -114,7 +87,8 @@ export default function Tasks() {
 
   const applyFilters = () => {
     let result = tasks.filter((task) => {
-      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || task.category === categoryFilter;
       return matchesSearch && matchesCategory;
@@ -124,51 +98,28 @@ export default function Tasks() {
 
   const handleLocationFilter = async () => {
     if (!userLocation.trim()) {
-      toast({
-        title: "Location required",
-        description: "Please enter your location to filter by distance.",
-        variant: "destructive"
-      });
+      toast({ title: 'Location required', description: 'Enter your location first.', variant: 'destructive' });
       return;
     }
-
-    const filtered = await filterTasksByDistance(filteredTasks) as Task[];
+    const filtered = (await filterTasksByDistance(filteredTasks)) as Task[];
     setFilteredTasks(filtered);
-
-    toast({
-      title: "Tasks filtered",
-      description: `Showing ${filtered.length} tasks within ${maxMiles} miles.`
-    });
+    toast({ title: 'Tasks filtered', description: `Showing ${filtered.length} within ${maxMiles} mi.` });
   };
 
   const handleGetLocation = async () => {
     const loc = await getUserCurrentLocation();
     if (loc) {
       setUserLocation(loc);
-      toast({
-        title: "Location detected",
-        description: "Your coordinates have been set. Click 'Filter by Distance' to apply."
-      });
-    } else {
-      toast({
-        title: "Location unavailable",
-        description: "Could not detect your location. Please enter it manually.",
-        variant: "destructive"
-      });
+      toast({ title: 'Location detected' });
     }
-  };
-
-  const clearLocationFilter = () => {
-    setUserLocation('');
-    applyFilters();
   };
 
   if (loading) {
     return (
       <>
         <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="flex items-center justify-center min-h-screen pt-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </>
     );
@@ -177,66 +128,50 @@ export default function Tasks() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-transparent py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
+      <DecorativeCircles />
+      <div className="min-h-screen bg-background pt-28 pb-20">
+        <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
+          {/* Header */}
+          <motion.div
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
             <div>
-              <h1 className="text-4xl font-bold mb-2">Browse Tasks</h1>
-              <p className="text-muted-foreground">Find tasks in your area and start earning</p>
+              <h1 className="editorial-headline text-5xl lg:text-[4.5rem] mb-3">
+                Browse <em className="italic font-light text-primary">tasks</em>
+              </h1>
+              <p className="font-body text-lg text-muted-foreground max-w-xl">
+                Find a way to help a neighbor today.
+              </p>
             </div>
-            <Button variant="hero" size="lg" onClick={() => navigate('/post-task')}>
+            <Button
+              size="lg"
+              onClick={() => navigate('/post-task')}
+              className="rounded-full px-8 h-12 self-start md:self-auto"
+            >
               Post a Task
             </Button>
-          </div>
+          </motion.div>
 
-          {/* AI Recommendations */}
-          {user && recommendations.length > 0 && (
-            <Card className="mb-6 border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  Recommended for You
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3 overflow-x-auto pb-2">
-                  {recommendations.slice(0, 3).map((rec) => {
-                    const task = tasks.find(t => t.id === rec.id);
-                    if (!task) return null;
-                    return (
-                      <Card
-                        key={rec.id}
-                        className="min-w-[250px] cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => navigate(`/tasks/${task.id}`)}
-                      >
-                        <CardContent className="p-4">
-                          <Badge variant="secondary" className="mb-2">{task.category}</Badge>
-                          <p className="font-medium line-clamp-1">{task.title}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{rec.reason}</p>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-
-          {/* Search and Category Filter */}
-          <div className="grid md:grid-cols-2 gap-4 mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search tasks..."
+          {/* Search bar */}
+          <div
+            className="bg-card rounded-[20px] p-2 flex flex-col md:flex-row items-stretch gap-2 mb-4"
+            style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
+          >
+            <div className="flex items-center flex-1 px-4">
+              <Search className="w-5 h-5 text-muted-foreground/60 mr-3 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search tasks…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground/60"
               />
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by category" />
+              <SelectTrigger className="md:w-56 border-0 bg-background rounded-2xl h-12 font-body">
+                <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
@@ -246,6 +181,7 @@ export default function Tasks() {
                 <SelectItem value="Grocery Runs">Grocery Runs</SelectItem>
                 <SelectItem value="Home Repairs">Home Repairs</SelectItem>
                 <SelectItem value="Babysitting">Babysitting</SelectItem>
+                <SelectItem value="Pet Care">Pet Care</SelectItem>
                 <SelectItem value="Handyman">Handyman</SelectItem>
                 <SelectItem value="Errands">Errands</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
@@ -253,119 +189,74 @@ export default function Tasks() {
             </Select>
           </div>
 
-          {/* AI-Powered Location Filter */}
-          <Card className="mb-8 border-primary/20 bg-primary/5">
-            <CardContent className="py-4">
-              <div className="flex flex-col sm:flex-row gap-3 items-end">
-                <div className="flex-1 w-full">
-                  <label className="text-sm font-medium mb-1.5 block">Your Location</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter your city or address..."
-                      value={userLocation}
-                      onChange={(e) => setUserLocation(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleGetLocation}
-                      title="Use my current location"
-                    >
-                      <Locate className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="w-full sm:w-36">
-                  <label className="text-sm font-medium mb-1.5 block">Max Distance</label>
-                  <Select value={maxMiles.toString()} onValueChange={(v) => setMaxMiles(Number(v))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5 miles</SelectItem>
-                      <SelectItem value="10">10 miles</SelectItem>
-                      <SelectItem value="15">15 miles</SelectItem>
-                      <SelectItem value="25">25 miles</SelectItem>
-                      <SelectItem value="50">50 miles</SelectItem>
-                      <SelectItem value="0">No limit</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <Button
-                    onClick={handleLocationFilter}
-                    disabled={isFiltering || !userLocation.trim()}
-                    className="flex-1 sm:flex-none"
-                  >
-                    {isFiltering ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Filtering...
-                      </>
-                    ) : (
-                      'Filter by Distance'
-                    )}
-                  </Button>
-                  {userLocation && (
-                    <Button variant="ghost" onClick={clearLocationFilter}>
-                      Clear
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                AI-powered location filtering helps find tasks near you
-              </p>
-            </CardContent>
-          </Card>
+          {/* Location filter */}
+          <div
+            className="bg-card rounded-[20px] p-4 mb-10 flex flex-col md:flex-row items-stretch md:items-center gap-3"
+            style={{ boxShadow: '0 10px 40px hsl(60 3% 17% / 0.05)' }}
+          >
+            <MapPin className="w-5 h-5 text-primary ml-2 shrink-0 hidden md:block" />
+            <input
+              type="text"
+              placeholder="Your city or address (for distance filter)…"
+              value={userLocation}
+              onChange={(e) => setUserLocation(e.target.value)}
+              className="flex-1 bg-background rounded-2xl px-4 py-2.5 outline-none font-body text-sm"
+            />
+            <Button variant="ghost" size="icon" onClick={handleGetLocation} className="rounded-full" title="Use my current location">
+              <Locate className="w-4 h-4" />
+            </Button>
+            <Select value={maxMiles.toString()} onValueChange={(v) => setMaxMiles(Number(v))}>
+              <SelectTrigger className="w-32 bg-background border-0 rounded-2xl font-body text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 mi</SelectItem>
+                <SelectItem value="10">10 mi</SelectItem>
+                <SelectItem value="25">25 mi</SelectItem>
+                <SelectItem value="50">50 mi</SelectItem>
+                <SelectItem value="0">No limit</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={handleLocationFilter} disabled={isFiltering || !userLocation.trim()} className="rounded-full">
+              {isFiltering ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Filter'}
+            </Button>
+          </div>
 
+          {/* AI Recs */}
+          {user && recommendations.length > 0 && (
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="font-display font-bold text-sm uppercase tracking-wider text-primary">
+                  Recommended for you
+                </span>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommendations.slice(0, 3).map((rec) => {
+                  const task = tasks.find((t) => t.id === rec.id);
+                  if (!task) return null;
+                  return <TaskCard key={task.id} task={task} featured />;
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Task grid */}
           {filteredTasks.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <p className="text-muted-foreground text-lg">No tasks found</p>
-                <Button variant="link" onClick={() => navigate('/post-task')} className="mt-4">
-                  Be the first to post a task
-                </Button>
-              </CardContent>
-            </Card>
+            <div
+              className="bg-card rounded-3xl p-12 text-center"
+              style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
+            >
+              <p className="font-display text-2xl mb-3">No tasks yet</p>
+              <p className="font-body text-muted-foreground mb-6">Be the first neighbor to post.</p>
+              <Button onClick={() => navigate('/post-task')} className="rounded-full px-6">
+                Post a task
+              </Button>
+            </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTasks.map((task) => (
-                <Card
-                  key={task.id}
-                  className="hover:shadow-lg transition-all cursor-pointer"
-                  onClick={() => navigate(`/tasks/${task.id}`)}
-                >
-                  <CardHeader>
-                    <div className="flex justify-between items-start mb-2">
-                      <Badge variant="secondary">{task.category}</Badge>
-                      <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">
-                        ${task.budget_min} - ${task.budget_max}
-                      </Badge>
-                    </div>
-                    <CardTitle className="line-clamp-2">{task.title}</CardTitle>
-                    <CardDescription className="line-clamp-3">
-                      {task.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {task.location}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-2" />
-                      Posted {format(new Date(task.created_at), 'MMM d, yyyy')}
-                    </div>
-                    <div className="text-sm font-medium">
-                      Posted by {task.profiles?.full_name || 'Anonymous'}
-                    </div>
-                    <Button variant="outline" className="w-full mt-4">
-                      View Details & Make Offer
-                    </Button>
-                  </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {filteredTasks.map((task, i) => (
+                <TaskCard key={task.id} task={task} delay={i * 0.04} />
               ))}
             </div>
           )}
