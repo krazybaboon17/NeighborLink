@@ -39,6 +39,15 @@ export default function Auth() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const consumeRedirect = (fallback: string = '/tasks') => {
+    const target = sessionStorage.getItem('postAuthRedirect');
+    if (target) {
+      sessionStorage.removeItem('postAuthRedirect');
+      return target;
+    }
+    return fallback;
+  };
+
   useEffect(() => {
     const checkOnboarding = async () => {
       if (user && !showOnboarding) {
@@ -52,7 +61,7 @@ export default function Auth() {
           setNewUserId(user.id);
           setShowOnboarding(true);
         } else {
-          navigate('/tasks');
+          navigate(consumeRedirect());
         }
       }
     };
