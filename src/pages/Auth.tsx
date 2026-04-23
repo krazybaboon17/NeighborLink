@@ -145,7 +145,7 @@ export default function Auth() {
           toast.success('Welcome back! Please complete your profile.');
         } else {
           toast.success('Welcome back!');
-          navigate('/tasks');
+          navigate(consumeRedirect());
         }
       }
     } catch (error: any) {
@@ -191,7 +191,7 @@ export default function Auth() {
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
-    navigate('/tasks');
+    navigate(consumeRedirect());
   };
 
   if (showOnboarding && newUserId) {
