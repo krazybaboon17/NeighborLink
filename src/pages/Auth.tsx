@@ -39,6 +39,15 @@ export default function Auth() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const consumeRedirect = (fallback: string = '/tasks') => {
+    const target = sessionStorage.getItem('postAuthRedirect');
+    if (target) {
+      sessionStorage.removeItem('postAuthRedirect');
+      return target;
+    }
+    return fallback;
+  };
+
   useEffect(() => {
     const checkOnboarding = async () => {
       if (user && !showOnboarding) {
@@ -52,7 +61,7 @@ export default function Auth() {
           setNewUserId(user.id);
           setShowOnboarding(true);
         } else {
-          navigate('/tasks');
+          navigate(consumeRedirect());
         }
       }
     };
@@ -136,7 +145,7 @@ export default function Auth() {
           toast.success('Welcome back! Please complete your profile.');
         } else {
           toast.success('Welcome back!');
-          navigate('/tasks');
+          navigate(consumeRedirect());
         }
       }
     } catch (error: any) {
@@ -182,7 +191,7 @@ export default function Auth() {
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
-    navigate('/tasks');
+    navigate(consumeRedirect());
   };
 
   if (showOnboarding && newUserId) {
