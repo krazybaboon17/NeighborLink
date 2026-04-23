@@ -40,6 +40,7 @@ interface Task {
   budget_max: number;
   status: string;
   created_at: string;
+  due_date: string | null;
   user_id: string;
   selected_offer_id: string | null;
   profiles: {
@@ -661,6 +662,15 @@ export default function TaskDetail() {
                       ${task.budget_min} - ${task.budget_max}
                     </span>
                   </div>
+                  {task.due_date && (
+                    <div className="flex items-center text-foreground bg-primary/5 rounded-2xl px-4 py-3">
+                      <Clock className="w-5 h-5 mr-2 text-primary" />
+                      <span className="font-body">
+                        <span className="font-bold text-primary">Needed by:</span>{' '}
+                        {format(new Date(task.due_date), "MMM d, yyyy 'at' h:mm a")}
+                      </span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
