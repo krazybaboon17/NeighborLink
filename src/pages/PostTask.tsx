@@ -27,6 +27,7 @@ export default function PostTask() {
   const [location, setLocation] = useState('');
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
+  const [dueDate, setDueDate] = useState('');
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -89,8 +90,9 @@ export default function PostTask() {
         title, description, category, location,
         budget_min: parseInt(budgetMin),
         budget_max: parseInt(budgetMax),
+        due_date: dueDate ? new Date(dueDate).toISOString() : null,
         status: 'open',
-      });
+      } as any);
       if (error) throw error;
       toast.success('Task posted!');
       navigate('/tasks');
@@ -262,6 +264,28 @@ export default function PostTask() {
                       />
                     </div>
                   </div>
+                </div>
+              </section>
+
+              {/* Section: Timing */}
+              <section>
+                <h2 className="font-display font-bold text-2xl mb-5 text-foreground">
+                  When do you need it done?
+                </h2>
+                <div className={fieldShellClass} style={fieldShellShadow}>
+                  <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
+                    Deadline (optional)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                    className="w-full bg-transparent border-0 outline-none font-body text-base text-foreground placeholder:text-muted-foreground/60"
+                  />
+                  <p className="font-body text-xs text-muted-foreground mt-1.5">
+                    Leave blank if it's flexible.
+                  </p>
                 </div>
               </section>
 
