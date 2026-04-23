@@ -256,7 +256,7 @@ export default function Tasks() {
                 {recommendations.slice(0, 3).map((rec) => {
                   const task = tasks.find((t) => t.id === rec.id);
                   if (!task) return null;
-                  return <TaskCard key={task.id} task={task} featured />;
+                  return <TaskCard key={task.id} task={task} featured applied={appliedTaskIds.has(task.id)} />;
                 })}
               </div>
             </div>
@@ -277,7 +277,7 @@ export default function Tasks() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {filteredTasks.map((task, i) => (
-                <TaskCard key={task.id} task={task} delay={i * 0.04} />
+                <TaskCard key={task.id} task={task} delay={i * 0.04} applied={appliedTaskIds.has(task.id)} />
               ))}
             </div>
           )}
