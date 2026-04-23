@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, Clock } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +12,7 @@ export interface TaskCardData {
   budget_min: number;
   budget_max: number;
   created_at?: string;
+  due_date?: string | null;
   status?: string;
   posterName?: string;
 }
