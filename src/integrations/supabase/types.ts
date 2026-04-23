@@ -222,6 +222,7 @@ export type Database = {
           completion_photo_url: string | null
           created_at: string | null
           description: string
+          due_date: string | null
           id: string
           location: string
           selected_offer_id: string | null
@@ -237,6 +238,7 @@ export type Database = {
           completion_photo_url?: string | null
           created_at?: string | null
           description: string
+          due_date?: string | null
           id?: string
           location: string
           selected_offer_id?: string | null
@@ -252,6 +254,7 @@ export type Database = {
           completion_photo_url?: string | null
           created_at?: string | null
           description?: string
+          due_date?: string | null
           id?: string
           location?: string
           selected_offer_id?: string | null
