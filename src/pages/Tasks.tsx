@@ -20,6 +20,7 @@ interface Task extends TaskCardData {
 export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [appliedTaskIds, setAppliedTaskIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -41,7 +42,7 @@ export default function Tasks() {
 
   useEffect(() => {
     fetchTasks();
-  }, [location.pathname]);
+  }, [location.pathname, user?.id]);
 
   useEffect(() => {
     applyFilters();
@@ -53,14 +54,22 @@ export default function Tasks() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const { data: tasksData } = await supabase
+      let query = supabase
         .from('tasks')
         .select('*')
         .eq('status', 'open')
         .order('created_at', { ascending: false });
 
+      // Hide tasks posted by the current user
+      if (user?.id) {
+        query = query.neq('user_id', user.id);
+      }
+
+      const { data: tasksData } = await query;
+
       if (!tasksData || tasksData.length === 0) {
         setTasks([]);
+        setAppliedTaskIds(new Set());
         return;
       }
 
@@ -78,6 +87,18 @@ export default function Tasks() {
       }));
 
       setTasks(formatted);
+
+      // Fetch which of these tasks the current user has applied to
+      if (user?.id) {
+        const { data: offersData } = await supabase
+          .from('offers')
+          .select('task_id')
+          .eq('helper_id', user.id)
+          .in('task_id', tasksData.map((t: any) => t.id));
+        setAppliedTaskIds(new Set((offersData || []).map((o: any) => o.task_id)));
+      } else {
+        setAppliedTaskIds(new Set());
+      }
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
