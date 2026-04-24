@@ -259,11 +259,14 @@ export default function Tasks() {
                 </span>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recommendations.slice(0, 3).map((rec) => {
-                  const task = tasks.find((t) => t.id === rec.id);
-                  if (!task) return null;
-                  return <TaskCard key={task.id} task={task} featured applied={appliedTaskIds.has(task.id)} />;
-                })}
+                {recommendations
+                  .filter((rec) => !appliedTaskIds.has(rec.id))
+                  .slice(0, 3)
+                  .map((rec) => {
+                    const task = tasks.find((t) => t.id === rec.id);
+                    if (!task) return null;
+                    return <TaskCard key={task.id} task={task} featured applied={false} />;
+                  })}
               </div>
             </div>
           )}
