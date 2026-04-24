@@ -250,46 +250,77 @@ export default function Tasks() {
           </div>
 
           {/* AI Recs */}
-          {user && recommendations.length > 0 && (
-            <div className="mb-10">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="font-display font-bold text-sm uppercase tracking-wider text-primary">
-                  Recommended for you
-                </span>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recommendations
-                  .filter((rec) => !appliedTaskIds.has(rec.id))
-                  .slice(0, 3)
-                  .map((rec) => {
-                    const task = tasks.find((t) => t.id === rec.id);
-                    if (!task) return null;
-                    return <TaskCard key={task.id} task={task} featured applied={false} />;
-                  })}
-              </div>
-            </div>
-          )}
+          {(() => {
+            // Build "Recommended for you": prefer AI recs (unapplied), then pad with other unapplied tasks to fill 3
+            const recIds = new Set(
+              recommendations.filter((r) => !appliedTaskIds.has(r.id)).map((r) => r.id)
+            );
+            const recTasks = recommendations
+              .filter((r) => !appliedTaskIds.has(r.id))
+              .map((r) => tasks.find((t) => t.id === r.id))
+              .filter(Boolean) as Task[];
 
-          {/* Task grid */}
-          {filteredTasks.length === 0 ? (
-            <div
-              className="bg-card rounded-3xl p-12 text-center"
-              style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
-            >
-              <p className="font-display text-2xl mb-3">No tasks yet</p>
-              <p className="font-body text-muted-foreground mb-6">Be the first neighbor to post.</p>
-              <Button onClick={() => navigate('/post-task')} className="rounded-full px-6">
-                Post a task
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {filteredTasks.map((task, i) => (
-                <TaskCard key={task.id} task={task} delay={i * 0.04} applied={appliedTaskIds.has(task.id)} />
-              ))}
-            </div>
-          )}
+            const showRecs = user && recTasks.length > 0;
+            const padded = showRecs
+              ? [
+                  ...recTasks,
+                  ...filteredTasks.filter(
+                    (t) => !recIds.has(t.id) && !appliedTaskIds.has(t.id)
+                  ),
+                ].slice(0, 3)
+              : [];
+            const paddedIds = new Set(padded.map((t) => t.id));
+            const remainingTasks = filteredTasks.filter((t) => !paddedIds.has(t.id));
+
+            return (
+              <>
+                {showRecs && padded.length > 0 && (
+                  <div className="mb-10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="font-display font-bold text-sm uppercase tracking-wider text-primary">
+                        Recommended for you
+                      </span>
+                    </div>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {padded.map((task, i) => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          featured={i < recTasks.length}
+                          applied={false}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {remainingTasks.length === 0 && !showRecs ? (
+                  <div
+                    className="bg-card rounded-3xl p-12 text-center"
+                    style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
+                  >
+                    <p className="font-display text-2xl mb-3">No tasks yet</p>
+                    <p className="font-body text-muted-foreground mb-6">Be the first neighbor to post.</p>
+                    <Button onClick={() => navigate('/post-task')} className="rounded-full px-6">
+                      Post a task
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    {remainingTasks.map((task, i) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        delay={i * 0.04}
+                        applied={appliedTaskIds.has(task.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
     </>
