@@ -85,7 +85,7 @@ export default function Messages() {
     try {
       const { data, error } = await supabase
         .from('public_profiles' as any)
-        .select('id, full_name, avatar_url, rating, completed_tasks, is_young_neighbor, verified')
+        .select('id, full_name, avatar_url, rating, completed_tasks, verified')
         .eq('id', otherId)
         .single();
 
