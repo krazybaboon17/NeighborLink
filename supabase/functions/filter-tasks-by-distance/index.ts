@@ -38,6 +38,27 @@ serve(async (req) => {
       });
     }
 
+    // Input validation
+    if (!Array.isArray(tasks) || tasks.length > 500) {
+      return new Response(JSON.stringify({ error: "tasks must be an array of at most 500 items" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (typeof userLocation !== "string" || userLocation.length > 200) {
+      return new Response(JSON.stringify({ error: "Invalid userLocation" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const milesNum = Number(maxMiles);
+    if (!Number.isFinite(milesNum) || milesNum <= 0 || milesNum > 5000) {
+      return new Response(JSON.stringify({ error: "Invalid maxMiles" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     console.log("Filtering", tasks.length, "tasks within", maxMiles, "miles of", userLocation);
 
     // Use AI to analyze locations and determine which tasks are within range

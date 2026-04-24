@@ -13,10 +13,18 @@ serve(async (req) => {
   try {
     const { imageBase64 } = await req.json();
 
-    if (!imageBase64) {
+    if (!imageBase64 || typeof imageBase64 !== "string") {
       return new Response(
         JSON.stringify({ error: "No image provided" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Limit image payload to ~7MB base64 (≈5MB binary)
+    if (imageBase64.length > 7_500_000) {
+      return new Response(
+        JSON.stringify({ error: "Image too large (max ~5MB)" }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
