@@ -9,7 +9,7 @@ const helperCards = [
     name: "Sarah M.",
     distance: "0.3 mi away",
     initials: "SM",
-    gradient: "from-[hsl(210,75%,62%)] to-[hsl(210,75%,45%)]",
+    gradient: "from-[hsl(14,78%,68%)] to-[hsl(14,78%,52%)]",
     tags: ["🐕 Dog Walking", "🌱 Gardening"],
     rating: "4.9",
     reviews: 47,
@@ -21,7 +21,7 @@ const helperCards = [
     name: "Marcus T.",
     distance: "0.5 mi away",
     initials: "MT",
-    gradient: "from-[hsl(195,70%,60%)] to-[hsl(200,75%,42%)]",
+    gradient: "from-[hsl(145,28%,58%)] to-[hsl(145,28%,42%)]",
     tags: ["📦 Moving Help", "🔧 Handyman"],
     rating: "5.0",
     reviews: 32,
@@ -33,7 +33,7 @@ const helperCards = [
     name: "Priya R.",
     distance: "0.8 mi away",
     initials: "PR",
-    gradient: "from-[hsl(38,85%,68%)] to-[hsl(210,75%,55%)]",
+    gradient: "from-[hsl(42,92%,68%)] to-[hsl(14,78%,60%)]",
     tags: ["👨‍👩‍👧 Childcare", "📚 Tutoring"],
     rating: "4.8",
     reviews: 28,
@@ -204,7 +204,7 @@ export const Hero = () => {
             transition={{ delay: 0.5 }}
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-[60px] h-[60px] rounded-full bg-gradient-to-br from-[hsl(210,75%,62%)] to-[hsl(210,75%,45%)] flex items-center justify-center text-white font-display font-bold">
+              <div className="w-[60px] h-[60px] rounded-full bg-gradient-to-br from-[hsl(14,78%,68%)] to-[hsl(14,78%,52%)] flex items-center justify-center text-white font-display font-bold">
                 SM
               </div>
               <div className="flex-1">
