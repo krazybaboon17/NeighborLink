@@ -59,18 +59,17 @@ export const TaskCard = ({ task, featured = false, delay = 0, applied = false }:
           <span className="bg-background text-foreground text-xs font-body font-medium px-3 py-1.5 rounded-full">
             {task.category}
           </span>
-          <div className="flex items-center gap-1.5">
-            {applied && (
-              <span className="bg-primary/10 text-primary text-[11px] font-body font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Applied
-              </span>
-            )}
-            {task.status === "open" && (
+          {applied ? (
+            <span className="bg-primary/10 text-primary text-[11px] font-body font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
+              Applied
+            </span>
+          ) : (
+            task.status === "open" && (
               <span className="bg-accent text-accent-foreground text-[11px] font-body font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                 Open
               </span>
-            )}
-          </div>
+            )
+          )}
         </div>
 
         <h3 className="font-display font-bold text-xl text-foreground leading-tight mb-2 line-clamp-2">
