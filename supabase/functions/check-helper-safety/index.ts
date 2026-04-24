@@ -18,6 +18,22 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Input validation
+    if (!helperProfile || typeof helperProfile !== "object") {
+      return new Response(JSON.stringify({ error: "Invalid helperProfile" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (reviews !== undefined && reviews !== null) {
+      if (!Array.isArray(reviews) || reviews.length > 100) {
+        return new Response(JSON.stringify({ error: "reviews must be an array of at most 100 items" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     console.log("Analyzing helper profile for scam risk:", helperProfile?.full_name);
 
     // Quick heuristic checks first

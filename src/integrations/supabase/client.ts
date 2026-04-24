@@ -10,18 +10,13 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-// Debug environment variables
-console.log('Environment variables:', {
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY,
-  allEnvVars: import.meta.env
-});
-
 // Use real client if credentials are available, otherwise fall back to mock
 let supabase: any;
 
 if (SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY) {
-  console.log('Using real Supabase client with URL:', SUPABASE_URL);
+  if (import.meta.env.DEV) {
+    console.log('Using real Supabase client');
+  }
   supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       storage: localStorage,

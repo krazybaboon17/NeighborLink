@@ -190,7 +190,7 @@ export default function TaskDetail() {
       const helperIds = [...new Set(offersData.map(o => o.helper_id))];
       const { data: profilesData } = await supabase
         .from('public_profiles' as any)
-        .select('id, full_name, avatar_url, rating, completed_tasks, is_young_neighbor, verified')
+        .select('id, full_name, avatar_url, rating, completed_tasks, verified')
         .in('id', helperIds);
 
       const profileMap = new Map((profilesData || []).map((p: any) => [p.id, p]));

@@ -18,6 +18,30 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Input validation
+    const allowedTypes = ["generate-description", "suggest-pricing", "generate-bio"];
+    if (typeof type !== "string" || !allowedTypes.includes(type)) {
+      return new Response(JSON.stringify({ error: "Invalid assist type" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!data || typeof data !== "object") {
+      return new Response(JSON.stringify({ error: "Invalid data payload" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Cap any string field at 2000 chars to prevent abuse
+    for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+      if (typeof v === "string" && v.length > 2000) {
+        return new Response(JSON.stringify({ error: `Field '${k}' is too long` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     let messages: any[] = [];
 
     switch (type) {

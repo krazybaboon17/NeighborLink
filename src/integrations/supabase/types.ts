@@ -385,7 +385,6 @@ export type Database = {
           full_name: string | null
           id: string | null
           is_helper: boolean | null
-          is_young_neighbor: boolean | null
           rating: number | null
           skills: string[] | null
           verified: boolean | null
@@ -398,7 +397,6 @@ export type Database = {
           full_name?: string | null
           id?: string | null
           is_helper?: boolean | null
-          is_young_neighbor?: boolean | null
           rating?: number | null
           skills?: string[] | null
           verified?: boolean | null
@@ -411,7 +409,6 @@ export type Database = {
           full_name?: string | null
           id?: string | null
           is_helper?: boolean | null
-          is_young_neighbor?: boolean | null
           rating?: number | null
           skills?: string[] | null
           verified?: boolean | null
