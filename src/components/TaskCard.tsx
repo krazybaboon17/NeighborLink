@@ -60,16 +60,15 @@ export const TaskCard = ({ task, featured = false, delay = 0, applied = false }:
             {task.category}
           </span>
           <div className="flex items-center gap-1.5">
-            {applied && (
+            {applied ? (
               <span className="bg-primary/10 text-primary text-[11px] font-body font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                 Applied
               </span>
-            )}
-            {task.status === "open" && (
+            ) : task.status === "open" ? (
               <span className="bg-accent text-accent-foreground text-[11px] font-body font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                 Open
               </span>
-            )}
+            ) : null}
           </div>
         </div>
 

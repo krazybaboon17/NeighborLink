@@ -49,7 +49,7 @@ export default function Tasks() {
     if (user && tasks.length > 0) {
       getRecommendations(user.id, tasks);
     }
-  }, [tasks, searchTerm, categoryFilter]);
+  }, [tasks, searchTerm, categoryFilter, appliedTaskIds]);
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -113,6 +113,12 @@ export default function Tasks() {
         task.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || task.category === categoryFilter;
       return matchesSearch && matchesCategory;
+    });
+    // Show tasks the user hasn't applied to first
+    result.sort((a, b) => {
+      const aApplied = appliedTaskIds.has(a.id) ? 1 : 0;
+      const bApplied = appliedTaskIds.has(b.id) ? 1 : 0;
+      return aApplied - bApplied;
     });
     setFilteredTasks(result);
   };
