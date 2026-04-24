@@ -49,7 +49,7 @@ export default function Tasks() {
     if (user && tasks.length > 0) {
       getRecommendations(user.id, tasks);
     }
-  }, [tasks, searchTerm, categoryFilter]);
+  }, [tasks, searchTerm, categoryFilter, appliedTaskIds]);
 
   const fetchTasks = async () => {
     setLoading(true);
