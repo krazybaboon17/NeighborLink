@@ -4,51 +4,55 @@
 
 @layer base {
   :root {
-    /* Friendly neighborhood blue palette */
-    --background: 210 40% 97%;          /* soft sky cream */
-    --foreground: 215 30% 18%;          /* deep navy text */
+    /* Friendly Neighborhood palette — warm coral hospitality + trust blue + sage safety */
+    --background: 32 45% 96%;           /* warm cream porch-light */
+    --foreground: 25 25% 15%;           /* deep cocoa, warmer than black */
 
     --card: 0 0% 100%;
-    --card-foreground: 215 30% 18%;
+    --card-foreground: 25 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 30% 18%;
+    --popover-foreground: 25 25% 15%;
 
-    --primary: 210 75% 52%;             /* friendly neighborhood blue */
+    --primary: 14 78% 60%;              /* friendly coral — belonging & warmth */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 35% 93%;
-    --secondary-foreground: 215 30% 18%;
+    --secondary: 32 38% 92%;            /* soft sand */
+    --secondary-foreground: 25 25% 15%;
 
-    --muted: 210 25% 91%;
-    --muted-foreground: 215 15% 38%;    /* slate gray */
+    --muted: 32 25% 90%;
+    --muted-foreground: 25 12% 38%;     /* warm slate */
 
-    --accent: 38 85% 60%;               /* warm porch-light yellow */
-    --accent-foreground: 215 30% 18%;
+    --accent: 200 65% 52%;              /* trust sky blue — complement to coral */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 65% 51%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 25% 88%;
-    --input: 210 25% 88%;
-    --ring: 210 75% 52%;
+    --border: 32 25% 87%;
+    --input: 32 25% 87%;
+    --ring: 14 78% 60%;
 
     --radius: 1.25rem;
 
-    --card-shadow: 0 4px 16px hsl(215 30% 18% / 0.04), 0 1px 4px hsl(215 30% 18% / 0.03);
-    --card-shadow-hover: 0 20px 60px hsl(210 60% 30% / 0.14), 0 4px 16px hsl(215 30% 18% / 0.06);
-    --transition-smooth: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    --glass-bg: rgba(243, 248, 254, 0.78);
-    --glass-border: rgba(46, 117, 211, 0.12);
+    /* Supporting friendly-neighborhood accents (use sparingly) */
+    --sage: 145 28% 52%;                /* verified / safety green */
+    --sunshine: 42 92% 62%;             /* welcome-mat gold for highlights */
 
-    --sidebar-background: 210 35% 95%;
-    --sidebar-foreground: 215 30% 18%;
-    --sidebar-primary: 210 75% 52%;
+    --card-shadow: 0 4px 16px hsl(25 25% 15% / 0.04), 0 1px 4px hsl(25 25% 15% / 0.03);
+    --card-shadow-hover: 0 20px 60px hsl(14 60% 30% / 0.14), 0 4px 16px hsl(25 25% 15% / 0.06);
+    --transition-smooth: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    --glass-bg: rgba(252, 247, 240, 0.78);
+    --glass-border: rgba(232, 110, 80, 0.12);
+
+    --sidebar-background: 32 38% 94%;
+    --sidebar-foreground: 25 25% 15%;
+    --sidebar-primary: 14 78% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 30% 90%;
-    --sidebar-accent-foreground: 215 30% 18%;
-    --sidebar-border: 210 25% 88%;
-    --sidebar-ring: 210 75% 52%;
+    --sidebar-accent: 32 30% 88%;
+    --sidebar-accent-foreground: 25 25% 15%;
+    --sidebar-border: 32 25% 87%;
+    --sidebar-ring: 14 78% 60%;
   }
 
   .grain-overlay {
