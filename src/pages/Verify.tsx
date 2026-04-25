@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FaceVerification } from '@/components/FaceVerification';
-import { Camera, Upload, CheckCircle } from 'lucide-react';
+import { Camera, Upload, CheckCircle, Lock } from 'lucide-react';
 
 export default function Verify() {
   const { user } = useAuth();
