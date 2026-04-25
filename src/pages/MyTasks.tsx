@@ -58,7 +58,6 @@ export default function MyTasks() {
   const fetchMyTasks = async () => {
     setLoading(true);
     try {
-      console.log('Fetching tasks for user:', user?.id);
 
       // tasks posted by the user
       const { data: postedData, error: postErr } = await supabase
@@ -72,7 +71,6 @@ export default function MyTasks() {
         throw postErr;
       }
 
-      console.log('Posted tasks:', postedData);
       setPosted(postedData as any || []);
 
       // Posted tasks with pending offers
@@ -101,14 +99,12 @@ export default function MyTasks() {
         throw offersErr;
       }
 
-      console.log('Offers data:', offersData);
       const taskIds = (offersData || []).map((o: any) => o.task_id);
       const pendingTaskIds = (offersData || []).filter((o: any) => o.status === 'pending').map((o: any) => o.task_id);
       let appliedTasks: any[] = [];
       let appliedPendingTasks: any[] = [];
 
       if (taskIds.length > 0) {
-        console.log('Fetching tasks for offers:', taskIds);
         const { data: tdata, error: tErr } = await supabase
           .from('tasks')
           .select('*')
@@ -120,7 +116,6 @@ export default function MyTasks() {
           throw tErr;
         }
 
-        console.log('Applied tasks:', tdata);
         const offerStatusMap = new Map((offersData || []).map((o: any) => [o.task_id, o.status]));
 
         appliedTasks = (tdata || []).map((t: any) => ({
