@@ -206,8 +206,9 @@ export default function Verify() {
                     Start Face Verification
                   </Button>
 
-                  <p className="text-xs text-muted-foreground">
-                    🔒 Privacy: Your image is processed instantly and never stored.
+                  <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 justify-center">
+                    <Lock className="w-3 h-3" aria-hidden="true" />
+                    Privacy: Your image is processed instantly and never stored.
                   </p>
                 </div>
               </TabsContent>
