@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, ShieldX, Camera } from 'lucide-react';
+import { ShieldCheck, ShieldX, Camera, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Routes where we don't show the verification prompt
@@ -99,13 +99,13 @@ export function VerificationPrompt() {
             <h4 className="font-medium text-sm">Why verify?</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li className="flex items-center gap-2">
-                <span className="text-primary">✓</span> Get a verified badge on your profile
+                <Check className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> Get a verified badge on your profile
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-primary">✓</span> Build trust with task posters
+                <Check className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> Build trust with task posters
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-primary">✓</span> Access age-appropriate tasks
+                <Check className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> Access age-appropriate tasks
               </li>
             </ul>
           </div>
