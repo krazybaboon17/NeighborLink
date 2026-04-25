@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { MapPin, Star, Clock } from "lucide-react";
+import { MapPin, Clock, Navigation } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { formatDistance } from "@/lib/distance";
 
 export interface TaskCardData {
   id: string;
@@ -22,9 +23,17 @@ interface TaskCardProps {
   featured?: boolean;
   delay?: number;
   applied?: boolean;
+  /** Distance from the current user in miles. null when unknown. */
+  distanceMiles?: number | null;
 }
 
-export const TaskCard = ({ task, featured = false, delay = 0, applied = false }: TaskCardProps) => {
+export const TaskCard = ({
+  task,
+  featured = false,
+  delay = 0,
+  applied = false,
+  distanceMiles = null,
+}: TaskCardProps) => {
   const navigate = useNavigate();
   const lo = Math.min(task.budget_min, task.budget_max);
   const hi = Math.max(task.budget_min, task.budget_max);
