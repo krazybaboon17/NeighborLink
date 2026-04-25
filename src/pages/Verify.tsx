@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FaceVerification } from '@/components/FaceVerification';
-import { Camera, Upload, CheckCircle } from 'lucide-react';
+import { Camera, Upload, CheckCircle, Lock } from 'lucide-react';
 
 export default function Verify() {
   const { user } = useAuth();
@@ -206,8 +206,9 @@ export default function Verify() {
                     Start Face Verification
                   </Button>
 
-                  <p className="text-xs text-muted-foreground">
-                    🔒 Privacy: Your image is processed instantly and never stored.
+                  <p className="text-xs text-muted-foreground inline-flex items-center gap-1.5 justify-center">
+                    <Lock className="w-3 h-3" aria-hidden="true" />
+                    Privacy: Your image is processed instantly and never stored.
                   </p>
                 </div>
               </TabsContent>

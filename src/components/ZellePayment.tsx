@@ -154,14 +154,21 @@ export function ZellePayment({ open, onOpenChange, zelleId, amount, helperName, 
                   Open your banking app, go to Zelle, and send ${amount.toFixed(2)} to the ID above.
                 </p>
               </div>
+
+              <div className="w-full p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <p className="text-xs text-foreground text-center leading-relaxed">
+                  <strong>Payment is confirmed by your helper after they receive it.</strong>{" "}
+                  Until then, the task stays in <em>pending payment verification</em>.
+                </p>
+              </div>
             </div>
 
             <DialogFooter className="flex flex-col gap-2 sm:flex-col">
               <Button onClick={onPaymentDone} className="w-full bg-green-600 hover:bg-green-700">
-                I've Completed Both Payments
+                I've sent payment
               </Button>
               <Button variant="ghost" onClick={() => setStep(1)} className="w-full">
-                <ArrowLeft className="h-4 w-4 mr-1" /> Back to Commission
+                <ArrowLeft className="h-4 w-4 mr-1" /> Back to commission
               </Button>
             </DialogFooter>
           </>

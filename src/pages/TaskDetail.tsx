@@ -555,7 +555,6 @@ export default function TaskDetail() {
         },
       });
 
-      console.log('Payment response:', { data, error });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (data?.url) {

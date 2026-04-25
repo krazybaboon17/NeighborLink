@@ -1,34 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { Navbar } from '@/components/Navbar';
-import { Search, Locate, Loader2, Sparkles, MapPin } from 'lucide-react';
+import { Search, Locate, Loader2, Sparkles, MapPin, Inbox } from 'lucide-react';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
 import { useTaskRecommendations } from '@/hooks/useTaskRecommendations';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { TaskCard, TaskCardData } from '@/components/TaskCard';
+import { TaskCardSkeletonGrid } from '@/components/TaskCardSkeleton';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { motion } from 'framer-motion';
 
 interface Task extends TaskCardData {
   user_id?: string;
 }
 
+const PAGE_SIZE = 12;
+
 export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [appliedTaskIds, setAppliedTaskIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [zipInput, setZipInput] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const { user } = useAuth();
   const { recommendations, getRecommendations } = useTaskRecommendations();
+
+  // Persisted location prefs (survive across sessions)
+  const [savedLocation, setSavedLocation] = useLocalStorage<string>('nl_user_location', '');
+  const [savedMaxMiles, setSavedMaxMiles] = useLocalStorage<number>('nl_max_miles', 5);
 
   const {
     isFiltering,
@@ -36,20 +46,57 @@ export default function Tasks() {
     setUserLocation,
     maxMiles,
     setMaxMiles,
-    filterTasksByDistance,
     getUserCurrentLocation,
+    distanceFor,
   } = useLocationFilter();
+
+  const debouncedSearch = useDebouncedValue(searchTerm, 200);
+
+  // Restore saved prefs once on mount
+  useEffect(() => {
+    if (savedLocation) setUserLocation(savedLocation);
+    if (savedMaxMiles) setMaxMiles(savedMaxMiles);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist whenever user changes them
+  useEffect(() => {
+    setSavedLocation(userLocation);
+  }, [userLocation, setSavedLocation]);
+
+  useEffect(() => {
+    setSavedMaxMiles(maxMiles);
+  }, [maxMiles, setSavedMaxMiles]);
+
+  // Auto-request geolocation on first visit if we don't already have something
+  useEffect(() => {
+    if (savedLocation || userLocation) return;
+    let cancelled = false;
+    (async () => {
+      const loc = await getUserCurrentLocation();
+      if (!cancelled && loc) setUserLocation(loc);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     fetchTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, user?.id]);
 
   useEffect(() => {
-    applyFilters();
     if (user && tasks.length > 0) {
       getRecommendations(user.id, tasks);
     }
-  }, [tasks, searchTerm, categoryFilter, appliedTaskIds]);
+  }, [tasks, user, getRecommendations]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [debouncedSearch, categoryFilter, maxMiles, userLocation]);
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -60,12 +107,10 @@ export default function Tasks() {
         .eq('status', 'open')
         .order('created_at', { ascending: false });
 
-      // Hide tasks posted by the current user
-      if (user?.id) {
-        query = query.neq('user_id', user.id);
-      }
+      if (user?.id) query = query.neq('user_id', user.id);
 
-      const { data: tasksData } = await query;
+      const { data: tasksData, error } = await query;
+      if (error) throw error;
 
       if (!tasksData || tasksData.length === 0) {
         setTasks([]);
@@ -85,10 +130,8 @@ export default function Tasks() {
         ...task,
         posterName: profilesMap.get(task.user_id) || 'Anonymous',
       }));
-
       setTasks(formatted);
 
-      // Fetch which of these tasks the current user has applied to
       if (user?.id) {
         const { data: offersData } = await supabase
           .from('offers')
@@ -99,61 +142,97 @@ export default function Tasks() {
       } else {
         setAppliedTaskIds(new Set());
       }
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
+    } catch {
+      // Soft fail — empty list is the safe state
+      setTasks([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const applyFilters = () => {
-    let result = tasks.filter((task) => {
-      const matchesSearch =
-        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || task.category === categoryFilter;
-      return matchesSearch && matchesCategory;
-    });
-    // Show tasks the user hasn't applied to first
-    result.sort((a, b) => {
-      const aApplied = appliedTaskIds.has(a.id) ? 1 : 0;
-      const bApplied = appliedTaskIds.has(b.id) ? 1 : 0;
-      return aApplied - bApplied;
-    });
-    setFilteredTasks(result);
-  };
+  // Compute filtered + distance-annotated list
+  const filteredTasks = useMemo(() => {
+    const search = debouncedSearch.trim().toLowerCase();
+    let result = tasks
+      .filter((task) => {
+        const matchesSearch =
+          !search ||
+          task.title.toLowerCase().includes(search) ||
+          task.description.toLowerCase().includes(search);
+        const matchesCategory = categoryFilter === 'all' || task.category === categoryFilter;
+        return matchesSearch && matchesCategory;
+      })
+      .map((task) => ({ task, distance: distanceFor(task.location) }));
 
-  const handleLocationFilter = async () => {
-    if (!userLocation.trim()) {
-      toast({ title: 'Location required', description: 'Enter your location first.', variant: 'destructive' });
-      return;
+    // Distance filter (only when we have user coords AND maxMiles > 0)
+    if (maxMiles > 0) {
+      const anyDistance = result.some((r) => r.distance !== null);
+      if (anyDistance) {
+        result = result.filter((r) => r.distance === null || r.distance <= maxMiles);
+      }
     }
-    const filtered = (await filterTasksByDistance(filteredTasks)) as Task[];
-    setFilteredTasks(filtered);
-    toast({ title: 'Tasks filtered', description: `Showing ${filtered.length} within ${maxMiles} mi.` });
-  };
+
+    // Sort: unapplied first, then by distance asc (when known), then newest
+    result.sort((a, b) => {
+      const aA = appliedTaskIds.has(a.task.id) ? 1 : 0;
+      const bA = appliedTaskIds.has(b.task.id) ? 1 : 0;
+      if (aA !== bA) return aA - bA;
+      if (a.distance !== null && b.distance !== null) return a.distance - b.distance;
+      if (a.distance !== null) return -1;
+      if (b.distance !== null) return 1;
+      return 0;
+    });
+
+    return result;
+  }, [tasks, debouncedSearch, categoryFilter, maxMiles, appliedTaskIds, distanceFor]);
 
   const handleGetLocation = async () => {
     const loc = await getUserCurrentLocation();
-    if (loc) {
-      setUserLocation(loc);
-      toast({ title: 'Location detected' });
-    }
+    if (loc) setUserLocation(loc);
   };
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen pt-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </>
-    );
-  }
+  const handleZipSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const z = zipInput.trim();
+    if (!/^\d{5}$/.test(z)) return;
+    setUserLocation(z);
+  };
+
+  // AI recommended (unapplied) tasks first, padded to 3
+  const recIds = useMemo(
+    () => new Set(recommendations.filter((r) => !appliedTaskIds.has(r.id)).map((r) => r.id)),
+    [recommendations, appliedTaskIds],
+  );
+
+  const recTasks = useMemo(
+    () =>
+      recommendations
+        .filter((r) => !appliedTaskIds.has(r.id))
+        .map((r) => filteredTasks.find((ft) => ft.task.id === r.id))
+        .filter(Boolean) as { task: Task; distance: number | null }[],
+    [recommendations, appliedTaskIds, filteredTasks],
+  );
+
+  const showRecs = !!user && recTasks.length > 0;
+  const padded = showRecs
+    ? [
+        ...recTasks,
+        ...filteredTasks.filter((ft) => !recIds.has(ft.task.id) && !appliedTaskIds.has(ft.task.id)),
+      ].slice(0, 3)
+    : [];
+  const paddedIds = new Set(padded.map((p) => p.task.id));
+  const remaining = filteredTasks.filter((ft) => !paddedIds.has(ft.task.id));
+  const visibleRemaining = remaining.slice(0, visibleCount);
 
   return (
     <>
+      <Helmet>
+        <title>Browse Tasks — NeighborLink</title>
+        <meta
+          name="description"
+          content="Find local tasks to help with in Arlington Heights and Buffalo Grove. Pet care, lawn care, moving help, errands and more."
+        />
+      </Helmet>
       <Navbar />
       <DecorativeCircles />
       <div className="min-h-screen bg-background pt-28 pb-20">
@@ -175,7 +254,8 @@ export default function Tasks() {
             <Button
               size="lg"
               onClick={() => navigate('/post-task')}
-              className="rounded-full px-8 h-12 self-start md:self-auto"
+              className="rounded-full px-8 h-12 self-start md:self-auto min-h-[44px]"
+              aria-label="Post a new task"
             >
               Post a Task
             </Button>
@@ -186,18 +266,22 @@ export default function Tasks() {
             className="bg-card rounded-[20px] p-2 flex flex-col md:flex-row items-stretch gap-2 mb-4"
             style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
           >
-            <div className="flex items-center flex-1 px-4">
-              <Search className="w-5 h-5 text-muted-foreground/60 mr-3 shrink-0" />
+            <label className="flex items-center flex-1 px-4">
+              <Search className="w-5 h-5 text-muted-foreground/60 mr-3 shrink-0" aria-hidden="true" />
+              <span className="sr-only">Search tasks</span>
               <input
-                type="text"
+                type="search"
                 placeholder="Search tasks…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground/60"
+                className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground/60 min-h-[44px]"
               />
-            </div>
+            </label>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="md:w-56 border-0 bg-background rounded-2xl h-12 font-body">
+              <SelectTrigger
+                className="md:w-56 border-0 bg-background rounded-2xl h-12 font-body min-h-[44px]"
+                aria-label="Filter by category"
+              >
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -218,109 +302,157 @@ export default function Tasks() {
 
           {/* Location filter */}
           <div
-            className="bg-card rounded-[20px] p-4 mb-10 flex flex-col md:flex-row items-stretch md:items-center gap-3"
+            className="bg-card rounded-[20px] p-4 mb-10 space-y-4"
             style={{ boxShadow: '0 10px 40px hsl(60 3% 17% / 0.05)' }}
           >
-            <MapPin className="w-5 h-5 text-primary ml-2 shrink-0 hidden md:block" />
-            <input
-              type="text"
-              placeholder="Your city or address (for distance filter)…"
-              value={userLocation}
-              onChange={(e) => setUserLocation(e.target.value)}
-              className="flex-1 bg-background rounded-2xl px-4 py-2.5 outline-none font-body text-sm"
-            />
-            <Button variant="ghost" size="icon" onClick={handleGetLocation} className="rounded-full" title="Use my current location">
-              <Locate className="w-4 h-4" />
-            </Button>
-            <Select value={maxMiles.toString()} onValueChange={(v) => setMaxMiles(Number(v))}>
-              <SelectTrigger className="w-32 bg-background border-0 rounded-2xl font-body text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 mi</SelectItem>
-                <SelectItem value="10">10 mi</SelectItem>
-                <SelectItem value="25">25 mi</SelectItem>
-                <SelectItem value="50">50 mi</SelectItem>
-                <SelectItem value="0">No limit</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={handleLocationFilter} disabled={isFiltering || !userLocation.trim()} className="rounded-full">
-              {isFiltering ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Filter'}
-            </Button>
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <div className="flex items-center gap-2 flex-1 bg-background rounded-2xl px-4 min-h-[44px]">
+                <MapPin className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                <input
+                  type="text"
+                  placeholder="Your address, city, or coordinates"
+                  value={userLocation}
+                  onChange={(e) => setUserLocation(e.target.value)}
+                  className="flex-1 bg-transparent border-0 outline-none py-2.5 font-body text-sm"
+                  aria-label="Your location"
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleGetLocation}
+                className="rounded-full min-w-[44px] min-h-[44px]"
+                aria-label="Use my current location"
+                title="Use my current location"
+              >
+                <Locate className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            </div>
+
+            {/* ZIP fallback when location was denied or unset */}
+            {!userLocation && (
+              <form onSubmit={handleZipSubmit} className="flex gap-2 items-center">
+                <label className="flex-1 sr-only" htmlFor="zip-fallback">
+                  ZIP code
+                </label>
+                <input
+                  id="zip-fallback"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d{5}"
+                  maxLength={5}
+                  placeholder="Enter ZIP code if location was denied"
+                  value={zipInput}
+                  onChange={(e) => setZipInput(e.target.value.replace(/\D/g, ''))}
+                  className="flex-1 bg-background rounded-2xl px-4 py-2.5 outline-none font-body text-sm min-h-[44px]"
+                />
+                <Button type="submit" variant="outline" className="rounded-full min-h-[44px]">
+                  Use ZIP
+                </Button>
+              </form>
+            )}
+
+            <div className="flex items-center gap-4 px-1">
+              <label className="font-body text-sm text-muted-foreground shrink-0" htmlFor="distance-slider">
+                Within{' '}
+                <span className="font-semibold text-foreground">
+                  {maxMiles === 0 ? 'No limit' : `${maxMiles} mi`}
+                </span>
+              </label>
+              <Slider
+                id="distance-slider"
+                value={[maxMiles === 0 ? 50 : maxMiles]}
+                min={1}
+                max={50}
+                step={1}
+                onValueChange={(v) => setMaxMiles(v[0])}
+                className="flex-1"
+                aria-label="Distance filter in miles"
+              />
+              <button
+                type="button"
+                onClick={() => setMaxMiles(0)}
+                className="text-xs font-body text-primary hover:underline shrink-0 min-h-[44px] px-2"
+              >
+                No limit
+              </button>
+              {isFiltering && (
+                <Loader2 className="w-4 h-4 animate-spin text-primary" aria-hidden="true" />
+              )}
+            </div>
           </div>
 
-          {/* AI Recs */}
-          {(() => {
-            // Build "Recommended for you": prefer AI recs (unapplied), then pad with other unapplied tasks to fill 3
-            const recIds = new Set(
-              recommendations.filter((r) => !appliedTaskIds.has(r.id)).map((r) => r.id)
-            );
-            const recTasks = recommendations
-              .filter((r) => !appliedTaskIds.has(r.id))
-              .map((r) => tasks.find((t) => t.id === r.id))
-              .filter(Boolean) as Task[];
-
-            const showRecs = user && recTasks.length > 0;
-            const padded = showRecs
-              ? [
-                  ...recTasks,
-                  ...filteredTasks.filter(
-                    (t) => !recIds.has(t.id) && !appliedTaskIds.has(t.id)
-                  ),
-                ].slice(0, 3)
-              : [];
-            const paddedIds = new Set(padded.map((t) => t.id));
-            const remainingTasks = filteredTasks.filter((t) => !paddedIds.has(t.id));
-
-            return (
-              <>
-                {showRecs && padded.length > 0 && (
-                  <div className="mb-10">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="font-display font-bold text-sm uppercase tracking-wider text-primary">
-                        Recommended for you
-                      </span>
-                    </div>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {padded.map((task, i) => (
-                        <TaskCard
-                          key={task.id}
-                          task={task}
-                          featured={i < recTasks.length}
-                          applied={false}
-                        />
-                      ))}
-                    </div>
+          {/* Results */}
+          {loading ? (
+            <TaskCardSkeletonGrid count={6} />
+          ) : (
+            <>
+              {showRecs && padded.length > 0 && (
+                <div className="mb-10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="w-4 h-4 text-primary" aria-hidden="true" />
+                    <span className="font-display font-bold text-sm uppercase tracking-wider text-primary">
+                      Recommended for you
+                    </span>
                   </div>
-                )}
-
-                {remainingTasks.length === 0 && !showRecs ? (
-                  <div
-                    className="bg-card rounded-3xl p-12 text-center"
-                    style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
-                  >
-                    <p className="font-display text-2xl mb-3">No tasks yet</p>
-                    <p className="font-body text-muted-foreground mb-6">Be the first neighbor to post.</p>
-                    <Button onClick={() => navigate('/post-task')} className="rounded-full px-6">
-                      Post a task
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                    {remainingTasks.map((task, i) => (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {padded.map((p, i) => (
                       <TaskCard
-                        key={task.id}
-                        task={task}
-                        delay={i * 0.04}
-                        applied={appliedTaskIds.has(task.id)}
+                        key={p.task.id}
+                        task={p.task}
+                        featured={i < recTasks.length}
+                        applied={false}
+                        distanceMiles={p.distance}
                       />
                     ))}
                   </div>
-                )}
-              </>
-            );
-          })()}
+                </div>
+              )}
+
+              {remaining.length === 0 && !showRecs ? (
+                <div
+                  className="bg-card rounded-3xl p-12 text-center"
+                  style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
+                >
+                  <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Inbox className="w-8 h-8 text-primary" aria-hidden="true" />
+                  </div>
+                  <p className="font-display text-2xl mb-3">No helpers found near you yet</p>
+                  <p className="font-body text-muted-foreground mb-6">
+                    Try widening your distance filter, or be the first to post a task.
+                  </p>
+                  <Button onClick={() => navigate('/post-task')} className="rounded-full px-6 min-h-[44px]">
+                    Post a task
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    {visibleRemaining.map((p, i) => (
+                      <TaskCard
+                        key={p.task.id}
+                        task={p.task}
+                        delay={i * 0.04}
+                        applied={appliedTaskIds.has(p.task.id)}
+                        distanceMiles={p.distance}
+                      />
+                    ))}
+                  </div>
+                  {remaining.length > visibleCount && (
+                    <div className="flex justify-center mt-10">
+                      <Button
+                        variant="outline"
+                        onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                        className="rounded-full px-8 min-h-[44px]"
+                      >
+                        Show more ({remaining.length - visibleCount} left)
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
     </>

@@ -1,16 +1,34 @@
-import { Search, ShieldCheck, Star, MapPin, Check } from "lucide-react";
+import { Search, ShieldCheck, Star, MapPin, Check, Dog, Sprout, Package, Wrench, Baby, BookOpen, type LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const helperCards = [
+interface HelperTag {
+  Icon: LucideIcon;
+  label: string;
+}
+
+interface HelperCard {
+  name: string;
+  distance: string;
+  initials: string;
+  gradient: string;
+  tags: HelperTag[];
+  rating: string;
+  reviews: number;
+  delay: string;
+  position: string;
+  rotate: string;
+}
+
+const helperCards: HelperCard[] = [
   {
     name: "Sarah M.",
     distance: "0.3 mi away",
     initials: "SM",
     gradient: "from-[hsl(11,56%,68%)] to-[hsl(11,56%,52%)]",
-    tags: ["🐕 Dog Walking", "🌱 Gardening"],
+    tags: [{ Icon: Dog, label: "Dog Walking" }, { Icon: Sprout, label: "Gardening" }],
     rating: "4.9",
     reviews: 47,
     delay: "0s",
@@ -22,7 +40,7 @@ const helperCards = [
     distance: "0.5 mi away",
     initials: "MT",
     gradient: "from-[hsl(105,11%,65%)] to-[hsl(105,11%,48%)]",
-    tags: ["📦 Moving Help", "🔧 Handyman"],
+    tags: [{ Icon: Package, label: "Moving Help" }, { Icon: Wrench, label: "Handyman" }],
     rating: "5.0",
     reviews: 32,
     delay: "2s",
@@ -34,7 +52,7 @@ const helperCards = [
     distance: "0.8 mi away",
     initials: "PR",
     gradient: "from-[hsl(38,55%,68%)] to-[hsl(11,56%,60%)]",
-    tags: ["👨‍👩‍👧 Childcare", "📚 Tutoring"],
+    tags: [{ Icon: Baby, label: "Childcare" }, { Icon: BookOpen, label: "Tutoring" }],
     rating: "4.8",
     reviews: 28,
     delay: "4s",
@@ -172,10 +190,11 @@ export const Hero = () => {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {card.tags.map((t) => (
                     <span
-                      key={t}
-                      className="bg-background text-foreground text-xs font-body font-medium px-3 py-1.5 rounded-full"
+                      key={t.label}
+                      className="bg-background text-foreground text-xs font-body font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5"
                     >
-                      {t}
+                      <t.Icon className="w-3 h-3" aria-hidden="true" />
+                      {t.label}
                     </span>
                   ))}
                 </div>
@@ -218,8 +237,12 @@ export const Hero = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className="bg-background text-xs font-medium px-3 py-1.5 rounded-full">🐕 Dog Walking</span>
-              <span className="bg-background text-xs font-medium px-3 py-1.5 rounded-full">🌱 Gardening</span>
+              <span className="bg-background text-xs font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                <Dog className="w-3 h-3" aria-hidden="true" /> Dog Walking
+              </span>
+              <span className="bg-background text-xs font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5">
+                <Sprout className="w-3 h-3" aria-hidden="true" /> Gardening
+              </span>
             </div>
             <div className="flex items-center justify-between pt-3 border-t border-muted-foreground/10">
               <div className="flex items-center gap-1">

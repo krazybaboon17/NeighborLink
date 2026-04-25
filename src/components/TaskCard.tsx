@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { MapPin, Star, Clock } from "lucide-react";
+import { MapPin, Clock, Navigation } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { formatDistance } from "@/lib/distance";
 
 export interface TaskCardData {
   id: string;
@@ -22,9 +23,17 @@ interface TaskCardProps {
   featured?: boolean;
   delay?: number;
   applied?: boolean;
+  /** Distance from the current user in miles. null when unknown. */
+  distanceMiles?: number | null;
 }
 
-export const TaskCard = ({ task, featured = false, delay = 0, applied = false }: TaskCardProps) => {
+export const TaskCard = ({
+  task,
+  featured = false,
+  delay = 0,
+  applied = false,
+  distanceMiles = null,
+}: TaskCardProps) => {
   const navigate = useNavigate();
   const lo = Math.min(task.budget_min, task.budget_max);
   const hi = Math.max(task.budget_min, task.budget_max);
@@ -88,12 +97,23 @@ export const TaskCard = ({ task, featured = false, delay = 0, applied = false }:
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-4 border-t border-muted-foreground/10">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <MapPin className="w-3.5 h-3.5" />
-            <span className="font-body text-xs truncate max-w-[120px]">{task.location}</span>
+        <div className="flex items-center justify-between pt-4 border-t border-muted-foreground/10 gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground min-w-0">
+            <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span className="font-body text-xs truncate">{task.location}</span>
           </div>
-          <span className="font-display font-bold text-base text-primary">{budget}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            {distanceMiles !== null && distanceMiles !== undefined && (
+              <span
+                className="inline-flex items-center gap-1 text-xs font-body font-medium text-accent-foreground bg-accent/40 px-2 py-0.5 rounded-full"
+                aria-label={`${formatDistance(distanceMiles)} from you`}
+              >
+                <Navigation className="w-3 h-3" aria-hidden="true" />
+                {formatDistance(distanceMiles)}
+              </span>
+            )}
+            <span className="font-display font-bold text-base text-primary">{budget}</span>
+          </div>
         </div>
 
         {(timeAgo || task.posterName) && (
