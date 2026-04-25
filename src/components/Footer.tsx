@@ -81,8 +81,8 @@ export const Footer = () => {
           <p className="text-sm text-muted-foreground">
             © 2025 NeighborLink. All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+          <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground justify-center md:justify-end">
+            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
             <Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link>
           </div>
