@@ -102,7 +102,39 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFaceVerificationComplete = async (result: {
+    success: boolean;
+    estimatedAge?: number;
+    isAdult?: boolean;
+    confidence?: string;
+  }) => {
+    setShowFaceVerification(false);
+    if (!result.success || !user) return;
+    try {
+      const isYN = !result.isAdult;
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          age: result.estimatedAge,
+          is_young_neighbor: isYN,
+          verified: true,
+        } as any)
+        .eq('id', user.id);
+      if (error) throw error;
+      setVerified(true);
+      setEstimatedAge(result.estimatedAge ?? null);
+      setIsYoungNeighbor(isYN);
+      toast.success(
+        result.isAdult
+          ? 'Age verified! You are confirmed as 18+.'
+          : `Verified as Young Neighbor (estimated age: ${result.estimatedAge}).`
+      );
+    } catch (err: any) {
+      console.error('Error updating profile after verification:', err);
+      toast.error('Verification complete but failed to update profile.');
+    }
+  };
+
     e.preventDefault();
     if (!user) return;
 
