@@ -7,13 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, Star, Sparkles, Wand2 } from 'lucide-react';
+import { Loader2, Star, Sparkles, Wand2, ShieldCheck, Camera, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
 import { Badge } from '@/components/ui/badge';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
+import { FaceVerification } from '@/components/FaceVerification';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, 'Please enter your full name').max(100, 'Name is too long (max 100 characters)')
@@ -37,6 +39,9 @@ export default function ProfilePage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [zelleId, setZelleId] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [estimatedAge, setEstimatedAge] = useState<number | null>(null);
+  const [showFaceVerification, setShowFaceVerification] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
@@ -46,7 +51,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, zelle_id').eq('id', user!.id).single();
+      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, zelle_id, verified, age').eq('id', user!.id).single();
       if (error) throw error;
       setFullName(data?.full_name || '');
       setAvatarUrl(data?.avatar_url || null);
@@ -56,6 +61,8 @@ export default function ProfilePage() {
       setBio(data?.bio || '');
       setSkills(data?.skills || []);
       setZelleId((data as any)?.zelle_id || '');
+      setVerified((data as any)?.verified || false);
+      setEstimatedAge((data as any)?.age || null);
     } catch (err: any) {
       console.error('Error loading profile:', err);
       toast.error('Error loading profile');
@@ -92,6 +99,39 @@ export default function ProfilePage() {
       toast.error(err.message || 'Failed to generate bio');
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const handleFaceVerificationComplete = async (result: {
+    success: boolean;
+    estimatedAge?: number;
+    isAdult?: boolean;
+    confidence?: string;
+  }) => {
+    setShowFaceVerification(false);
+    if (!result.success || !user) return;
+    try {
+      const isYN = !result.isAdult;
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          age: result.estimatedAge,
+          is_young_neighbor: isYN,
+          verified: true,
+        } as any)
+        .eq('id', user.id);
+      if (error) throw error;
+      setVerified(true);
+      setEstimatedAge(result.estimatedAge ?? null);
+      setIsYoungNeighbor(isYN);
+      toast.success(
+        result.isAdult
+          ? 'Age verified! You are confirmed as 18+.'
+          : `Verified as Young Neighbor (estimated age: ${result.estimatedAge}).`
+      );
+    } catch (err: any) {
+      console.error('Error updating profile after verification:', err);
+      toast.error('Verification complete but failed to update profile.');
     }
   };
 
@@ -169,6 +209,12 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-4">
                   {isYoungNeighbor && <YoungNeighborBadge />}
+                  {verified && (
+                    <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20">
+                      <ShieldCheck className="w-3 h-3" aria-hidden="true" />
+                      Verified{estimatedAge ? ` • Age ~${estimatedAge}` : ''}
+                    </Badge>
+                  )}
                   {completedTasks > 0 && (
                     <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
                       <div className="flex items-center gap-1">
@@ -230,6 +276,29 @@ export default function ProfilePage() {
                     <input id="avatar" type="file" accept="image/*" onChange={handleFileChange} className="text-sm" />
                   </div>
 
+                  <div className="space-y-2 rounded-lg border-2 border-dashed border-primary/20 p-4 bg-primary/5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-primary" aria-hidden="true" />
+                        <Label className="text-base">Identity & Age Verification</Label>
+                      </div>
+                      {verified && (
+                        <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
+                          <CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Verified
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {verified
+                        ? 'Your identity is verified. You can re-verify anytime.'
+                        : 'Quick AI face scan to verify your age. No images are stored.'}
+                    </p>
+                    <Button type="button" variant={verified ? 'outline' : 'default'} size="sm" onClick={() => setShowFaceVerification(true)}>
+                      <Camera className="mr-2 h-4 w-4" />
+                      {verified ? 'Re-verify' : 'Verify with AgeVerif'}
+                    </Button>
+                  </div>
+
                   <div className="flex gap-2 pt-2">
                     <Button type="submit" disabled={submitting}>
                       {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -243,6 +312,18 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </div>
+
+      <Dialog open={showFaceVerification} onOpenChange={setShowFaceVerification}>
+        <DialogContent className="sm:max-w-lg p-0 bg-transparent border-0 shadow-none">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Age Verification</DialogTitle>
+          </DialogHeader>
+          <FaceVerification
+            onVerificationComplete={handleFaceVerificationComplete}
+            onCancel={() => setShowFaceVerification(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
