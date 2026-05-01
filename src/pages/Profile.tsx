@@ -209,6 +209,12 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-4">
                   {isYoungNeighbor && <YoungNeighborBadge />}
+                  {verified && (
+                    <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20">
+                      <ShieldCheck className="w-3 h-3" aria-hidden="true" />
+                      Verified{estimatedAge ? ` • Age ~${estimatedAge}` : ''}
+                    </Badge>
+                  )}
                   {completedTasks > 0 && (
                     <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
                       <div className="flex items-center gap-1">
@@ -268,6 +274,29 @@ export default function ProfilePage() {
                   <div className="space-y-2">
                     <Label htmlFor="avatar">Avatar</Label>
                     <input id="avatar" type="file" accept="image/*" onChange={handleFileChange} className="text-sm" />
+                  </div>
+
+                  <div className="space-y-2 rounded-lg border-2 border-dashed border-primary/20 p-4 bg-primary/5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-primary" aria-hidden="true" />
+                        <Label className="text-base">Identity & Age Verification</Label>
+                      </div>
+                      {verified && (
+                        <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
+                          <CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Verified
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {verified
+                        ? 'Your identity is verified. You can re-verify anytime.'
+                        : 'Quick AI face scan to verify your age. No images are stored.'}
+                    </p>
+                    <Button type="button" variant={verified ? 'outline' : 'default'} size="sm" onClick={() => setShowFaceVerification(true)}>
+                      <Camera className="mr-2 h-4 w-4" />
+                      {verified ? 'Re-verify' : 'Verify with AgeVerif'}
+                    </Button>
                   </div>
 
                   <div className="flex gap-2 pt-2">
