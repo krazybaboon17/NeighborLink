@@ -7,13 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, Star, Sparkles, Wand2 } from 'lucide-react';
+import { Loader2, Star, Sparkles, Wand2, ShieldCheck, Camera, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
 import { Badge } from '@/components/ui/badge';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
+import { FaceVerification } from '@/components/FaceVerification';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, 'Please enter your full name').max(100, 'Name is too long (max 100 characters)')
@@ -37,6 +39,9 @@ export default function ProfilePage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [zelleId, setZelleId] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [estimatedAge, setEstimatedAge] = useState<number | null>(null);
+  const [showFaceVerification, setShowFaceVerification] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
@@ -46,7 +51,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, zelle_id').eq('id', user!.id).single();
+      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, zelle_id, verified, age').eq('id', user!.id).single();
       if (error) throw error;
       setFullName(data?.full_name || '');
       setAvatarUrl(data?.avatar_url || null);
@@ -56,6 +61,8 @@ export default function ProfilePage() {
       setBio(data?.bio || '');
       setSkills(data?.skills || []);
       setZelleId((data as any)?.zelle_id || '');
+      setVerified((data as any)?.verified || false);
+      setEstimatedAge((data as any)?.age || null);
     } catch (err: any) {
       console.error('Error loading profile:', err);
       toast.error('Error loading profile');
