@@ -312,6 +312,18 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </div>
+
+      <Dialog open={showFaceVerification} onOpenChange={setShowFaceVerification}>
+        <DialogContent className="sm:max-w-lg p-0 bg-transparent border-0 shadow-none">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Age Verification</DialogTitle>
+          </DialogHeader>
+          <FaceVerification
+            onVerificationComplete={handleFaceVerificationComplete}
+            onCancel={() => setShowFaceVerification(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
