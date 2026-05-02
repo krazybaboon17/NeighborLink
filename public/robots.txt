@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /messages
+Disallow: /conversations
+Disallow: /verify
+Disallow: /reset-password
+
+Sitemap: https://myneighborlink.lovable.app/sitemap.xml

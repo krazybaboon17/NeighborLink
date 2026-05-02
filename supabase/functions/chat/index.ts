@@ -1,0 +1,128 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { messages } = await req.json();
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Input validation
+    if (!Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: "Invalid messages format" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (messages.length === 0 || messages.length > 50) {
+      return new Response(JSON.stringify({ error: "Messages must be between 1 and 50" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    for (const msg of messages) {
+      if (!msg || typeof msg.role !== "string" || typeof msg.content !== "string") {
+        return new Response(JSON.stringify({ error: "Invalid message format" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!["system", "user", "assistant"].includes(msg.role)) {
+        return new Response(JSON.stringify({ error: "Invalid message role" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (msg.content.length > 10000) {
+        return new Response(JSON.stringify({ error: "Message too long (max 10000 chars)" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    console.log("Chat request received with", messages.length, "messages");
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `You are Neighborly, the friendly and helpful AI assistant for NeighborLink — a hyperlocal task marketplace connecting homeowners with local helpers in their community.
+
+Your personality:
+- Warm, friendly, and approachable — like a helpful neighbor
+- Use casual, conversational language with occasional emojis 😊
+- Be encouraging and supportive
+- Keep responses concise but helpful
+
+Your role is to help users:
+- Post tasks: Go to "Post a Task" page, add title, description, location, budget range, and category
+- Find tasks: Browse "Tasks" page, filter by category, search, or use AI-powered location filter
+- Make offers: Click on a task, submit your price and message (or volunteer for free!)
+- Manage tasks: View "My Tasks" for Posted Tasks, Accepted Tasks, and Applied Tasks
+- Message others: Use Messages for negotiations between task owners and helpers
+- Get verified: Complete identity verification for trust badges
+- Track volunteer hours: Available after completing volunteer tasks (great for students!)
+
+Categories: Lawn Care, Snow Removal, Moving Help, Grocery Runs, Home Repairs, Babysitting, Handyman, Errands, Other
+
+Special feature: Young Neighbors (under 18) get a special badge and can earn service hours!
+
+Always be helpful and encouraging. If users ask about features not in the app, kindly explain what's available and suggest alternatives.`
+          },
+          ...messages,
+        ],
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
+      return new Response(JSON.stringify({ error: "AI service error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(response.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    });
+  } catch (error) {
+    console.error("Chat error:", error);
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
