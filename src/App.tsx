@@ -7,7 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatWidget } from "@/components/ChatWidget";
 import { GlobalWaves } from "@/components/ui/GlobalWaves";
-import { VerificationPrompt } from "@/components/VerificationPrompt";
+// VerificationPrompt removed — verification is now opt-in from the Profile tab
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -45,7 +45,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <VerificationPrompt />
+              {/* VerificationPrompt removed — verification is opt-in from Profile tab */}
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />

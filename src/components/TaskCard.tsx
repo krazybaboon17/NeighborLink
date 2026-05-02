@@ -43,6 +43,24 @@ export const TaskCard = ({
     ? formatDistanceToNow(new Date(task.created_at), { addSuffix: true })
     : null;
 
+  // Helper to parse metadata from text
+  const parseApprovalMetadata = (text: string | null) => {
+    if (!text) return { cleanText: '', approval: null };
+    const match = text.match(/\[YN_APPROVAL:({.*?})\]/);
+    if (match) {
+      try {
+        const approval = JSON.parse(match[1]);
+        const cleanText = text.replace(/\[YN_APPROVAL:({.*?})\]/, '').trim();
+        return { cleanText, approval };
+      } catch (e) {
+        return { cleanText: text, approval: null };
+      }
+    }
+    return { cleanText: text, approval: null };
+  };
+
+  const { cleanText, approval } = parseApprovalMetadata(task.description);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -85,8 +103,17 @@ export const TaskCard = ({
           {task.title}
         </h3>
         <p className="font-body text-sm text-muted-foreground line-clamp-3 mb-5 flex-1">
-          {task.description}
+          {cleanText}
         </p>
+
+        {approval && (
+          <div className="flex items-center gap-1.5 mb-3 px-3 py-1.5 bg-green-500/5 border border-green-500/10 rounded-full self-start">
+            <Clock className="w-3.5 h-3.5 text-green-600" />
+            <span className="font-body text-[10px] font-bold text-green-700 uppercase tracking-wider">
+              Parent Approved
+            </span>
+          </div>
+        )}
 
         {task.due_date && (
           <div className="flex items-center gap-1.5 mb-3 px-3 py-1.5 bg-primary/5 rounded-full self-start">

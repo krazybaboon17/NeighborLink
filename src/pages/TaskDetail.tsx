@@ -19,8 +19,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Navbar } from '@/components/Navbar';
-import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard, Camera, ImageIcon } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard, Camera, ImageIcon, ShieldCheck, ShieldX, Users, ShieldAlert } from 'lucide-react';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
+import { UnverifiedBadge } from '@/components/UnverifiedBadge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +30,7 @@ import { useHelperSafetyCheck } from '@/hooks/useHelperSafetyCheck';
 import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
 import { ZellePayment } from '@/components/ZellePayment';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
+import { useContentModeration } from '@/hooks/useContentModeration';
 
 interface Task {
   id: string;
@@ -107,12 +109,65 @@ export default function TaskDetail() {
   const [agreeVolunteer, setAgreeVolunteer] = useState(false);
   const [acceptingAgreement, setAcceptingAgreement] = useState<Record<string, boolean>>({});
 
+  // Young Neighbor & verification state for current user
+  const [currentUserIsYoungNeighbor, setCurrentUserIsYoungNeighbor] = useState(false);
+  const [currentUserParentalConsent, setCurrentUserParentalConsent] = useState(false);
+  const [currentUserVerified, setCurrentUserVerified] = useState(false);
+  const [showYNGateDialog, setShowYNGateDialog] = useState(false);
+  
+  // Content moderation
+  const { isChecking: isModeratingContent, moderateMessage } = useContentModeration();
+
+  // Per-task parental approval state for offers
+  const [offerParentName, setOfferParentName] = useState('');
+  const [offerParentEmail, setOfferParentEmail] = useState('');
+  const [offerHasParentalApproval, setOfferHasParentalApproval] = useState(false);
+
+  // Helper to parse metadata from text
+  const parseApprovalMetadata = (text: string | null) => {
+    if (!text) return { cleanText: '', approval: null };
+    const match = text.match(/\[YN_APPROVAL:({.*?})\]/);
+    if (match) {
+      try {
+        const approval = JSON.parse(match[1]);
+        const cleanText = text.replace(/\[YN_APPROVAL:({.*?})\]/, '').trim();
+        return { cleanText, approval };
+      } catch (e) {
+        return { cleanText: text, approval: null };
+      }
+    }
+    return { cleanText: text, approval: null };
+  };
+
   useEffect(() => {
     if (id) {
       fetchTask();
       fetchOffers();
     }
   }, [id]);
+
+  // Fetch current user's Young Neighbor / verification status
+  useEffect(() => {
+    if (user) {
+      fetchCurrentUserProfile();
+    }
+  }, [user]);
+
+  const fetchCurrentUserProfile = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('is_young_neighbor, verified')
+        .eq('id', user!.id)
+        .single();
+      if (data) {
+        setCurrentUserIsYoungNeighbor(data?.is_young_neighbor || false);
+        setCurrentUserVerified(data?.verified || false);
+      }
+    } catch (err) {
+      console.error('Error fetching current user profile:', err);
+    }
+  };
 
   // Handle payment success/cancel from URL params
   useEffect(() => {
@@ -220,6 +275,17 @@ export default function TaskDetail() {
       return;
     }
 
+    // Young Neighbor parental consent check
+    if (currentUserIsYoungNeighbor && !offerHasParentalApproval) {
+      toast.error('Parental approval is required for Young Neighbors to make offers.');
+      return;
+    }
+
+    if (currentUserIsYoungNeighbor && (!offerParentName.trim() || !offerParentEmail.trim())) {
+      toast.error('Please provide parent/guardian contact information.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const priceNum = parseInt(offerPrice);
@@ -235,13 +301,34 @@ export default function TaskDetail() {
         return;
       }
 
+      // AI Content Moderation on offer message
+      if (offerMessage && offerMessage.trim().length > 0) {
+        const modResult = await moderateMessage(offerMessage, currentUserIsYoungNeighbor);
+        if (!modResult.allowed) {
+          toast.error(`Message blocked: ${modResult.reason || 'This message violates our community guidelines.'}`);
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      // Append parental approval metadata if YN
+      let finalMessage = offerMessage;
+      if (currentUserIsYoungNeighbor) {
+        const approvalData = {
+          parentName: offerParentName.trim(),
+          parentEmail: offerParentEmail.trim(),
+          timestamp: new Date().toISOString()
+        };
+        finalMessage += `\n\n[YN_APPROVAL:${JSON.stringify(approvalData)}]`;
+      }
+
       const { error } = await supabase
         .from('offers')
         .insert({
           task_id: id!,
           helper_id: user.id,
           price: validation.data.price,
-          message: validation.data.message || null,
+          message: finalMessage || null,
         });
 
       if (error) throw error;
@@ -250,6 +337,9 @@ export default function TaskDetail() {
       setOfferPrice('');
       setOfferMessage('');
       setAgreeOffer(false);
+      setOfferParentName('');
+      setOfferParentEmail('');
+      setOfferHasParentalApproval(false);
       fetchOffers();
     } catch (error: any) {
       toast.error(error.message || 'Error submitting offer');
@@ -257,7 +347,6 @@ export default function TaskDetail() {
       setSubmitting(false);
     }
   };
-
   const handleVolunteerOffer = async () => {
     if (!user) {
       toast.error('Please sign in to volunteer');
@@ -269,15 +358,37 @@ export default function TaskDetail() {
       return;
     }
 
+    // Young Neighbor parental consent check
+    if (currentUserIsYoungNeighbor && !offerHasParentalApproval) {
+      toast.error('Parental approval is required for Young Neighbors to volunteer.');
+      return;
+    }
+
+    if (currentUserIsYoungNeighbor && (!offerParentName.trim() || !offerParentEmail.trim())) {
+      toast.error('Please provide parent/guardian contact information.');
+      return;
+    }
+
     setSubmitting(true);
     try {
+      // Append parental approval metadata if YN
+      let finalMessage = 'Volunteer (service hours)';
+      if (currentUserIsYoungNeighbor) {
+        const approvalData = {
+          parentName: offerParentName.trim(),
+          parentEmail: offerParentEmail.trim(),
+          timestamp: new Date().toISOString()
+        };
+        finalMessage += `\n\n[YN_APPROVAL:${JSON.stringify(approvalData)}]`;
+      }
+
       const { error } = await supabase
         .from('offers')
         .insert({
           task_id: id!,
           helper_id: user.id,
           price: 0,
-          message: 'Volunteer (service hours)'
+          message: finalMessage
         });
 
       if (error) throw error;
@@ -640,9 +751,15 @@ export default function TaskDetail() {
                     </Badge>
                   </div>
                   <CardTitle className="text-3xl">{task.title}</CardTitle>
-                  <CardDescription className="text-base mt-4">
-                    {task.description}
+                  <CardDescription className="text-base mt-4 whitespace-pre-wrap">
+                    {parseApprovalMetadata(task.description).cleanText}
                   </CardDescription>
+                  {parseApprovalMetadata(task.description).approval && (
+                    <div className="mt-4 p-3 bg-green-500/5 border border-green-500/20 rounded-xl flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-green-600" />
+                      <span className="text-sm font-medium text-green-700">Parental Approval Confirmed</span>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -686,7 +803,20 @@ export default function TaskDetail() {
                         <AvatarFallback>{task.profiles?.full_name?.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-semibold">{task.profiles?.full_name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold">{task.profiles?.full_name}</p>
+                          {(task.profiles as any)?.verified ? (
+                            (task.profiles as any)?.is_young_neighbor ? (
+                              <YoungNeighborBadge size="sm" />
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                                <ShieldCheck className="w-3 h-3" />
+                              </span>
+                            )
+                          ) : (
+                            <UnverifiedBadge size="sm" />
+                          )}
+                        </div>
                         <div className="flex items-center text-sm text-muted-foreground">
                           <Star className="w-4 h-4 mr-1 fill-yellow-400 text-yellow-400" />
                           {task.profiles?.rating?.toFixed(1) || '0.0'} ({task.profiles?.completed_tasks || 0} tasks)
@@ -715,9 +845,19 @@ export default function TaskDetail() {
                               <AvatarFallback>{offer.profiles?.full_name?.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-semibold">{offer.profiles?.full_name}</p>
-                                {offer.profiles?.is_young_neighbor && <YoungNeighborBadge size="sm" />}
+                                {offer.profiles?.verified ? (
+                                  offer.profiles?.is_young_neighbor ? (
+                                    <YoungNeighborBadge size="sm" />
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                                      <ShieldCheck className="w-3 h-3" />
+                                    </span>
+                                  )
+                                ) : (
+                                  <UnverifiedBadge size="sm" />
+                                )}
                               </div>
                               <div className="flex items-center text-sm text-muted-foreground">
                                 <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
@@ -737,7 +877,17 @@ export default function TaskDetail() {
                           </div>
                         </div>
                         {offer.message && (
-                          <p className="text-sm text-muted-foreground mt-3">{offer.message}</p>
+                          <div className="mt-3">
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                              {parseApprovalMetadata(offer.message).cleanText}
+                            </p>
+                            {parseApprovalMetadata(offer.message).approval && (
+                              <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-green-500/5 border border-green-500/20 rounded-md">
+                                <ShieldCheck className="w-3 h-3 text-green-600" />
+                                <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wider">Parent Approved</span>
+                              </div>
+                            )}
+                          </div>
                         )}
                         {isTaskOwner && offer.status === 'pending' && task.status === 'open' && (
                           <div className="mt-4 space-y-3 rounded-md border border-border p-3 bg-muted/30">
@@ -840,6 +990,26 @@ export default function TaskDetail() {
                         />
                       </div>
 
+                      {/* Young Neighbor Parental Approval for Paid Offers */}
+                      {currentUserIsYoungNeighbor && (
+                        <div className="bg-amber-50/50 border border-amber-200 rounded-xl p-3 space-y-2 mb-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Users className="w-3.5 h-3.5 text-amber-600" />
+                            <span className="text-xs font-bold text-amber-800 uppercase tracking-tight">Parental Approval</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <Input placeholder="Parent Name" value={offerParentName} onChange={(e) => setOfferParentName(e.target.value)} className="h-8 text-xs bg-white" />
+                            <Input placeholder="Parent Email" value={offerParentEmail} onChange={(e) => setOfferParentEmail(e.target.value)} className="h-8 text-xs bg-white" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox id="paid-parent-confirm" checked={offerHasParentalApproval} onCheckedChange={(c) => setOfferHasParentalApproval(c === true)} />
+                            <Label htmlFor="paid-parent-confirm" className="text-[10px] text-amber-800 leading-tight cursor-pointer">
+                              Parent/guardian has approved this offer.
+                            </Label>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-start gap-2 rounded-md border border-border p-3 bg-muted/30">
                         <Checkbox
                           id="agree-offer"
@@ -855,7 +1025,7 @@ export default function TaskDetail() {
                         </Label>
                       </div>
 
-                      <Button type="submit" className="w-full" disabled={submitting || !agreeOffer}>
+                      <Button type="submit" className="w-full" disabled={submitting || !agreeOffer || (currentUserIsYoungNeighbor && !offerHasParentalApproval)}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Submit Offer
                       </Button>
@@ -874,15 +1044,34 @@ export default function TaskDetail() {
                           for volunteering this task.
                         </Label>
                       </div>
+
+                      {currentUserIsYoungNeighbor && (
+                        <div className="bg-amber-50/50 border border-amber-200 rounded-xl p-3 space-y-2 mb-3 mt-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Users className="w-3.5 h-3.5 text-amber-600" />
+                            <span className="text-xs font-bold text-amber-800 uppercase tracking-tight">Parental Approval</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <Input placeholder="Parent Name" value={offerParentName} onChange={(e) => setOfferParentName(e.target.value)} className="h-8 text-xs bg-white" />
+                            <Input placeholder="Parent Email" value={offerParentEmail} onChange={(e) => setOfferParentEmail(e.target.value)} className="h-8 text-xs bg-white" />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox id="vol-parent-confirm" checked={offerHasParentalApproval} onCheckedChange={(c) => setOfferHasParentalApproval(c === true)} />
+                            <Label htmlFor="vol-parent-confirm" className="text-[10px] text-amber-800 leading-tight cursor-pointer">
+                              Parent/guardian has approved this offer.
+                            </Label>
+                          </div>
+                        </div>
+                      )}
+
                       <Button
                         type="button"
-                        className="w-full mt-2"
-                        variant="outline"
+                        className="w-full mt-2 bg-accent hover:bg-accent/90"
                         onClick={handleVolunteerOffer}
-                        disabled={submitting || !agreeVolunteer}
+                        disabled={submitting || !agreeVolunteer || (currentUserIsYoungNeighbor && !offerHasParentalApproval)}
                       >
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Volunteer (Free)
+                        Volunteer (Earn Service Hours)
                       </Button>
                     </form>
                   </CardContent>

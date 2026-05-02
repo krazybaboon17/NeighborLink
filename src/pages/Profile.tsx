@@ -6,16 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Loader2, Star, Sparkles, Wand2, ShieldCheck, Camera, CheckCircle2 } from 'lucide-react';
+import { Loader2, Star, Sparkles, Wand2, ShieldCheck, ShieldX, Users, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
+import { UnverifiedBadge } from '@/components/UnverifiedBadge';
 import { Badge } from '@/components/ui/badge';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
-import { FaceVerification } from '@/components/FaceVerification';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, 'Please enter your full name').max(100, 'Name is too long (max 100 characters)')
@@ -39,9 +39,10 @@ export default function ProfilePage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [zelleId, setZelleId] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
-  const [verified, setVerified] = useState(false);
-  const [estimatedAge, setEstimatedAge] = useState<number | null>(null);
-  const [showFaceVerification, setShowFaceVerification] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  
+  // Parental consent is now handled per-task
+  const [parentEmail, setParentEmail] = useState('');
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
@@ -61,8 +62,9 @@ export default function ProfilePage() {
       setBio(data?.bio || '');
       setSkills(data?.skills || []);
       setZelleId((data as any)?.zelle_id || '');
-      setVerified((data as any)?.verified || false);
-      setEstimatedAge((data as any)?.age || null);
+      setIsVerified(data?.verified || false);
+      
+      // Parental consent is now handled per-task, so no need to fetch these columns
     } catch (err: any) {
       console.error('Error loading profile:', err);
       toast.error('Error loading profile');
@@ -99,39 +101,6 @@ export default function ProfilePage() {
       toast.error(err.message || 'Failed to generate bio');
     } finally {
       setAiLoading(false);
-    }
-  };
-
-  const handleFaceVerificationComplete = async (result: {
-    success: boolean;
-    estimatedAge?: number;
-    isAdult?: boolean;
-    confidence?: string;
-  }) => {
-    setShowFaceVerification(false);
-    if (!result.success || !user) return;
-    try {
-      const isYN = !result.isAdult;
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          age: result.estimatedAge,
-          is_young_neighbor: isYN,
-          verified: true,
-        } as any)
-        .eq('id', user.id);
-      if (error) throw error;
-      setVerified(true);
-      setEstimatedAge(result.estimatedAge ?? null);
-      setIsYoungNeighbor(isYN);
-      toast.success(
-        result.isAdult
-          ? 'Age verified! You are confirmed as 18+.'
-          : `Verified as Young Neighbor (estimated age: ${result.estimatedAge}).`
-      );
-    } catch (err: any) {
-      console.error('Error updating profile after verification:', err);
-      toast.error('Verification complete but failed to update profile.');
     }
   };
 
@@ -185,7 +154,7 @@ export default function ProfilePage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-transparent py-12">
-        <div className="container mx-auto px-4 max-w-2xl">
+        <div className="container mx-auto px-4 max-w-2xl space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -208,13 +177,18 @@ export default function ProfilePage() {
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-4">
-                  {isYoungNeighbor && <YoungNeighborBadge />}
-                  {verified && (
-                    <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20">
-                      <ShieldCheck className="w-3 h-3" aria-hidden="true" />
-                      Verified{estimatedAge ? ` • Age ~${estimatedAge}` : ''}
+                  {/* Verification status badges */}
+                  {!isVerified ? (
+                    <UnverifiedBadge />
+                  ) : isYoungNeighbor ? (
+                    <YoungNeighborBadge />
+                  ) : (
+                    <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20 gap-1 py-1">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Verified Adult
                     </Badge>
                   )}
+                  
                   {completedTasks > 0 && (
                     <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
                       <div className="flex items-center gap-1">
@@ -276,29 +250,6 @@ export default function ProfilePage() {
                     <input id="avatar" type="file" accept="image/*" onChange={handleFileChange} className="text-sm" />
                   </div>
 
-                  <div className="space-y-2 rounded-lg border-2 border-dashed border-primary/20 p-4 bg-primary/5">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-primary" aria-hidden="true" />
-                        <Label className="text-base">Identity & Age Verification</Label>
-                      </div>
-                      {verified && (
-                        <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
-                          <CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Verified
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {verified
-                        ? 'Your identity is verified. You can re-verify anytime.'
-                        : 'Quick AI face scan to verify your age. No images are stored.'}
-                    </p>
-                    <Button type="button" variant={verified ? 'outline' : 'default'} size="sm" onClick={() => setShowFaceVerification(true)}>
-                      <Camera className="mr-2 h-4 w-4" />
-                      {verified ? 'Re-verify' : 'Verify with AgeVerif'}
-                    </Button>
-                  </div>
-
                   <div className="flex gap-2 pt-2">
                     <Button type="submit" disabled={submitting}>
                       {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -310,20 +261,44 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* Young Neighbor Parental Approval Info */}
+          {isYoungNeighbor && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="border-amber-500/20 bg-amber-500/5">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">Young Neighbor Status</CardTitle>
+                      <CardDescription>Extra safety measures for our younger members</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    As a Young Neighbor, you can still post and accept tasks! However, for your safety, 
+                    <strong> every task requires parental or guardian approval</strong>.
+                  </p>
+                  <div className="flex items-start gap-3 p-4 bg-background/50 rounded-xl border border-amber-500/10">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground">
+                      When you post a task or make an offer, you'll be asked to provide your parent's name 
+                      and email. We'll include this information with your task for transparency and safety.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </div>
       </div>
-
-      <Dialog open={showFaceVerification} onOpenChange={setShowFaceVerification}>
-        <DialogContent className="sm:max-w-lg p-0 bg-transparent border-0 shadow-none">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Age Verification</DialogTitle>
-          </DialogHeader>
-          <FaceVerification
-            onVerificationComplete={handleFaceVerificationComplete}
-            onCancel={() => setShowFaceVerification(false)}
-          />
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

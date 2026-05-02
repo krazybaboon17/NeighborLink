@@ -4,7 +4,9 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Plus, Check, Clock, Shield, Sparkles } from "lucide-react";
+import { Menu, X, User, LogOut, Plus, Check, Clock, Shield, Sparkles, ShieldCheck, ShieldX } from "lucide-react";
+import { UnverifiedBadge } from "@/components/UnverifiedBadge";
+import { YoungNeighborBadge } from "@/components/YoungNeighborBadge";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -166,11 +168,26 @@ export const Navbar = () => {
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium">{profile?.full_name}</p>
                         <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <div className="mt-1">
+                          {!profile?.verified ? (
+                            <UnverifiedBadge size="sm" />
+                          ) : profile?.is_young_neighbor ? (
+                            <YoungNeighborBadge size="sm" />
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                              <ShieldCheck className="w-3 h-3" />
+                              Verified
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
                       <User className="mr-2 h-4 w-4" /> My Profile
+                      {!profile?.verified && (
+                        <ShieldX className="ml-auto h-3.5 w-3.5 text-amber-500" />
+                      )}
                     </DropdownMenuItem>
                     {hasVolunteerHours && (
                       <DropdownMenuItem onClick={() => navigate('/service-hours')}>

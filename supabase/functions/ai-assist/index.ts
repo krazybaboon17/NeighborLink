@@ -19,7 +19,7 @@ serve(async (req) => {
     }
 
     // Input validation
-    const allowedTypes = ["generate-description", "suggest-pricing", "generate-bio"];
+    const allowedTypes = ["generate-description", "suggest-pricing", "generate-bio", "moderate-task"];
     if (typeof type !== "string" || !allowedTypes.includes(type)) {
       return new Response(JSON.stringify({ error: "Invalid assist type" }), {
         status: 400,
@@ -85,6 +85,64 @@ serve(async (req) => {
           {
             role: "user",
             content: `Write a bio for:\nName: ${fullName}\nSkills: ${skills?.join(", ") || "not specified"}\nTasks Completed: ${completedTasks || 0}\nRating: ${rating || "new member"}${isYoungNeighbor ? "\nYoung Neighbor: Yes" : ""}`
+          }
+        ];
+        break;
+      }
+
+      case "moderate-task": {
+        const { title, description, category, isYoungNeighbor } = data;
+        
+        const youngNeighborRules = isYoungNeighbor ? `
+ADDITIONAL RULES FOR YOUNG NEIGHBOR (user is under 18):
+- BLOCK any task involving alcohol, tobacco, vaping, drugs, or controlled substances
+- BLOCK any task involving weapons, firearms, or ammunition  
+- BLOCK any task requiring unsupervised overnight stays at a stranger's home
+- BLOCK any task that describes solo one-on-one interaction with an unknown adult in a private setting
+- BLOCK any task involving gambling or age-restricted venues
+- BLOCK any task that seems designed to exploit or take advantage of minors
+- Be EXTRA cautious with anything that might put a minor in an unsafe situation
+- Apply stricter scrutiny to tasks with suspiciously high pay for simple work (possible exploitation)
+` : '';
+
+        messages = [
+          {
+            role: "system",
+            content: `You are a content moderator for NeighborLink, a hyperlocal community task marketplace where neighbors help each other. Your job is to review task postings and messages for safety.
+
+RULES (be DECENTLY LENIENT — this is a casual community platform):
+
+IMMEDIATELY BLOCK:
+- Explicit sexual content, solicitation, or sexually suggestive tasks
+- Requests for illegal activities (drug deals, theft, fraud, etc.)
+- OBVIOUS scam patterns: advance fee requests, "wire money", "too good to be true" payments for no work, phishing, pyramid schemes, requests for bank/SSN/password info
+- Threats, harassment, or violent content
+- Tasks designed to stalk, harass, or harm someone
+
+ALLOW (do NOT block these):
+- Normal everyday tasks: yard work, errands, pet care, cleaning, moving help, babysitting, tutoring, etc.
+- Casual/informal language, slang, abbreviations
+- Mild frustration or urgency in descriptions ("I REALLY need this done ASAP!!!")
+- Religious or political references in task context (e.g., "help set up for church event")
+- Tasks with physical labor descriptions
+- Any normal, legitimate neighborhood task request
+- Offer messages with casual language or negotiation
+${youngNeighborRules}
+IMPORTANT: When in doubt, ALLOW the content. Only block things that are clearly and obviously problematic.
+
+Return ONLY a JSON object in this exact format:
+{"allowed": true/false, "reason": "brief explanation if blocked", "severity": "low/medium/high"}
+
+If the content is fine, return: {"allowed": true}
+If blocked, severity should be "high" for explicit/illegal, "medium" for scam-like, "low" for borderline.`
+          },
+          {
+            role: "user",
+            content: `Review this task posting for safety:
+Title: "${title || ''}"
+Description: "${description || ''}"
+Category: ${category || 'not specified'}
+User type: ${isYoungNeighbor ? 'Young Neighbor (under 18)' : 'Standard user'}`
           }
         ];
         break;

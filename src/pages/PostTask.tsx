@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, DollarSign, Wand2 } from 'lucide-react';
+import { Loader2, DollarSign, Wand2, ShieldAlert, Users } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
+import { useAuth } from '@/contexts/AuthContext';
+import { useContentModeration } from '@/hooks/useContentModeration';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const categories = [
   'Lawn Care', 'Snow Removal', 'Moving Help', 'Grocery Runs',
@@ -20,6 +29,7 @@ const fieldShellShadow = { boxShadow: '0 10px 40px hsl(60 3% 17% / 0.06)' };
 
 export default function PostTask() {
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState(searchParams.get('title') ?? '');
   const [description, setDescription] = useState('');
@@ -30,6 +40,38 @@ export default function PostTask() {
   const [dueDate, setDueDate] = useState('');
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const navigate = useNavigate();
+  
+  // Young Neighbor state
+  const [isYoungNeighbor, setIsYoungNeighbor] = useState(false);
+  const [parentName, setParentName] = useState('');
+  const [parentEmail, setParentEmail] = useState('');
+  const [hasParentalApproval, setHasParentalApproval] = useState(false);
+  
+  // Content moderation
+  const { isChecking: isModeratingContent, moderateTask } = useContentModeration();
+
+  // Check Young Neighbor status on mount
+  useEffect(() => {
+    if (user) {
+      checkYoungNeighborStatus();
+    }
+  }, [user]);
+
+  const checkYoungNeighborStatus = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('is_young_neighbor')
+        .eq('id', user!.id)
+        .single();
+      
+      if (data) {
+        setIsYoungNeighbor(data?.is_young_neighbor || false);
+      }
+    } catch (err) {
+      console.error('Error checking Young Neighbor status:', err);
+    }
+  };
 
   const handleAIDescription = async () => {
     if (!title.trim()) return toast.error('Please enter a title first');
@@ -77,17 +119,51 @@ export default function PostTask() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check Young Neighbor parental consent
+    if (isYoungNeighbor && (!hasParentalApproval || !parentName.trim() || !parentEmail.trim())) {
+      toast.error('Parental approval and contact info are required to post.');
+      return;
+    }
+    
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) {
         toast.error('You must be logged in');
         navigate('/auth');
         return;
       }
+
+      // AI Content Moderation
+      const moderationResult = await moderateTask(title, description, category, isYoungNeighbor);
+      
+      if (!moderationResult.allowed) {
+        const severityLabel = moderationResult.severity === 'high' 
+          ? '🚫 Content Blocked' 
+          : '⚠️ Content Flagged';
+        toast.error(`${severityLabel}: ${moderationResult.reason || 'This content violates our community guidelines.'}`);
+        setLoading(false);
+        return;
+      }
+
+      // Append parental approval metadata if YN
+      let finalDescription = description;
+      if (isYoungNeighbor) {
+        const approvalData = {
+          parentName: parentName.trim(),
+          parentEmail: parentEmail.trim(),
+          timestamp: new Date().toISOString()
+        };
+        finalDescription += `\n\n[YN_APPROVAL:${JSON.stringify(approvalData)}]`;
+      }
+
       const { error } = await supabase.from('tasks').insert({
-        user_id: user.id,
-        title, description, category, location,
+        user_id: currentUser.id,
+        title, 
+        description: finalDescription, 
+        category, 
+        location,
         budget_min: parseInt(budgetMin),
         budget_max: parseInt(budgetMax),
         due_date: dueDate ? new Date(dueDate).toISOString() : null,
@@ -121,6 +197,12 @@ export default function PostTask() {
               <p className="font-body text-lg text-muted-foreground max-w-xl mx-auto">
                 Tell your neighbors what you need help with. We'll match you with someone nearby.
               </p>
+              {isYoungNeighbor && (
+                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-sm text-amber-700 dark:text-amber-300">
+                  <Users className="w-4 h-4" />
+                  Young Neighbor — parental approval required for this task
+                </div>
+              )}
             </header>
 
             <form onSubmit={handleSubmit} className="space-y-10">
@@ -267,40 +349,49 @@ export default function PostTask() {
                 </div>
               </section>
 
-              {/* Section: Timing */}
-              <section>
-                <h2 className="font-display font-bold text-2xl mb-5 text-foreground">
-                  When do you need it done?
-                </h2>
-                <div className={fieldShellClass} style={fieldShellShadow}>
-                  <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
-                    Deadline (optional)
+              {/* Young Neighbor Parental Approval */}
+              {isYoungNeighbor && (
+                <section className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-amber-600" />
+                    <h2 className="font-display font-bold text-base text-foreground">Parental Approval</h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input type="text" placeholder="Parent Name" value={parentName} onChange={(e) => setParentName(e.target.value)} required className="w-full bg-white/50 border border-amber-500/20 rounded-lg px-3 py-2 text-sm outline-none" />
+                    <input type="email" placeholder="Parent Email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} required className="w-full bg-white/50 border border-amber-500/20 rounded-lg px-3 py-2 text-sm outline-none" />
+                  </div>
+
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                    <input type="checkbox" checked={hasParentalApproval} onChange={(e) => setHasParentalApproval(e.target.checked)} className="rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
+                    I confirm parental approval for this task.
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    min={new Date().toISOString().slice(0, 16)}
-                    className="w-full bg-transparent border-0 outline-none font-body text-base text-foreground placeholder:text-muted-foreground/60"
-                  />
-                  <p className="font-body text-xs text-muted-foreground mt-1.5">
-                    Leave blank if it's flexible.
-                  </p>
-                </div>
-              </section>
+                </section>
+              )}
+
+              {/* AI Safety Notice */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/30 rounded-xl px-4 py-3">
+                <ShieldAlert className="w-4 h-4 text-primary shrink-0" />
+                <span>
+                  All task postings are reviewed by AI for community safety. 
+                  {isYoungNeighbor && <strong> Stricter safety rules apply for Young Neighbors.</strong>}
+                </span>
+              </div>
 
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isModeratingContent}
                 className="w-full h-14 rounded-full text-base font-semibold"
               >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Post task
+                {(loading || isModeratingContent) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isModeratingContent ? 'Checking content safety...' : 'Post task'}
               </Button>
             </form>
           </motion.div>
         </div>
       </div>
+
+
     </>
   );
 }
