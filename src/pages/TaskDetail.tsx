@@ -31,6 +31,7 @@ import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
 import { ZellePayment } from '@/components/ZellePayment';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useContentModeration } from '@/hooks/useContentModeration';
+import { ReportTaskDialog } from '@/components/ReportTaskDialog';
 
 interface Task {
   id: string;
@@ -743,12 +744,15 @@ export default function TaskDetail() {
                 <CardHeader>
                   <div className="flex items-center justify-between mb-4">
                     <Badge variant="secondary">{task.category}</Badge>
-                    <Badge
-                      variant="outline"
-                      className={task.status === 'open' ? 'bg-green-50 text-green-700 border-green-200' : ''}
-                    >
-                      {task.status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={task.status === 'open' ? 'bg-green-50 text-green-700 border-green-200' : ''}
+                      >
+                        {task.status}
+                      </Badge>
+                      {!isTaskOwner && <ReportTaskDialog taskId={task.id} />}
+                    </div>
                   </div>
                   <CardTitle className="text-3xl">{task.title}</CardTitle>
                   <CardDescription className="text-base mt-4 whitespace-pre-wrap">

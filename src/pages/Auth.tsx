@@ -50,19 +50,26 @@ export default function Auth() {
 
   useEffect(() => {
     const checkOnboarding = async () => {
-      if (user && !showOnboarding) {
-        const { data: profile } = await supabase
+      if (!user || showOnboarding) return;
+
+      // Retry to give the handle_new_user trigger time to insert the profile row.
+      let profile: any = null;
+      for (let i = 0; i < 4; i++) {
+        const { data } = await supabase
           .from('profiles')
           .select('age, current_state, zelle_id')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+        if (data) { profile = data; break; }
+        await new Promise((r) => setTimeout(r, 400));
+      }
 
-        if (profile && (!profile.age || !profile.current_state || !(profile as any).zelle_id)) {
-          setNewUserId(user.id);
-          setShowOnboarding(true);
-        } else {
-          navigate(consumeRedirect());
-        }
+      const incomplete = !profile || !profile.age || !profile.current_state || !(profile as any).zelle_id;
+      if (incomplete) {
+        setNewUserId(user.id);
+        setShowOnboarding(true);
+      } else {
+        navigate(consumeRedirect());
       }
     };
     checkOnboarding();
@@ -92,12 +99,14 @@ export default function Auth() {
 
       if (error) throw error;
 
-      if (data?.user?.identities?.length === 0) {
-        toast.success('Please check your email for confirmation link');
+      // If email confirmation is required, the session is null. Tell user to confirm.
+      if (!data.session) {
+        toast.success('Account created! Please check your email to confirm, then sign in.');
       } else if (data.user) {
-        toast.success('Account created! Please complete your profile.');
-        setNewUserId(data.user.id);
-        setShowOnboarding(true);
+        // Auto-confirm enabled — user is signed in. Let the useEffect below
+        // handle showing onboarding once the profile row exists, so we don't
+        // race with the handle_new_user trigger and force the form to appear twice.
+        toast.success('Account created!');
       }
     } catch (error: any) {
       toast.error(error.message || 'Error creating account');
@@ -135,11 +144,12 @@ export default function Auth() {
       if (data.user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('age, current_state')
+          .select('age, current_state, zelle_id')
           .eq('id', data.user.id)
-          .single();
+          .maybeSingle();
 
-        if (profile && !profile.age && !profile.current_state) {
+        const incomplete = !profile || !profile.age || !profile.current_state || !(profile as any).zelle_id;
+        if (incomplete) {
           setNewUserId(data.user.id);
           setShowOnboarding(true);
           toast.success('Welcome back! Please complete your profile.');

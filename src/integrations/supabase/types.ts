@@ -214,6 +214,33 @@ export type Database = {
           },
         ]
       }
+      task_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string | null
+          reporter_id: string
+          status: string
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reporter_id: string
+          status?: string
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reporter_id?: string
+          status?: string
+          task_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           budget_max: number
