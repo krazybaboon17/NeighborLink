@@ -144,11 +144,12 @@ export default function Auth() {
       if (data.user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('age, current_state')
+          .select('age, current_state, zelle_id')
           .eq('id', data.user.id)
-          .single();
+          .maybeSingle();
 
-        if (profile && !profile.age && !profile.current_state) {
+        const incomplete = !profile || !profile.age || !profile.current_state || !(profile as any).zelle_id;
+        if (incomplete) {
           setNewUserId(data.user.id);
           setShowOnboarding(true);
           toast.success('Welcome back! Please complete your profile.');
