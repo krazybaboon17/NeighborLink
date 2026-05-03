@@ -50,19 +50,26 @@ export default function Auth() {
 
   useEffect(() => {
     const checkOnboarding = async () => {
-      if (user && !showOnboarding) {
-        const { data: profile } = await supabase
+      if (!user || showOnboarding) return;
+
+      // Retry to give the handle_new_user trigger time to insert the profile row.
+      let profile: any = null;
+      for (let i = 0; i < 4; i++) {
+        const { data } = await supabase
           .from('profiles')
           .select('age, current_state, zelle_id')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+        if (data) { profile = data; break; }
+        await new Promise((r) => setTimeout(r, 400));
+      }
 
-        if (profile && (!profile.age || !profile.current_state || !(profile as any).zelle_id)) {
-          setNewUserId(user.id);
-          setShowOnboarding(true);
-        } else {
-          navigate(consumeRedirect());
-        }
+      const incomplete = !profile || !profile.age || !profile.current_state || !(profile as any).zelle_id;
+      if (incomplete) {
+        setNewUserId(user.id);
+        setShowOnboarding(true);
+      } else {
+        navigate(consumeRedirect());
       }
     };
     checkOnboarding();
