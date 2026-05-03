@@ -92,12 +92,14 @@ export default function Auth() {
 
       if (error) throw error;
 
-      if (data?.user?.identities?.length === 0) {
-        toast.success('Please check your email for confirmation link');
+      // If email confirmation is required, the session is null. Tell user to confirm.
+      if (!data.session) {
+        toast.success('Account created! Please check your email to confirm, then sign in.');
       } else if (data.user) {
-        toast.success('Account created! Please complete your profile.');
-        setNewUserId(data.user.id);
-        setShowOnboarding(true);
+        // Auto-confirm enabled — user is signed in. Let the useEffect below
+        // handle showing onboarding once the profile row exists, so we don't
+        // race with the handle_new_user trigger and force the form to appear twice.
+        toast.success('Account created!');
       }
     } catch (error: any) {
       toast.error(error.message || 'Error creating account');
