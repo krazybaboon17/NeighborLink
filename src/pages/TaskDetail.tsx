@@ -31,6 +31,7 @@ import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
 import { ZellePayment } from '@/components/ZellePayment';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useContentModeration } from '@/hooks/useContentModeration';
+import { ReportTaskDialog } from '@/components/ReportTaskDialog';
 
 interface Task {
   id: string;
