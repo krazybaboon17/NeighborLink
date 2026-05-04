@@ -1,14 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Home,
-  PawPrint,
+  Sprout,
+  Snowflake,
   Package,
+  ShoppingBag,
+  Wrench,
   Baby,
-  Laptop,
-  ChefHat,
-  Palette,
-  GraduationCap,
+  PawPrint,
+  Hammer,
+  Footprints,
+  MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,15 +21,18 @@ interface Category {
   slug: string;
 }
 
+// Slugs MUST match the categories used in PostTask.tsx and Tasks.tsx filter
 const categories: Category[] = [
-  { Icon: Home, title: "Home & Garden", description: "Lawn care, repairs, cleaning", slug: "Lawn Care" },
-  { Icon: PawPrint, title: "Pet Care", description: "Walking, sitting, grooming", slug: "Pet Care" },
-  { Icon: Package, title: "Moving & Delivery", description: "Heavy lifting & errands", slug: "Moving Help" },
-  { Icon: Baby, title: "Childcare", description: "Babysitting & after-school", slug: "Babysitting" },
-  { Icon: Laptop, title: "Tech Help", description: "Setup, troubleshooting, lessons", slug: "Tech Help" },
-  { Icon: ChefHat, title: "Cooking", description: "Meal prep & baking", slug: "Cooking" },
-  { Icon: Palette, title: "Creative", description: "Photos, design, decorating", slug: "Creative" },
-  { Icon: GraduationCap, title: "Lessons", description: "Tutoring & skill sharing", slug: "Lessons" },
+  { Icon: Sprout, title: "Lawn Care", description: "Mowing, raking, gardening", slug: "Lawn Care" },
+  { Icon: Snowflake, title: "Snow Removal", description: "Driveways and walkways", slug: "Snow Removal" },
+  { Icon: Package, title: "Moving Help", description: "Heavy lifting & loading", slug: "Moving Help" },
+  { Icon: ShoppingBag, title: "Grocery Runs", description: "Shopping & delivery", slug: "Grocery Runs" },
+  { Icon: Wrench, title: "Home Repairs", description: "Small fixes around the house", slug: "Home Repairs" },
+  { Icon: Baby, title: "Babysitting", description: "Trusted, local sitters", slug: "Babysitting" },
+  { Icon: PawPrint, title: "Pet Care", description: "Walks, sitting, grooming", slug: "Pet Care" },
+  { Icon: Hammer, title: "Handyman", description: "Assembly & general help", slug: "Handyman" },
+  { Icon: Footprints, title: "Errands", description: "Pickups, drop-offs, more", slug: "Errands" },
+  { Icon: MoreHorizontal, title: "Other", description: "Got something else?", slug: "Other" },
 ];
 
 export const TaskCategories = () => {

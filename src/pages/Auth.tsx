@@ -31,6 +31,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [newUserId, setNewUserId] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -78,6 +79,12 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (!acceptedTerms) {
+      toast.error('Please accept the Terms of Service and Privacy Policy to continue.');
+      setLoading(false);
+      return;
+    }
 
     const validation = signUpSchema.safeParse({ email, password, fullName });
     if (!validation.success) {
@@ -231,10 +238,10 @@ export default function Auth() {
               transition={{ delay: 0.2, type: "spring", stiffness: 500, damping: 15 }}
             >
               <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center glow-pulse">
-                <span className="text-primary-foreground font-bold text-2xl">N</span>
+                <span className="text-primary-foreground font-bold text-2xl">D</span>
               </div>
             </motion.div>
-            <CardTitle className="text-2xl">Welcome to NeighborLink</CardTitle>
+            <CardTitle className="text-2xl">Welcome to Doable</CardTitle>
             <CardDescription className="flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-primary" />
               Connect with your community
@@ -334,7 +341,21 @@ export default function Auth() {
                     <Label htmlFor="signup-password">Password</Label>
                     <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                    />
+                    <span>
+                      I agree to Doable's{' '}
+                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">Terms of Service</a>{' '}
+                      and{' '}
+                      <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline">Privacy Policy</a>.
+                    </span>
+                  </label>
+                  <Button type="submit" className="w-full" disabled={loading || !acceptedTerms}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Account
                   </Button>

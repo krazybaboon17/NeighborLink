@@ -93,8 +93,8 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
       </motion.svg>
       {showText && (
         <span className={`${textClass} font-bold tracking-tight`}>
-          <span className="text-foreground">Neighbor</span>
-          <span className="text-primary">Link</span>
+          <span className="text-foreground">Do</span>
+          <span className="text-primary">able</span>
         </span>
       )}
     </span>

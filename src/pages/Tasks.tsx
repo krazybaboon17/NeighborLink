@@ -28,7 +28,8 @@ export default function Tasks() {
   const [appliedTaskIds, setAppliedTaskIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const initialCategory = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('category') || 'all';
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [zipInput, setZipInput] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const navigate = useNavigate();
@@ -227,7 +228,7 @@ export default function Tasks() {
   return (
     <>
       <Helmet>
-        <title>Browse Tasks — NeighborLink</title>
+        <title>Browse Tasks — Doable</title>
         <meta
           name="description"
           content="Find local tasks to help with in Arlington Heights and Buffalo Grove. Pet care, lawn care, moving help, errands and more."

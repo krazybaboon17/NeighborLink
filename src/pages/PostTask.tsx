@@ -135,6 +135,30 @@ export default function PostTask() {
         return;
       }
 
+      // Anti-spam: limit open tasks and tasks per 24h
+      const { count: openCount } = await supabase
+        .from('tasks')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id)
+        .eq('status', 'open');
+      if ((openCount ?? 0) >= 5) {
+        toast.error('You already have 5 open tasks. Please close or fill one before posting more.');
+        setLoading(false);
+        return;
+      }
+
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count: dailyCount } = await supabase
+        .from('tasks')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id)
+        .gte('created_at', since);
+      if ((dailyCount ?? 0) >= 8) {
+        toast.error('Daily limit reached: you can post up to 8 tasks per 24 hours.');
+        setLoading(false);
+        return;
+      }
+
       // AI Content Moderation
       const moderationResult = await moderateTask(title, description, category, isYoungNeighbor);
       
