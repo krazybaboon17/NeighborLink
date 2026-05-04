@@ -337,7 +337,7 @@ export default function TaskDetail() {
       toast.success('Offer submitted successfully!');
       setOfferPrice('');
       setOfferMessage('');
-      setAgreeOffer(false);
+      // setAgreeOffer(false); removed
       setOfferParentName('');
       setOfferParentEmail('');
       setOfferHasParentalApproval(false);
@@ -395,7 +395,7 @@ export default function TaskDetail() {
       if (error) throw error;
 
       toast.success('Volunteer offer submitted!');
-      setAgreeVolunteer(false);
+      // setAgreeVolunteer(false); removed
       fetchOffers();
     } catch (error: any) {
       console.error('Error submitting volunteer offer:', error);
