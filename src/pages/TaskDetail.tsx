@@ -502,6 +502,10 @@ export default function TaskDetail() {
   };
 
   const handleStartChat = (helperId: string) => {
+    if (user?.id === helperId) {
+      toast.error("You can't message yourself.");
+      return;
+    }
     navigate(`/messages?task=${id}&user=${helperId}`);
   };
 
