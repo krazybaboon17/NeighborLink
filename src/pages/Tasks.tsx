@@ -28,7 +28,8 @@ export default function Tasks() {
   const [appliedTaskIds, setAppliedTaskIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const initialCategory = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('category') || 'all';
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [zipInput, setZipInput] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const navigate = useNavigate();
