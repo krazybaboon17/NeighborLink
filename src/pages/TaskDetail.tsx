@@ -1010,20 +1010,8 @@ export default function TaskDetail() {
                         Submit Offer
                       </Button>
 
-                      <div className="flex items-start gap-2 rounded-md border border-border p-3 bg-muted/30 mt-4">
-                        <Checkbox
-                          id="agree-volunteer"
-                          checked={agreeVolunteer}
-                          onCheckedChange={(c) => setAgreeVolunteer(c === true)}
-                        />
-                        <Label htmlFor="agree-volunteer" className="text-xs leading-snug cursor-pointer">
-                          I agree to the{' '}
-                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                            Terms of Service
-                          </a>{' '}
-                          for volunteering this task.
-                        </Label>
-                      </div>
+                      <div className="hidden" />
+
 
                       {currentUserIsYoungNeighbor && (
                         <div className="bg-amber-50/50 border border-amber-200 rounded-xl p-3 space-y-2 mb-3 mt-4">
