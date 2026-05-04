@@ -50,6 +50,12 @@ export default function Messages() {
       return;
     }
 
+    if (otherId && user.id === otherId) {
+      toast.error("You can't message yourself.");
+      navigate('/conversations');
+      return;
+    }
+
     if (taskId && otherId) {
       fetchTask();
       fetchOtherUser();
