@@ -231,10 +231,10 @@ export default function Auth() {
               transition={{ delay: 0.2, type: "spring", stiffness: 500, damping: 15 }}
             >
               <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center glow-pulse">
-                <span className="text-primary-foreground font-bold text-2xl">N</span>
+                <span className="text-primary-foreground font-bold text-2xl">D</span>
               </div>
             </motion.div>
-            <CardTitle className="text-2xl">Welcome to NeighborLink</CardTitle>
+            <CardTitle className="text-2xl">Welcome to Doable</CardTitle>
             <CardDescription className="flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-primary" />
               Connect with your community

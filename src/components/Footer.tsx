@@ -79,7 +79,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2025 NeighborLink. All rights reserved.
+            © 2025 Doable. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground justify-center md:justify-end">
             <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
