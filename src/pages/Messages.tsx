@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { z } from 'zod';
+import { useContentModeration } from '@/hooks/useContentModeration';
 
 interface Message {
   id: string;
@@ -43,6 +44,7 @@ export default function Messages() {
   const [task, setTask] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { moderateMessage, isChecking } = useContentModeration();
 
   useEffect(() => {
     if (!user) {
@@ -160,6 +162,11 @@ export default function Messages() {
     }
 
     try {
+      const mod = await moderateMessage(validation.data.content, false);
+      if (!mod.allowed) {
+        toast.error(`Message blocked: ${mod.reason || 'violates community guidelines'}`);
+        return;
+      }
       const { error } = await supabase
         .from('messages')
         .insert({
