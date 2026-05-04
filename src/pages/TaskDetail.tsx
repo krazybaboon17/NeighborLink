@@ -105,10 +105,10 @@ export default function TaskDetail() {
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
   const [pendingOfferHelper, setPendingOfferHelper] = useState<string>('');
   const [showSafetyWarning, setShowSafetyWarning] = useState(false);
-  // Terms of Service agreement (must be re-checked for every offer / acceptance)
-  const [agreeOffer, setAgreeOffer] = useState(false);
-  const [agreeVolunteer, setAgreeVolunteer] = useState(false);
-  const [acceptingAgreement, setAcceptingAgreement] = useState<Record<string, boolean>>({});
+  // Per-task ToS removed — users accept ToS once at signup. Keep stubs for legacy logic.
+  const agreeOffer = true;
+  const agreeVolunteer = true;
+  const acceptingAgreement: Record<string, boolean> = new Proxy({}, { get: () => true });
 
   // Young Neighbor & verification state for current user
   const [currentUserIsYoungNeighbor, setCurrentUserIsYoungNeighbor] = useState(false);
@@ -898,23 +898,7 @@ export default function TaskDetail() {
                           </div>
                         )}
                         {isTaskOwner && offer.status === 'pending' && task.status === 'open' && (
-                          <div className="mt-4 space-y-3 rounded-md border border-border p-3 bg-muted/30">
-                            <div className="flex items-start gap-2">
-                              <Checkbox
-                                id={`agree-accept-${offer.id}`}
-                                checked={!!acceptingAgreement[offer.id]}
-                                onCheckedChange={(checked) =>
-                                  setAcceptingAgreement((prev) => ({ ...prev, [offer.id]: checked === true }))
-                                }
-                              />
-                              <Label htmlFor={`agree-accept-${offer.id}`} className="text-xs leading-snug cursor-pointer">
-                                I agree to the{' '}
-                                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                                  Terms of Service
-                                </a>{' '}
-                                and accept responsibility for this engagement.
-                              </Label>
-                            </div>
+                          <div className="mt-4 space-y-3">
                             <div className="flex gap-2">
                               <Button
                                 size="sm"
@@ -1018,20 +1002,8 @@ export default function TaskDetail() {
                         </div>
                       )}
 
-                      <div className="flex items-start gap-2 rounded-md border border-border p-3 bg-muted/30">
-                        <Checkbox
-                          id="agree-offer"
-                          checked={agreeOffer}
-                          onCheckedChange={(c) => setAgreeOffer(c === true)}
-                        />
-                        <Label htmlFor="agree-offer" className="text-xs leading-snug cursor-pointer">
-                          I agree to the{' '}
-                          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                            Terms of Service
-                          </a>{' '}
-                          for sending this paid offer.
-                        </Label>
-                      </div>
+                      <div className="hidden" />
+
 
                       <Button type="submit" className="w-full" disabled={submitting || !agreeOffer || (currentUserIsYoungNeighbor && !offerHasParentalApproval)}>
                         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
