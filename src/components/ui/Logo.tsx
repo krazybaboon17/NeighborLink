@@ -35,7 +35,7 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
         <rect x="58" y="32" width="8" height="8" rx="1.5" fill="white" opacity="0.7" />
         {/* Landscape wave */}
         <path
-          d="M12 72C28 58 42 64 60 56C78 48 92 62 108 68V78L60 114L12 78V72Z"
+          d="M12 70C32 60 50 64 60 64C70 64 88 60 108 70V78L60 114L12 78V70Z"
           fill="url(#wave-gradient)"
           opacity="0.6"
         />
