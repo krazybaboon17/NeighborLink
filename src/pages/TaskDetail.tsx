@@ -929,7 +929,7 @@ export default function TaskDetail() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleStartChat(offer.helper_id)}
+                                onClick={() => handleStartChat(isTaskOwner ? offer.helper_id : task.user_id)}
                               >
                                 <MessageCircle className="w-4 h-4 mr-1" />
                                 Message
