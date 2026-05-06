@@ -15,79 +15,34 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
       <motion.svg
         width={dims}
         height={dims}
-        viewBox="-2 -2 124 124"
+        viewBox="0 0 64 64"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         whileHover={{ scale: 1.08, rotate: 3 }}
         transition={{ type: "spring", stiffness: 400, damping: 15 }}
       >
-        {/* Diamond/shield shape */}
-        <path
-          d="M60 6L108 42V78L60 114L12 78V42L60 6Z"
-          fill="url(#shield-gradient)"
-          stroke="url(#border-gradient)"
-          strokeWidth="2"
+        {/* Rounded square background */}
+        <rect
+          x="2"
+          y="2"
+          width="60"
+          height="60"
+          rx="16"
+          fill="url(#doable-gradient)"
         />
-        {/* House windows */}
-        <rect x="46" y="20" width="8" height="8" rx="1.5" fill="white" opacity="0.9" />
-        <rect x="58" y="20" width="8" height="8" rx="1.5" fill="white" opacity="0.9" />
-        <rect x="46" y="32" width="8" height="8" rx="1.5" fill="white" opacity="0.9" />
-        <rect x="58" y="32" width="8" height="8" rx="1.5" fill="white" opacity="0.7" />
-        {/* Landscape wave */}
+        {/* Check mark */}
         <path
-          d="M12 72C28 58 42 64 60 56C78 48 92 62 108 68V78L60 114L12 78V72Z"
-          fill="url(#wave-gradient)"
-          opacity="0.6"
+          d="M18 33L28 43L46 23"
+          stroke="white"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
         />
-        {/* Handshake */}
-        <g transform="translate(30, 58)" opacity="0.95">
-          {/* Left hand */}
-          <path
-            d="M4 18C4 18 8 8 18 8C22 8 26 10 28 12"
-            stroke="white"
-            strokeWidth="4"
-            strokeLinecap="round"
-            fill="none"
-          />
-          {/* Right hand */}
-          <path
-            d="M56 18C56 18 52 8 42 8C38 8 34 10 32 12"
-            stroke="white"
-            strokeWidth="4"
-            strokeLinecap="round"
-            fill="none"
-          />
-          {/* Clasp */}
-          <path
-            d="M28 12C30 14 30 18 30 20"
-            stroke="white"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <path
-            d="M32 12C30 14 30 18 30 20"
-            stroke="white"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            fill="none"
-          />
-          {/* Shake detail */}
-          <circle cx="30" cy="12" r="3" fill="white" opacity="0.8" />
-        </g>
         <defs>
-          <linearGradient id="shield-gradient" x1="20" y1="10" x2="100" y2="110" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="hsl(145, 55%, 42%)" />
-            <stop offset="50%" stopColor="hsl(165, 50%, 45%)" />
-            <stop offset="100%" stopColor="hsl(190, 60%, 48%)" />
-          </linearGradient>
-          <linearGradient id="border-gradient" x1="20" y1="10" x2="100" y2="110" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="hsl(145, 55%, 35%)" />
-            <stop offset="100%" stopColor="hsl(190, 60%, 40%)" />
-          </linearGradient>
-          <linearGradient id="wave-gradient" x1="12" y1="56" x2="108" y2="80" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="hsl(190, 65%, 50%)" />
-            <stop offset="100%" stopColor="hsl(200, 70%, 55%)" />
+          <linearGradient id="doable-gradient" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="hsl(210, 90%, 50%)" />
+            <stop offset="100%" stopColor="hsl(190, 85%, 45%)" />
           </linearGradient>
         </defs>
       </motion.svg>
