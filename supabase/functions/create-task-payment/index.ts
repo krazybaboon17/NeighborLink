@@ -112,8 +112,8 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Platform Service Fee (15%)",
-              description: "NeighborLink platform fee",
+              name: "Platform Service Fee (10%)",
+              description: "Doable platform fee",
             },
             unit_amount: platformFeeCents,
           },
