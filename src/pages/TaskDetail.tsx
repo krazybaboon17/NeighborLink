@@ -595,9 +595,6 @@ export default function TaskDetail() {
 
       // Paid task → open Stripe Checkout (10% platform fee added on top)
       await handleProcessPayment();
-      } catch (err: any) {
-        toast.error(err.message || 'Error fetching payment info');
-      }
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
       toast.error(error.message || 'Error uploading photo');
