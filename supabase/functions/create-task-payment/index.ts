@@ -85,8 +85,8 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    // Calculate 15% platform fee
-    const PLATFORM_FEE_PERCENT = 0.15;
+    // Calculate 10% platform fee (added on top of helper amount)
+    const PLATFORM_FEE_PERCENT = 0.10;
     const helperAmountCents = Math.round(amount * 100);
     const platformFeeCents = Math.round(helperAmountCents * PLATFORM_FEE_PERCENT);
     const totalAmountCents = helperAmountCents + platformFeeCents;
@@ -112,8 +112,8 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Platform Service Fee (15%)",
-              description: "NeighborLink platform fee",
+              name: "Platform Service Fee (10%)",
+              description: "Doable platform fee",
             },
             unit_amount: platformFeeCents,
           },
