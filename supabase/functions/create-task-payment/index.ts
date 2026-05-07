@@ -113,7 +113,7 @@ serve(async (req) => {
             currency: "usd",
             product_data: {
               name: "Platform Service Fee (10%)",
-              description: "Doable platform fee",
+              description: "TaskIt! platform fee",
             },
             unit_amount: platformFeeCents,
           },

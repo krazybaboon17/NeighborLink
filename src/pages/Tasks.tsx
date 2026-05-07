@@ -228,7 +228,7 @@ export default function Tasks() {
   return (
     <>
       <Helmet>
-        <title>Browse Tasks — Doable</title>
+        <title>Browse Tasks — TaskIt!</title>
         <meta
           name="description"
           content="Find local tasks to help with in Arlington Heights and Buffalo Grove. Pet care, lawn care, moving help, errands and more."

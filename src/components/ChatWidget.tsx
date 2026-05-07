@@ -16,7 +16,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: "Hey there, neighbor! I'm Neighborly, your friendly guide to Doable. What can I help you with today?" }
+    { role: 'assistant', content: "Hey there, neighbor! I'm Neighborly, your friendly guide to TaskIt!. What can I help you with today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
