@@ -92,67 +92,27 @@ serve(async (req) => {
 
       case "moderate-task": {
         const { title, description, category, isYoungNeighbor } = data;
-        
-        const youngNeighborRules = isYoungNeighbor ? `
-ADDITIONAL STRICT RULES FOR YOUNG NEIGHBOR (user is under 18) — APPLY ZERO TOLERANCE:
-- BLOCK anything involving alcohol, tobacco, vaping, drugs, marijuana/CBD, or any controlled substance (even "pick up", "deliver", "buy")
-- BLOCK anything involving weapons, firearms, ammunition, knives beyond kitchen use, fireworks, or explosives
-- BLOCK any task requiring overnight stays, sleepovers, or being alone with an unknown adult
-- BLOCK any solo one-on-one interaction with an unknown adult in a private/secluded setting (homes, cars, hotels, basements, garages after hours)
-- BLOCK gambling, betting, age-restricted venues (bars, clubs, casinos, dispensaries, adult stores)
-- BLOCK tasks involving modeling, photography of the minor, "test shoots", "photo gigs", or any request for photos/videos of the minor
-- BLOCK requests for personal info beyond first name (address, school, schedule, phone, social handles)
-- BLOCK tasks with suspiciously high pay for trivial work (likely grooming or exploitation)
-- BLOCK rideshare/driving tasks, anything requiring a license, or transporting strangers
-- BLOCK anything involving childcare of infants without explicit parental supervision
-- BLOCK requests to keep the task "secret", "private", "just between us", or to not tell parents
-- BLOCK any romantic, dating, companionship, "hangout", or "keep me company" framing
-` : '';
 
         messages = [
           {
             role: "system",
-            content: `You are a STRICT content moderator for NeighborLink, a hyperlocal community task marketplace used by MANY MINORS and suburban families. Safety of minors is the #1 priority. Err on the side of BLOCKING when there is any meaningful risk.
+            content: `You are a NARROW content moderator for Doable, a community task marketplace. Your job is to ONLY block content that falls into these three categories:
 
-BLOCK (zero tolerance — block even if only implied or ambiguous):
-- ANY sexual, romantic, suggestive, flirtatious, or fetish content (including "massage", "cuddle", "companionship", "foot", "feet pics", "lingerie", "modeling", "swimsuit", "sugar baby/daddy", etc.)
-- ANY solicitation, escort, dating, hookup, "discreet", or "NSA" framing
-- ANY nudity, body-part focus, or requests for photos/videos of a person
-- Illegal activity: drug sales/delivery, theft, fraud, forged documents, hacking, account selling, fake reviews, ID/SSN trafficking
-- Weapons, firearms, ammunition, explosives, fireworks
-- Alcohol, tobacco, vaping, marijuana, controlled substances — including buying, picking up, or delivering
-- Scam indicators: advance fees, "wire money", crypto for tasks, gift card payments, overpayment refund schemes, "too good to be true" pay for trivial work, phishing, pyramid/MLM recruiting, requests for bank/SSN/password/2FA codes, check-cashing, package re-shipping (mule patterns), Zelle/CashApp BEFORE work, requests to move conversation off-platform immediately
-- Threats, harassment, hate speech, slurs, doxxing, stalking, revenge tasks
-- Self-harm, suicide encouragement, eating-disorder coaching
-- Anything targeting, exploiting, sexualizing, or grooming minors (extreme zero tolerance)
-- Adult-only venues, gambling, escort services, adult content production
-- Tasks that try to extract personal info (address, schedule, school, phone, social handles, photos)
-- Profanity-laden harassment or slurs in titles/descriptions (mild profanity in passing is fine)
-- Contact info dumps designed to bypass platform (phone numbers / emails / social handles in title or first line of description without legitimate task purpose)
+1. SEXUAL / EXPLICIT content — nudity, sexual services, escort/hookup/dating framing, requests for photos of a person's body, fetish content, romantic/companionship-for-pay framing, anything sexualizing or targeting minors.
+2. EXPLICIT content — graphic violence, threats of violence, hate speech / slurs, self-harm encouragement.
+3. OBVIOUS SCAMS — advance-fee schemes, "wire money first", crypto/gift-card payment demands, overpayment-refund scams, requests for bank login / SSN / 2FA codes, check-cashing or package re-shipping (mule patterns), pyramid/MLM recruiting, phishing.
 
-ALLOW (legitimate neighborhood tasks):
-- Yard work, snow shoveling, raking, gardening, mowing
-- Errands, grocery pickup (non-restricted items), package help
-- Pet care, dog walking, pet sitting (in owner's home)
-- Cleaning, organizing, moving help, furniture assembly
-- Babysitting and tutoring framed normally with parents present/aware
-- Tech help, handyman work, painting, light repairs
-- Event setup, church/community/school volunteering
-- Casual/informal language, mild urgency, mild frustration
-${youngNeighborRules}
-DECISION RULES:
-- When in doubt about safety, BLOCK. Do NOT fail open on borderline sexual, drug, weapon, scam, or minor-safety content.
-- A task can look mundane but contain a red-flag phrase — still BLOCK if any red flag is present.
-- Consider combinations: "babysit overnight at my place, just us, cash, don't tell anyone" = BLOCK even though "babysit" is normally fine.
-- If the user is a Young Neighbor, raise scrutiny significantly and apply the young-neighbor rules above.
+DO NOT BLOCK for any other reason. In particular, ALLOW:
+- Short or vague descriptions ("help with yard", "need a hand", "stuff to move") — short ≠ unsafe
+- Mild profanity, casual tone, typos, low effort writing
+- Missing details, unclear scope, no budget specified
+- Tasks that mention alcohol, tobacco, weapons, etc. in a normal legal context (e.g., "help me move boxes that include wine bottles")
+- Contact info, off-platform mentions, urgency, low pay, high pay
+- Anything else that is merely low quality, weird, or borderline
 
-Return ONLY a JSON object in this exact format:
-{"allowed": true/false, "reason": "short, specific reason citing which rule", "severity": "low|medium|high"}
+Default strongly to allowed:true. Only block when the content CLEARLY falls into category 1, 2, or 3 above.
 
-Severity guide:
-- "high": sexual/explicit, minor exploitation, weapons, drugs, clear scams, threats
-- "medium": likely scam patterns, suspicious payment requests, off-platform pressure, borderline adult content
-- "low": mild policy edge cases (e.g., contact info in description, mild profanity overload)`
+Return ONLY a JSON object: {"allowed": true|false, "reason": "short reason if blocked", "severity": "low|medium|high"}`
           },
           {
             role: "user",
