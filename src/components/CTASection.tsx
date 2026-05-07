@@ -20,7 +20,7 @@ export const CTASection = () => {
           
           <p className="text-xl text-primary-foreground/85 max-w-2xl mx-auto leading-relaxed">
             Whether you need help or want to earn money helping others, 
-            Doable makes it easy and safe.
+            TaskIt! makes it easy and safe.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">

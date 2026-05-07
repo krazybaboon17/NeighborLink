@@ -128,7 +128,7 @@ export default function Features() {
               <span className="text-primary">Help & Be Helped</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Doable makes it easy to find help, offer assistance, and build stronger community connections.
+              TaskIt! makes it easy to find help, offer assistance, and build stronger community connections.
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export default function Features() {
           {/* Highlights Section */}
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Why Choose Doable?</h2>
+              <h2 className="text-2xl font-bold mb-2">Why Choose TaskIt!?</h2>
               <p className="text-muted-foreground">Built with community values at its core</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

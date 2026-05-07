@@ -16,7 +16,7 @@ export default function Terms() {
               <h2 className="text-xl font-semibold">1. Acceptance of Terms</h2>
               <p>
                 By posting tasks, sending offers, accepting offers, or otherwise using
-                Doable ("the Platform"), you agree to be bound by these Terms of
+                TaskIt! ("the Platform"), you agree to be bound by these Terms of
                 Service. If you do not agree, do not use the Platform.
               </p>
             </section>
@@ -36,7 +36,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold">3. Marketplace Role</h2>
               <p>
-                Doable is a peer-to-peer community marketplace. We do not employ
+                TaskIt! is a peer-to-peer community marketplace. We do not employ
                 helpers, do not perform tasks ourselves, and are not a party to any
                 agreement between users. All arrangements, payments, and task
                 completion are solely between the requester and the helper.
@@ -46,7 +46,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold">4. Payments (Zelle)</h2>
               <p>
-                Payments are made directly between users via Zelle. Doable does
+                Payments are made directly between users via Zelle. TaskIt! does
                 not process or hold funds. A 10% platform fee may be requested
                 separately. You are responsible for verifying the recipient's Zelle ID
                 before sending money. Zelle transfers are typically irreversible.
@@ -79,7 +79,7 @@ export default function Terms() {
               <h2 className="text-xl font-semibold">7. Disputes</h2>
               <p>
                 Disputes between users must be resolved between the parties directly.
-                Doable may, at its discretion, suspend accounts but is not
+                TaskIt! may, at its discretion, suspend accounts but is not
                 obligated to mediate, refund, or arbitrate disputes.
               </p>
             </section>
@@ -88,7 +88,7 @@ export default function Terms() {
               <h2 className="text-xl font-semibold">8. Liability</h2>
               <p>
                 The Platform is provided "as is" without warranties of any kind.
-                Doable is not liable for any damages, injuries, losses, or
+                TaskIt! is not liable for any damages, injuries, losses, or
                 disputes arising from your use of the Platform or interactions with
                 other users. You use the Platform at your own risk.
               </p>
