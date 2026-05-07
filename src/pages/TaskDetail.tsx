@@ -570,24 +570,6 @@ export default function TaskDetail() {
     const acceptedOffer = getAcceptedOffer();
     if (!acceptedOffer) return;
 
-    // For paid tasks, ensure we have a Zelle ID (either existing or just entered)
-    if (acceptedOffer.price > 0 && helperMissingZelle) {
-      if (!helperZelleInput.trim()) {
-        toast.error("Please enter the helper's Zelle ID to proceed with payment");
-        return;
-      }
-      // Save the Zelle ID to the helper's profile via secure RPC
-      const { error: updateErr } = await supabase.rpc('set_helper_zelle_id' as any, {
-        p_task_id: id,
-        p_helper_id: acceptedOffer.helper_id,
-        p_zelle_id: helperZelleInput.trim()
-      });
-      if (updateErr) {
-        toast.error('Failed to save Zelle ID');
-        return;
-      }
-    }
-
     setUploadingPhoto(true);
     try {
       const fileExt = completionPhoto.name.split('.').pop();
@@ -611,18 +593,8 @@ export default function TaskDetail() {
         return;
       }
 
-      // Go straight to Zelle payment for paid tasks
-      try {
-        const { data: zelleId } = await supabase.rpc('get_helper_zelle_id' as any, {
-          p_task_id: id,
-          p_helper_id: acceptedOffer.helper_id
-        });
-        if (zelleId) {
-          setHelperZelleId(zelleId);
-          setShowZellePayment(true);
-        } else {
-          toast.error('Helper has not set up their Zelle ID. Contact them to arrange payment.');
-        }
+      // Paid task → open Stripe Checkout (10% platform fee added on top)
+      await handleProcessPayment();
       } catch (err: any) {
         toast.error(err.message || 'Error fetching payment info');
       }
