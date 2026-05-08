@@ -119,6 +119,51 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          amount_helper: number
+          amount_platform_fee: number
+          amount_total: number
+          created_at: string
+          id: string
+          payee_user_id: string
+          payer_user_id: string
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_transfer_id: string | null
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_helper: number
+          amount_platform_fee: number
+          amount_total: number
+          created_at?: string
+          id?: string
+          payee_user_id: string
+          payer_user_id: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_transfer_id?: string | null
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_helper?: number
+          amount_platform_fee?: number
+          amount_total?: number
+          created_at?: string
+          id?: string
+          payee_user_id?: string
+          payer_user_id?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_transfer_id?: string | null
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -134,6 +179,9 @@ export type Database = {
           location: string | null
           rating: number | null
           skills: string[] | null
+          stripe_account_id: string | null
+          stripe_customer_id: string | null
+          stripe_onboarding_complete: boolean
           updated_at: string | null
           verified: boolean | null
           zelle_id: string | null
@@ -152,6 +200,9 @@ export type Database = {
           location?: string | null
           rating?: number | null
           skills?: string[] | null
+          stripe_account_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_onboarding_complete?: boolean
           updated_at?: string | null
           verified?: boolean | null
           zelle_id?: string | null
@@ -170,6 +221,9 @@ export type Database = {
           location?: string | null
           rating?: number | null
           skills?: string[] | null
+          stripe_account_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_onboarding_complete?: boolean
           updated_at?: string | null
           verified?: boolean | null
           zelle_id?: string | null
