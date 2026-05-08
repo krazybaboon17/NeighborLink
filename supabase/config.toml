@@ -18,5 +18,17 @@ verify_jwt = false
 [functions.ai-assist]
 verify_jwt = false
 
-[functions.create-task-payment]
+[functions.create-connect-account]
+verify_jwt = false
+
+[functions.get-connect-account-status]
+verify_jwt = false
+
+[functions.create-payment-intent]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.get-stripe-publishable-key]
 verify_jwt = false
