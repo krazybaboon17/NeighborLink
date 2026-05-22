@@ -13,6 +13,7 @@ type Conversation = {
   other_user_avatar?: string | null;
   last_message: string;
   updated_at: string;
+  unread_count: number;
 };
 
 export default function Conversations() {
@@ -46,7 +47,11 @@ export default function Conversations() {
             other_user_avatar: null,
             last_message: m.content,
             updated_at: m.created_at,
+            unread_count: 0,
           };
+        }
+        if (m.receiver_id === user?.id && m.is_read === false) {
+          grouped[key].unread_count += 1;
         }
       });
 
@@ -81,17 +86,22 @@ export default function Conversations() {
               convos.map((c) => (
                 <div
                   key={`${c.task_id}_${c.other_user_id}`}
-                  className="p-3 border rounded-md flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
+                  className={`p-3 border rounded-md flex items-center justify-between cursor-pointer transition-colors ${c.unread_count > 0 ? 'bg-primary/5 hover:bg-primary/10 border-primary/20' : 'hover:bg-muted/50'}`}
                   onClick={() => navigate(`/messages?task=${c.task_id}&user=${c.other_user_id}`)}
                 >
                   <div className="flex items-center space-x-3">
-                    <Avatar>
-                      <AvatarImage src={c.other_user_avatar || ''} />
-                      <AvatarFallback>{c.other_user_name?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar>
+                        <AvatarImage src={c.other_user_avatar || ''} />
+                        <AvatarFallback>{c.other_user_name?.charAt(0) || 'U'}</AvatarFallback>
+                      </Avatar>
+                      {c.unread_count > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#B22234] rounded-full border-2 border-background" />
+                      )}
+                    </div>
                     <div>
-                      <p className="font-medium">{c.other_user_name}</p>
-                      <p className="text-sm text-muted-foreground line-clamp-1">{c.last_message}</p>
+                      <p className={`font-medium ${c.unread_count > 0 ? 'text-foreground' : ''}`}>{c.other_user_name}</p>
+                      <p className={`text-sm line-clamp-1 ${c.unread_count > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{c.last_message}</p>
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">{new Date(c.updated_at).toLocaleString()}</div>

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Navbar } from '@/components/Navbar';
-import { Send } from 'lucide-react';
+import { Send, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
@@ -19,6 +19,7 @@ interface Message {
   sender_id: string;
   receiver_id: string;
   created_at: string;
+  is_read?: boolean;
 }
 
 interface Profile {
@@ -43,6 +44,7 @@ export default function Messages() {
   const [otherUser, setOtherUser] = useState<Profile | null>(null);
   const [task, setTask] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [bannerDismissed, setBannerDismissed] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { moderateMessage, isChecking } = useContentModeration();
 
@@ -61,10 +63,27 @@ export default function Messages() {
     if (taskId && otherId) {
       fetchTask();
       fetchOtherUser();
+      fetchUserProfile();
       fetchMessages();
       subscribeToMessages();
     }
   }, [taskId, otherId, user]);
+
+  useEffect(() => {
+    if (user && messages.length > 0) {
+      const unreadIds = messages
+        .filter((m: any) => m.receiver_id === user.id && m.is_read === false)
+        .map((m) => m.id);
+      
+      if (unreadIds.length > 0) {
+        supabase.from('messages').update({ is_read: true } as any).in('id', unreadIds).then(() => {
+          setMessages((prev) => 
+            prev.map(m => unreadIds.includes(m.id) ? { ...m, is_read: true } : m)
+          );
+        });
+      }
+    }
+  }, [messages, user]);
 
   useEffect(() => {
     scrollToBottom();
@@ -103,6 +122,28 @@ export default function Messages() {
       console.error('Error fetching user:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('payment_banner_dismissed')
+        .eq('id', user?.id)
+        .single();
+      if (data) {
+        setBannerDismissed(data.payment_banner_dismissed || false);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  const handleDismissBanner = async () => {
+    setBannerDismissed(true);
+    if (user) {
+      await supabase.from('profiles').update({ payment_banner_dismissed: true } as any).eq('id', user.id);
     }
   };
 
@@ -214,6 +255,16 @@ export default function Messages() {
             </CardHeader>
 
             <CardContent className="flex flex-col h-[calc(100%-8rem)] p-0">
+              {!bannerDismissed && (
+                <div className="bg-amber-50 border-b border-amber-200 p-3 flex items-start justify-between">
+                  <p className="text-sm text-amber-800 pr-4">
+                    💡 Doable doesn't handle payments. Settle up directly with your neighbor via cash, Venmo, Zelle, or whatever works.
+                  </p>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-amber-800 shrink-0 hover:bg-amber-100" onClick={handleDismissBanner}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
               {/* Messages List */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (

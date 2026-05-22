@@ -37,7 +37,6 @@ export default function ProfilePage() {
   const [completedTasks, setCompletedTasks] = useState<number>(0);
   const [isYoungNeighbor, setIsYoungNeighbor] = useState<boolean>(false);
   const [skills, setSkills] = useState<string[]>([]);
-  const [zelleId, setZelleId] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   
@@ -61,9 +60,7 @@ export default function ProfilePage() {
       setIsYoungNeighbor(data?.is_young_neighbor || false);
       setBio(data?.bio || '');
       setSkills(data?.skills || []);
-      setZelleId((data as any)?.zelle_id || '');
       setIsVerified(data?.verified || false);
-      
       // Parental consent is now handled per-task, so no need to fetch these columns
     } catch (err: any) {
       console.error('Error loading profile:', err);
@@ -127,7 +124,6 @@ export default function ProfilePage() {
         full_name: validation.data.fullName,
         avatar_url: publicUrl,
         bio,
-        zelle_id: zelleId.trim() || null,
       } as any).eq('id', user.id);
 
       if (error) throw error;
@@ -239,11 +235,7 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="zelleId">Zelle ID</Label>
-                    <Input id="zelleId" placeholder="your@email.com or (555) 123-4567" value={zelleId} onChange={(e) => setZelleId(e.target.value)} />
-                    <p className="text-xs text-muted-foreground">Used to receive payments when you complete tasks</p>
-                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="avatar">Avatar</Label>

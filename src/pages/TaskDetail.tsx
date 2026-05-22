@@ -28,7 +28,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { useHelperSafetyCheck } from '@/hooks/useHelperSafetyCheck';
 import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
-import { ZellePayment } from '@/components/ZellePayment';
+
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { ReportTaskDialog } from '@/components/ReportTaskDialog';
@@ -88,18 +88,15 @@ export default function TaskDetail() {
   const [offerPrice, setOfferPrice] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
   const [isReviewOpen, setIsReviewOpen] = useState(false);
-  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-  const [processingPayment, setProcessingPayment] = useState(false);
+
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
-  const [showZellePayment, setShowZellePayment] = useState(false);
-  const [helperZelleId, setHelperZelleId] = useState<string | null>(null);
+
   const [completionPhoto, setCompletionPhoto] = useState<File | null>(null);
   const [completionPhotoPreview, setCompletionPhotoPreview] = useState<string | null>(null);
   const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [helperMissingZelle, setHelperMissingZelle] = useState(false);
-  const [helperZelleInput, setHelperZelleInput] = useState('');
+
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
   const [pendingOfferId, setPendingOfferId] = useState<string | null>(null);
@@ -539,10 +536,7 @@ export default function TaskDetail() {
     return offers.find(o => o.id === task.selected_offer_id);
   };
 
-  const handlePaymentClick = async () => {
-    const acceptedOffer = getAcceptedOffer();
-    if (!acceptedOffer) return;
-    setHelperMissingZelle(false);
+  const handlePaymentClick = () => {
     setShowCompletionPhotoDialog(true);
   };
 
@@ -567,8 +561,6 @@ export default function TaskDetail() {
       return;
     }
 
-    const acceptedOffer = getAcceptedOffer();
-    if (!acceptedOffer) return;
 
     setUploadingPhoto(true);
     try {
@@ -587,14 +579,7 @@ export default function TaskDetail() {
         .eq('id', id);
 
       setShowCompletionPhotoDialog(false);
-
-      if (acceptedOffer.price === 0) {
-        setIsReviewOpen(true);
-        return;
-      }
-
-      // Paid task → open Stripe Checkout (10% platform fee added on top)
-      await handleProcessPayment();
+      setIsReviewOpen(true);
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
       toast.error(error.message || 'Error uploading photo');
@@ -603,46 +588,7 @@ export default function TaskDetail() {
     }
   };
 
-  const handleProcessPayment = async () => {
-    const acceptedOffer = getAcceptedOffer();
-    if (!acceptedOffer) {
-      toast.error('No accepted offer found');
-      return;
-    }
 
-    // If it's a volunteer (free) task, skip payment and go straight to review
-    if (acceptedOffer.price === 0) {
-      setIsPaymentDialogOpen(false);
-      setIsReviewOpen(true);
-      return;
-    }
-
-    setProcessingPayment(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-task-payment', {
-        body: {
-          taskId: task!.id,
-          offerId: acceptedOffer.id,
-          amount: acceptedOffer.price,
-          helperName: acceptedOffer.profiles?.full_name || 'Helper',
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error: any) {
-      console.error('Error creating payment:', error);
-      toast.error(error.message || 'Error processing payment');
-    } finally {
-      setProcessingPayment(false);
-      setIsPaymentDialogOpen(false);
-    }
-  };
 
   const handleSubmitReview = async () => {
     if (!task?.selected_offer_id) return;
@@ -1022,25 +968,25 @@ export default function TaskDetail() {
                               The task is currently assigned. Once the work is done, {isVolunteer ? 'mark it as completed' : 'pay the helper and mark it as completed'}.
                             </p>
                             {acceptedOffer && !isVolunteer && (
-                              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                                <span className="text-sm font-medium">Amount to Pay</span>
-                                <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
+                              <div className="flex flex-col gap-2 mb-2">
+                                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                                  <span className="text-sm font-medium">Amount to Pay</span>
+                                  <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
+                                </div>
+                                <Button
+                                  className="w-full bg-[#B22234] hover:bg-[#901c2a]"
+                                  onClick={() => navigate(`/messages?task=${id}&user=${acceptedOffer.helper_id}`)}
+                                >
+                                  💬 Arrange payment in Messages
+                                </Button>
                               </div>
                             )}
                             <Button
-                              className="w-full bg-green-600 hover:bg-green-700"
+                              className="w-full bg-green-600 hover:bg-green-700 mt-2"
                               onClick={handlePaymentClick}
-                              disabled={submitting || processingPayment}
+                              disabled={submitting}
                             >
-                              {processingPayment && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                              {isVolunteer ? (
-                                'Mark as Completed'
-                              ) : (
-                                <>
-                                  <CreditCard className="mr-2 h-4 w-4" />
-                                  Pay & Complete Task
-                                </>
-                              )}
+                              Mark as Completed
                             </Button>
                           </>
                         );
@@ -1156,31 +1102,11 @@ export default function TaskDetail() {
         />
       )}
 
-      {/* Zelle Payment Dialog */}
-      {helperZelleId && (() => {
-        const acceptedOffer = getAcceptedOffer();
-        return (
-          <ZellePayment
-            open={showZellePayment}
-            onOpenChange={setShowZellePayment}
-            zelleId={helperZelleId}
-            amount={acceptedOffer?.price || 0}
-            helperName={acceptedOffer?.profiles?.full_name || 'Helper'}
-            onPaymentDone={() => {
-              setShowZellePayment(false);
-              setIsReviewOpen(true);
-            }}
-          />
-        );
-      })()}
+
 
       {/* Completion Photo Dialog */}
       <Dialog open={showCompletionPhotoDialog} onOpenChange={(open) => {
         setShowCompletionPhotoDialog(open);
-        if (!open) {
-          setHelperMissingZelle(false);
-          setHelperZelleInput('');
-        }
       }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -1242,23 +1168,7 @@ export default function TaskDetail() {
               </div>
             )}
 
-            {/* Zelle ID input if helper is missing it (paid tasks only) */}
-            {helperMissingZelle && (
-              <div className="space-y-2">
-                <Separator />
-                <Label htmlFor="helper-zelle">Helper's Zelle ID</Label>
-                <p className="text-xs text-muted-foreground">
-                  The helper hasn't added their Zelle ID yet. Enter it here so you can pay them.
-                </p>
-                <Input
-                  id="helper-zelle"
-                  type="text"
-                  placeholder="Email or phone number"
-                  value={helperZelleInput}
-                  onChange={(e) => setHelperZelleInput(e.target.value)}
-                />
-              </div>
-            )}
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCompletionPhotoDialog(false)}>
@@ -1266,7 +1176,7 @@ export default function TaskDetail() {
             </Button>
             <Button
               onClick={handleCompletionPhotoSubmit}
-              disabled={!completionPhoto || uploadingPhoto || (helperMissingZelle && !helperZelleInput.trim())}
+              disabled={!completionPhoto || uploadingPhoto}
             >
               {uploadingPhoto && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Continue
