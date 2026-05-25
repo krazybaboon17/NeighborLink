@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { FileText, UserCheck, CreditCard, CheckCircle } from "lucide-react";
+import { FileText, UserCheck, MessageCircle, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -19,16 +19,16 @@ const steps = [
     path: "/tasks"
   },
   {
-    icon: CheckCircle,
-    title: "Choose & Complete",
-    description: "Select a helper based on AI safety scores, reviews, and proximity. Track progress live.",
+    icon: MessageCircle,
+    title: "Chat & Coordinate",
+    description: "Message the helper directly to coordinate timing and arrange payment off-app — your way.",
     step: "3",
-    path: "/my-tasks"
+    path: "/conversations"
   },
   {
-    icon: CreditCard,
-    title: "Pay Securely",
-    description: "Payment is held securely until you confirm completion. 100% satisfaction guaranteed.",
+    icon: CheckCircle,
+    title: "Complete & Review",
+    description: "When the work is done, mark the task complete and leave a review to build community trust.",
     step: "4",
     path: "/my-tasks"
   }
