@@ -167,21 +167,6 @@ export default function TaskDetail() {
     }
   };
 
-  // Handle payment success/cancel from URL params
-  useEffect(() => {
-    const paymentStatus = searchParams.get('payment');
-    const offerId = searchParams.get('offer_id');
-    
-    if (paymentStatus === 'success' && offerId) {
-      toast.success('Payment successful! Now complete the task and rate the helper.');
-      setIsReviewOpen(true);
-      // Clean up URL params
-      navigate(`/task/${id}`, { replace: true });
-    } else if (paymentStatus === 'cancelled') {
-      toast.info('Payment was cancelled');
-      navigate(`/task/${id}`, { replace: true });
-    }
-  }, [searchParams, id, navigate]);
 
   const fetchTask = async () => {
     setLoading(true);
