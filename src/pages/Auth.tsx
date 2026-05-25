@@ -58,14 +58,14 @@ export default function Auth() {
       for (let i = 0; i < 4; i++) {
         const { data } = await supabase
           .from('profiles')
-          .select('age, current_state, zelle_id')
+          .select('age, current_state')
           .eq('id', user.id)
           .maybeSingle();
         if (data) { profile = data; break; }
         await new Promise((r) => setTimeout(r, 400));
       }
 
-      const incomplete = !profile || !profile.age || !profile.current_state || !(profile as any).zelle_id;
+      const incomplete = !profile || !profile.age || !profile.current_state;
       if (incomplete) {
         setNewUserId(user.id);
         setShowOnboarding(true);
@@ -151,11 +151,11 @@ export default function Auth() {
       if (data.user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('age, current_state, zelle_id')
+          .select('age, current_state')
           .eq('id', data.user.id)
           .maybeSingle();
 
-        const incomplete = !profile || !profile.age || !profile.current_state || !(profile as any).zelle_id;
+        const incomplete = !profile || !profile.age || !profile.current_state;
         if (incomplete) {
           setNewUserId(data.user.id);
           setShowOnboarding(true);

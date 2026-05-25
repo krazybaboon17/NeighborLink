@@ -37,6 +37,7 @@ export type Database = {
           content: string
           created_at: string | null
           id: string
+          is_read: boolean
           receiver_id: string
           sender_id: string
           task_id: string
@@ -45,6 +46,7 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          is_read?: boolean
           receiver_id: string
           sender_id: string
           task_id: string
@@ -53,6 +55,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          is_read?: boolean
           receiver_id?: string
           sender_id?: string
           task_id?: string
@@ -119,51 +122,6 @@ export type Database = {
           },
         ]
       }
-      payments: {
-        Row: {
-          amount_helper: number
-          amount_platform_fee: number
-          amount_total: number
-          created_at: string
-          id: string
-          payee_user_id: string
-          payer_user_id: string
-          status: string
-          stripe_payment_intent_id: string | null
-          stripe_transfer_id: string | null
-          task_id: string
-          updated_at: string
-        }
-        Insert: {
-          amount_helper: number
-          amount_platform_fee: number
-          amount_total: number
-          created_at?: string
-          id?: string
-          payee_user_id: string
-          payer_user_id: string
-          status?: string
-          stripe_payment_intent_id?: string | null
-          stripe_transfer_id?: string | null
-          task_id: string
-          updated_at?: string
-        }
-        Update: {
-          amount_helper?: number
-          amount_platform_fee?: number
-          amount_total?: number
-          created_at?: string
-          id?: string
-          payee_user_id?: string
-          payer_user_id?: string
-          status?: string
-          stripe_payment_intent_id?: string | null
-          stripe_transfer_id?: string | null
-          task_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           age: number | null
@@ -179,12 +137,8 @@ export type Database = {
           location: string | null
           rating: number | null
           skills: string[] | null
-          stripe_account_id: string | null
-          stripe_customer_id: string | null
-          stripe_onboarding_complete: boolean
           updated_at: string | null
           verified: boolean | null
-          zelle_id: string | null
         }
         Insert: {
           age?: number | null
@@ -200,12 +154,8 @@ export type Database = {
           location?: string | null
           rating?: number | null
           skills?: string[] | null
-          stripe_account_id?: string | null
-          stripe_customer_id?: string | null
-          stripe_onboarding_complete?: boolean
           updated_at?: string | null
           verified?: boolean | null
-          zelle_id?: string | null
         }
         Update: {
           age?: number | null
@@ -221,12 +171,8 @@ export type Database = {
           location?: string | null
           rating?: number | null
           skills?: string[] | null
-          stripe_account_id?: string | null
-          stripe_customer_id?: string | null
-          stripe_onboarding_complete?: boolean
           updated_at?: string | null
           verified?: boolean | null
-          zelle_id?: string | null
         }
         Relationships: []
       }
@@ -507,10 +453,6 @@ export type Database = {
         Returns: boolean
       }
       check_is_admin: { Args: never; Returns: boolean }
-      get_helper_zelle_id: {
-        Args: { p_helper_id: string; p_task_id: string }
-        Returns: string
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -519,10 +461,6 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
-      set_helper_zelle_id: {
-        Args: { p_helper_id: string; p_task_id: string; p_zelle_id: string }
-        Returns: boolean
-      }
       submit_review: {
         Args: {
           p_comment?: string

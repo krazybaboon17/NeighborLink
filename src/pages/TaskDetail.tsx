@@ -19,7 +19,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Navbar } from '@/components/Navbar';
-import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, CreditCard, Camera, ImageIcon, ShieldCheck, ShieldX, Users, ShieldAlert } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Star, MessageCircle, Loader2, CheckCircle, Camera, ImageIcon, ShieldCheck, Users } from 'lucide-react';
 import { YoungNeighborBadge } from '@/components/YoungNeighborBadge';
 import { UnverifiedBadge } from '@/components/UnverifiedBadge';
 import { format } from 'date-fns';
@@ -167,21 +167,6 @@ export default function TaskDetail() {
     }
   };
 
-  // Handle payment success/cancel from URL params
-  useEffect(() => {
-    const paymentStatus = searchParams.get('payment');
-    const offerId = searchParams.get('offer_id');
-    
-    if (paymentStatus === 'success' && offerId) {
-      toast.success('Payment successful! Now complete the task and rate the helper.');
-      setIsReviewOpen(true);
-      // Clean up URL params
-      navigate(`/task/${id}`, { replace: true });
-    } else if (paymentStatus === 'cancelled') {
-      toast.info('Payment was cancelled');
-      navigate(`/task/${id}`, { replace: true });
-    }
-  }, [searchParams, id, navigate]);
 
   const fetchTask = async () => {
     setLoading(true);
@@ -965,19 +950,23 @@ export default function TaskDetail() {
                         return (
                           <>
                             <p className="text-sm text-muted-foreground">
-                              The task is currently assigned. Once the work is done, {isVolunteer ? 'mark it as completed' : 'pay the helper and mark it as completed'}.
+                              The task is assigned. {isVolunteer ? 'Mark it completed when the work is done.' : 'Coordinate payment with the helper in Messages, then mark it completed.'}
                             </p>
                             {acceptedOffer && !isVolunteer && (
                               <div className="flex flex-col gap-2 mb-2">
                                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                                  <span className="text-sm font-medium">Amount to Pay</span>
+                                  <span className="text-sm font-medium">Agreed Price</span>
                                   <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
+                                </div>
+                                <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground/80">
+                                  💬 Payment is handled off-app — go to Messages to coordinate payment directly with the helper.
                                 </div>
                                 <Button
                                   className="w-full bg-[#B22234] hover:bg-[#901c2a]"
                                   onClick={() => navigate(`/messages?task=${id}&user=${acceptedOffer.helper_id}`)}
                                 >
-                                  💬 Arrange payment in Messages
+                                  <MessageCircle className="mr-2 h-4 w-4" />
+                                  Open Messages
                                 </Button>
                               </div>
                             )}
@@ -986,6 +975,7 @@ export default function TaskDetail() {
                               onClick={handlePaymentClick}
                               disabled={submitting}
                             >
+                              <CheckCircle className="mr-2 h-4 w-4" />
                               Mark as Completed
                             </Button>
                           </>

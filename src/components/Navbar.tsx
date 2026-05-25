@@ -4,7 +4,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Plus, Check, Clock, Shield, Sparkles, ShieldCheck, ShieldX } from "lucide-react";
+import { Menu, X, User, LogOut, Plus, Check, Clock, Shield, Sparkles, ShieldCheck, ShieldX, MessageCircle } from "lucide-react";
 import { UnverifiedBadge } from "@/components/UnverifiedBadge";
 import { YoungNeighborBadge } from "@/components/YoungNeighborBadge";
 import { useState, useEffect } from "react";
@@ -20,45 +20,57 @@ export const Navbar = () => {
   const [profile, setProfile] = useState<any>(null);
   const [hasVolunteerHours, setHasVolunteerHours] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     if (user) {
       fetchProfile();
       checkVolunteerHours();
       checkAdminStatus();
+      fetchUnreadCount();
+
+      const channel = supabase
+        .channel(`nav-unread-${user.id}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` }, () => {
+          fetchUnreadCount();
+        })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
     } else {
       setIsAdmin(false);
+      setUnreadCount(0);
     }
   }, [user]);
+
+  // Refetch unread count when route changes (e.g. user opens messages)
+  useEffect(() => { if (user) fetchUnreadCount(); }, [location.pathname, user]);
+
+  const fetchUnreadCount = async () => {
+    if (!user) return;
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', user.id)
+      .eq('is_read', false);
+    setUnreadCount(count || 0);
+  };
 
   const checkAdminStatus = async () => {
     try {
       const { data, error } = await supabase.rpc('check_is_admin');
       if (error) throw error;
       setIsAdmin(data === true);
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      setIsAdmin(false);
-    }
+    } catch { setIsAdmin(false); }
   };
 
   const fetchProfile = async () => {
     try {
       const { data } = await supabase.from('profiles').select('*').eq('id', user?.id).single();
       setProfile(data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
+    } catch (error) { console.error('Error fetching profile:', error); }
   };
 
   const checkVolunteerHours = async () => {
@@ -68,31 +80,26 @@ export const Navbar = () => {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user?.id);
       if (!error && count && count > 0) setHasVolunteerHours(true);
-    } catch (error) {
-      console.error('Error checking volunteer hours:', error);
-    }
+    } catch (error) { console.error('Error checking volunteer hours:', error); }
   };
 
-  const NavLink = ({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) => {
+  const NavLink = ({ href, children, onClick, badge }: { href: string; children: React.ReactNode; onClick?: () => void; badge?: number }) => {
     const isActive = location.pathname === href;
-    const isExternal = href.startsWith('#');
-
     const className = cn(
-      "text-sm font-medium transition-colors relative py-1",
+      "text-sm font-medium transition-colors relative py-1 inline-flex items-center gap-1.5",
       isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
-      "block md:inline-block py-2 md:py-0"
+      "md:inline-flex py-2 md:py-0"
     );
-
-    if (isExternal) return <a href={href} className={className} onClick={onClick}>{children}</a>;
-
     return (
       <Link to={href} className={className} onClick={onClick}>
         {children}
+        {badge !== undefined && badge > 0 && (
+          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#B22234] text-white text-[10px] font-bold leading-none">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
         {isActive && (
-          <motion.div
-            className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full hidden md:block"
-            layoutId="nav-indicator"
-          />
+          <motion.div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full hidden md:block" layoutId="nav-indicator" />
         )}
       </Link>
     );
@@ -104,6 +111,7 @@ export const Navbar = () => {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         "bg-background/90 backdrop-blur-[10px] border-b border-primary/10"
       )}
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
@@ -114,36 +122,29 @@ export const Navbar = () => {
             <Logo size="sm" />
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <NavLink href="/tasks">Browse Tasks</NavLink>
             <NavLink href="/my-tasks">My Tasks</NavLink>
             {hasVolunteerHours && (
               <NavLink href="/service-hours">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  Service Hours
-                </span>
+                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Service Hours</span>
               </NavLink>
             )}
             {isAdmin && (
               <NavLink href="/admin/verifications">
-                <span className="flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5" />
-                  Admin
-                </span>
+                <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Admin</span>
               </NavLink>
             )}
-            <NavLink href="/conversations">Messages</NavLink>
+            <NavLink href="/conversations" badge={unreadCount}>
+              <span className="flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" /> Messages</span>
+            </NavLink>
           </div>
 
-          {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
                 <Button variant="default" size="sm" onClick={() => navigate('/post-task')} className="gap-1.5">
-                  <Plus className="w-4 h-4" />
-                  Post Task
+                  <Plus className="w-4 h-4" /> Post Task
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -169,25 +170,16 @@ export const Navbar = () => {
                         <p className="text-sm font-medium">{profile?.full_name}</p>
                         <p className="text-xs text-muted-foreground">{user.email}</p>
                         <div className="mt-1">
-                          {!profile?.verified ? (
-                            <UnverifiedBadge size="sm" />
-                          ) : profile?.is_young_neighbor ? (
-                            <YoungNeighborBadge size="sm" />
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-xs text-green-600">
-                              <ShieldCheck className="w-3 h-3" />
-                              Verified
-                            </span>
-                          )}
+                          {!profile?.verified ? <UnverifiedBadge size="sm" />
+                            : profile?.is_young_neighbor ? <YoungNeighborBadge size="sm" />
+                            : <span className="inline-flex items-center gap-1 text-xs text-green-600"><ShieldCheck className="w-3 h-3" /> Verified</span>}
                         </div>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
                       <User className="mr-2 h-4 w-4" /> My Profile
-                      {!profile?.verified && (
-                        <ShieldX className="ml-auto h-3.5 w-3.5 text-amber-500" />
-                      )}
+                      {!profile?.verified && <ShieldX className="ml-auto h-3.5 w-3.5 text-amber-500" />}
                     </DropdownMenuItem>
                     {hasVolunteerHours && (
                       <DropdownMenuItem onClick={() => navigate('/service-hours')}>
@@ -204,25 +196,24 @@ export const Navbar = () => {
             ) : (
               <>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/auth')} className="rounded-full">Sign In</Button>
-                <Button size="sm" onClick={() => navigate('/auth')} className="rounded-full px-6">
-                  Get Started
-                </Button>
+                <Button size="sm" onClick={() => navigate('/auth')} className="rounded-full px-6">Get Started</Button>
               </>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <motion.button
-            className="md:hidden p-2 rounded-xl hover:bg-muted transition-colors"
+            className="md:hidden p-2 rounded-xl hover:bg-muted transition-colors relative"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
             whileTap={{ scale: 0.9 }}
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {!isOpen && unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#B22234]" />
+            )}
           </motion.button>
         </div>
 
-        {/* Mobile Menu */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -239,7 +230,9 @@ export const Navbar = () => {
                   <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Service Hours</span>
                 </NavLink>
               )}
-              <NavLink href="/conversations" onClick={() => setIsOpen(false)}>Messages</NavLink>
+              <NavLink href="/conversations" onClick={() => setIsOpen(false)} badge={unreadCount}>
+                <span className="flex items-center gap-1.5"><MessageCircle className="w-4 h-4" /> Messages</span>
+              </NavLink>
               {isAdmin && (
                 <NavLink href="/admin/verifications" onClick={() => setIsOpen(false)}>
                   <span className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> Admin</span>

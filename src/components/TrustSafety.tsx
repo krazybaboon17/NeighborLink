@@ -1,15 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, UserCheck, Star, Lock, Phone, Award } from "lucide-react";
+import { Shield, UserCheck, Star, MessageCircle, Phone, Award } from "lucide-react";
 import { motion } from "framer-motion";
 
 const features = [
   { icon: Shield, title: "Background Checks", description: "All helpers undergo comprehensive background verification before joining.", badge: "Required" },
   { icon: UserCheck, title: "Identity Verification", description: "Government ID + selfie verification ensures you know exactly who's helping.", badge: "Verified" },
   { icon: Star, title: "AI Safety Scores", description: "AI-powered risk analysis reviews helper profiles and flags concerns automatically.", badge: "AI-Powered" },
-  { icon: Lock, title: "Secure Payments", description: "Payment held in escrow until task completion. Your money is always protected.", badge: "Protected" },
+  { icon: MessageCircle, title: "Direct Messaging", description: "Coordinate tasks and payment directly with your neighbor — your way, no middleman.", badge: "Flexible" },
   { icon: Phone, title: "In-App Messaging", description: "Communicate safely without sharing personal phone numbers or emails.", badge: "Private" },
-  { icon: Award, title: "Quality Guarantee", description: "Not satisfied? We'll make it right. 100% satisfaction guaranteed on every task.", badge: "Guaranteed" },
+  { icon: Award, title: "Community Reviews", description: "Real reviews from real neighbors help you choose with confidence every time.", badge: "Trusted" },
 ];
 
 const containerVariants = {

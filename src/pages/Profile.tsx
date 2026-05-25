@@ -51,7 +51,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, zelle_id, verified, age').eq('id', user!.id).single();
+      const { data, error } = await supabase.from('profiles').select('full_name, avatar_url, rating, completed_tasks, is_young_neighbor, bio, skills, verified, age').eq('id', user!.id).single();
       if (error) throw error;
       setFullName(data?.full_name || '');
       setAvatarUrl(data?.avatar_url || null);
