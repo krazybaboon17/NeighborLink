@@ -16,11 +16,11 @@ export default function Privacy() {
               <h2 className="text-xl font-semibold">1. What we collect</h2>
               <p>
                 When you sign up we collect your name, email, age, optional
-                location, profile photo, bio, and the Zelle handle you choose to
-                share. When you post a task or send a message we store that content
-                so the other party can see it. When you use face verification, the
-                video frames are processed in memory and immediately discarded —
-                we never persist them to disk or cloud storage.
+                location, profile photo, and bio. When you post a task or send a
+                message we store that content so the other party can see it. When
+                you use face verification, the video frames are processed in
+                memory and immediately discarded — we never persist them to disk
+                or cloud storage.
               </p>
             </section>
 
@@ -28,9 +28,10 @@ export default function Privacy() {
               <h2 className="text-xl font-semibold">2. What we don't collect</h2>
               <p>
                 We don't sell your data. We don't run third-party advertising
-                trackers. We don't store payment card numbers (Zelle is sent
-                directly between users via their banks). We don't store the camera
-                frames used for age verification.
+                trackers. We don't collect or store any payment information —
+                payments are arranged and sent directly between users off-app,
+                outside of TaskIt!. We don't store the camera frames used for age
+                verification.
               </p>
             </section>
 
@@ -48,7 +49,7 @@ export default function Privacy() {
               <h2 className="text-xl font-semibold">4. Who can see your info</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Your name, photo, bio, and skills are visible on your public profile.</li>
-                <li>Your age, location, and Zelle handle are protected — only revealed when an offer you've sent is accepted.</li>
+                <li>Your age and location are protected — only revealed when an offer you've sent is accepted.</li>
                 <li>Direct messages are only visible to the sender and the recipient.</li>
                 <li>Verification photos are visible only to platform admins for review.</li>
               </ul>
@@ -77,9 +78,8 @@ export default function Privacy() {
               <h2 className="text-xl font-semibold">7. Security</h2>
               <p>
                 Sensitive fields are protected by row-level security and accessed
-                only through audited stored procedures. We never expose Zelle
-                handles to anonymous browsers. Passwords are hashed by our
-                authentication provider.
+                only through audited stored procedures. Passwords are hashed by
+                our authentication provider.
               </p>
             </section>
 

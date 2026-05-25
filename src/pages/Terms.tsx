@@ -44,12 +44,14 @@ export default function Terms() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold">4. Payments (Zelle)</h2>
+              <h2 className="text-xl font-semibold">4. Payments (Off-App)</h2>
               <p>
-                Payments are made directly between users via Zelle. TaskIt! does
-                not process or hold funds. A 10% platform fee may be requested
-                separately. You are responsible for verifying the recipient's Zelle ID
-                before sending money. Zelle transfers are typically irreversible.
+                TaskIt! does not process, hold, or facilitate payments. Payment is
+                handled entirely off-app — users coordinate and arrange payment
+                directly with each other through Messages using whatever method
+                they agree on (cash, Venmo, Zelle, etc.). You are solely
+                responsible for verifying who you are paying and for the security
+                of your transfers.
               </p>
             </section>
 
@@ -98,9 +100,8 @@ export default function Terms() {
               <h2 className="text-xl font-semibold">9. Privacy</h2>
               <p>
                 Camera frames used for face verification are processed in-memory and
-                never stored. Personal information (Zelle ID, age, location) is
-                protected by access controls and only shared as necessary to complete
-                a task.
+                never stored. Personal information (age, location) is protected by
+                access controls and only shared as necessary to complete a task.
               </p>
             </section>
 
