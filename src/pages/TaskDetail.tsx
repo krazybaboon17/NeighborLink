@@ -546,7 +546,6 @@ export default function TaskDetail() {
       return;
     }
 
-
     setUploadingPhoto(true);
     try {
       const fileExt = completionPhoto.name.split('.').pop();
@@ -558,18 +557,40 @@ export default function TaskDetail() {
 
       if (uploadError) throw uploadError;
 
-      await supabase
+      // Helper submits for review: store photo + flip status to pending_review
+      const { error: updErr } = await supabase
         .from('tasks')
-        .update({ completion_photo_url: filePath } as any)
+        .update({ completion_photo_url: filePath, status: 'pending_review' } as any)
         .eq('id', id);
 
+      if (updErr) throw updErr;
+
+      toast.success('Submitted for the poster\'s approval!');
       setShowCompletionPhotoDialog(false);
-      setIsReviewOpen(true);
+      setCompletionPhoto(null);
+      setCompletionPhotoPreview(null);
+      fetchTask();
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
       toast.error(error.message || 'Error uploading photo');
     } finally {
       setUploadingPhoto(false);
+    }
+  };
+
+  const handleRequestChanges = async () => {
+    if (!id) return;
+    if (!window.confirm('Send this task back to the helper for changes?')) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('tasks').update({ status: 'assigned' } as any).eq('id', id);
+      if (error) throw error;
+      toast.success('Changes requested — helper has been notified.');
+      fetchTask();
+    } catch (err: any) {
+      toast.error(err.message || 'Error requesting changes');
+    } finally {
+      setSubmitting(false);
     }
   };
 
