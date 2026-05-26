@@ -1267,3 +1267,25 @@ export default function TaskDetail() {
     </>
   );
 }
+
+function CompletionPhotoPreview({ path }: { path: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.storage
+        .from('completion-photos')
+        .createSignedUrl(path, 60 * 60);
+      if (!cancelled) setUrl(data?.signedUrl || null);
+    })();
+    return () => { cancelled = true; };
+  }, [path]);
+  if (!url) return null;
+  return (
+    <img
+      src={url}
+      alt="Completion proof"
+      className="w-full max-h-64 object-cover rounded-lg border"
+    />
+  );
+}
