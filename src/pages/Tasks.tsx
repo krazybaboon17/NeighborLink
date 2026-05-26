@@ -229,10 +229,18 @@ export default function Tasks() {
     <>
       <Helmet>
         <title>Browse Tasks — TaskIt!</title>
-        <meta
-          name="description"
-          content="Find local tasks to help with in Arlington Heights and Buffalo Grove. Pet care, lawn care, moving help, errands and more."
-        />
+        <meta name="description" content="Find local tasks in Arlington Heights and Buffalo Grove: pet care, lawn care, moving help, errands and more." />
+        <link rel="canonical" href="https://myneighborlink.lovable.app/tasks" />
+        <meta property="og:title" content="Browse Tasks — TaskIt!" />
+        <meta property="og:description" content="Find local tasks in Arlington Heights and Buffalo Grove: pet care, lawn care, moving help, errands and more." />
+        <meta property="og:url" content="https://myneighborlink.lovable.app/tasks" />
+        <meta property="og:type" content="website" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Browse Tasks",
+          url: "https://myneighborlink.lovable.app/tasks",
+        })}</script>
       </Helmet>
       <Navbar />
       <DecorativeCircles />
