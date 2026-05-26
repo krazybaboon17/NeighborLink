@@ -1058,23 +1058,63 @@ export default function TaskDetail() {
                 </Card>
               )}
 
-              {hasUserOffered && !isTaskOwner && (
-                <Card className="sticky top-24">
-                  <CardHeader>
-                    <CardTitle>Offer Submitted</CardTitle>
-                    <CardDescription>
-                      Your offer has been submitted
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {task.status === 'assigned'
-                        ? "The owner will pay you once the task has been completed."
-                        : "The task owner will review your offer and get back to you."}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+              {hasUserOffered && !isTaskOwner && (() => {
+                const myOffer = offers.find(o => o.helper_id === user?.id);
+                const isMyAccepted = myOffer?.status === 'accepted' && task.selected_offer_id === myOffer?.id;
+                return (
+                  <Card className="sticky top-24">
+                    <CardHeader>
+                      <CardTitle>
+                        {isMyAccepted ? 'You\'re assigned!' : 'Offer Submitted'}
+                      </CardTitle>
+                      <CardDescription>
+                        {isMyAccepted ? 'Get the work done, then submit for the poster\'s approval.' : 'Your offer has been submitted'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {!isMyAccepted && (
+                        <p className="text-sm text-muted-foreground">
+                          {task.status === 'open'
+                            ? 'The task owner will review your offer and get back to you.'
+                            : 'This task has been assigned to another helper.'}
+                        </p>
+                      )}
+
+                      {isMyAccepted && task.status === 'assigned' && (
+                        <>
+                          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground/80">
+                            💬 Coordinate payment with the poster in Messages, then submit photo proof.
+                          </div>
+                          <Button
+                            className="w-full bg-[#B22234] hover:bg-[#901c2a]"
+                            onClick={() => navigate(`/messages?task=${id}&user=${task.user_id}`)}
+                          >
+                            <MessageCircle className="mr-2 h-4 w-4" /> Open Messages
+                          </Button>
+                          <Button
+                            className="w-full bg-green-600 hover:bg-green-700"
+                            onClick={() => setShowCompletionPhotoDialog(true)}
+                          >
+                            <Camera className="mr-2 h-4 w-4" /> Submit for Completion
+                          </Button>
+                        </>
+                      )}
+
+                      {isMyAccepted && task.status === 'pending_review' && (
+                        <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg text-sm text-amber-700">
+                          ⏳ Waiting for the poster to approve and leave a review.
+                        </div>
+                      )}
+
+                      {isMyAccepted && task.status === 'completed' && (
+                        <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" /> Task complete!
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </div>
           </div>
         </div>
