@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/ui/Logo";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -146,6 +147,7 @@ export const Navbar = () => {
                 <Button variant="default" size="sm" onClick={() => navigate('/post-task')} className="gap-1.5">
                   <Plus className="w-4 h-4" /> Post Task
                 </Button>
+                <NotificationBell />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
