@@ -1,10 +1,16 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEO } from "@/components/SEO";
 
 export default function Privacy() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="Privacy Policy — TaskIt!"
+        description="How TaskIt! handles your data, including face verification frames that are processed in-memory and never stored."
+        path="/privacy"
+      />
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-4xl font-bold mb-2 text-foreground">Privacy Policy</h1>

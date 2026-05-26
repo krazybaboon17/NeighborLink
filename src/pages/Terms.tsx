@@ -1,10 +1,16 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEO } from "@/components/SEO";
 
 export default function Terms() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="Terms of Service — TaskIt!"
+        description="Read the TaskIt! terms of service for the Arlington Heights and Buffalo Grove neighborhood task marketplace."
+        path="/terms"
+      />
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-4xl font-bold mb-2 text-foreground">Terms of Service</h1>

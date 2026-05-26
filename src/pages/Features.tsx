@@ -1,5 +1,6 @@
 import React from "react";
 import { Navbar } from "@/components/Navbar";
+import { SEO } from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -114,6 +115,11 @@ export default function Features() {
 
   return (
     <div className="min-h-screen bg-transparent">
+      <SEO
+        title="Features — How TaskIt! Works"
+        description="See how TaskIt! connects neighbors: post tasks, get offers, verified helpers, off-app payments, and trust & safety tools."
+        path="/features"
+      />
       <Navbar />
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto space-y-16">
