@@ -964,45 +964,73 @@ export default function TaskDetail() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {task.status === 'assigned' ? (
-                      (() => {
-                        const acceptedOffer = getAcceptedOffer();
-                        const isVolunteer = acceptedOffer?.price === 0;
-                        return (
-                          <>
-                            <p className="text-sm text-muted-foreground">
-                              The task is assigned. {isVolunteer ? 'Mark it completed when the work is done.' : 'Coordinate payment with the helper in Messages, then mark it completed.'}
-                            </p>
-                            {acceptedOffer && !isVolunteer && (
-                              <div className="flex flex-col gap-2 mb-2">
-                                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                                  <span className="text-sm font-medium">Agreed Price</span>
-                                  <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
-                                </div>
-                                <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground/80">
-                                  💬 Payment is handled off-app — go to Messages to coordinate payment directly with the helper.
-                                </div>
-                                <Button
-                                  className="w-full bg-[#B22234] hover:bg-[#901c2a]"
-                                  onClick={() => navigate(`/messages?task=${id}&user=${acceptedOffer.helper_id}`)}
-                                >
-                                  <MessageCircle className="mr-2 h-4 w-4" />
-                                  Open Messages
-                                </Button>
+                    {task.status === 'assigned' && (() => {
+                      const acceptedOffer = getAcceptedOffer();
+                      const isVolunteer = acceptedOffer?.price === 0;
+                      return (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            The task is assigned. {isVolunteer ? 'The helper will submit photo proof when done.' : 'Coordinate payment with the helper in Messages. The helper will submit photo proof when done.'}
+                          </p>
+                          {acceptedOffer && !isVolunteer && (
+                            <div className="flex flex-col gap-2 mb-2">
+                              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                                <span className="text-sm font-medium">Agreed Price</span>
+                                <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
                               </div>
-                            )}
-                            <Button
-                              className="w-full bg-green-600 hover:bg-green-700 mt-2"
-                              onClick={handlePaymentClick}
-                              disabled={submitting}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Mark as Completed
-                            </Button>
-                          </>
-                        );
-                      })()
-                    ) : (
+                              <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground/80">
+                                💬 Payment is handled off-app — coordinate directly in Messages.
+                              </div>
+                              <Button
+                                className="w-full bg-[#B22234] hover:bg-[#901c2a]"
+                                onClick={() => navigate(`/messages?task=${id}&user=${acceptedOffer.helper_id}`)}
+                              >
+                                <MessageCircle className="mr-2 h-4 w-4" />
+                                Open Messages
+                              </Button>
+                            </div>
+                          )}
+                          <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg text-xs text-amber-700">
+                            ⏳ Waiting for the helper to submit the task for review.
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {task.status === 'pending_review' && (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          The helper submitted this task for your approval. Review the photo proof and leave a rating.
+                        </p>
+                        {task.completion_photo_url && (
+                          <CompletionPhotoPreview path={task.completion_photo_url as any} />
+                        )}
+                        <Button
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          onClick={() => setIsReviewOpen(true)}
+                          disabled={submitting}
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Approve & Review
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleRequestChanges}
+                          disabled={submitting}
+                        >
+                          Request Changes
+                        </Button>
+                      </>
+                    )}
+
+                    {task.status === 'completed' && (
+                      <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" /> Task complete. Thanks for using TaskIt!
+                      </div>
+                    )}
+
+                    {task.status === 'open' && (
                       <>
                         <p className="text-sm text-muted-foreground">
                           Review offers from helpers and accept the best one for your task.
