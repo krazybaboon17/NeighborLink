@@ -1120,52 +1120,18 @@ export default function TaskDetail() {
         </div>
       </div>
 
-      <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Complete Task & Rate Helper</DialogTitle>
-            <DialogDescription>
-              Please rate your experience with the helper. This helps build trust in the community.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Rating</Label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    className="focus:outline-none"
-                  >
-                    <Star
-                      className={`w-8 h-8 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                        }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="review">Comment</Label>
-              <Textarea
-                id="review"
-                placeholder="How was the work?"
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsReviewOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmitReview} disabled={submitting}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Submit Review
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ReviewDialog
+        open={isReviewOpen}
+        onOpenChange={setIsReviewOpen}
+        title="Approve & Rate Helper"
+        description="This approves the task as complete and saves your rating."
+        submitting={submitting}
+        onSubmit={async (r, c) => {
+          setRating(r);
+          setReviewComment(c);
+          await handleSubmitReview(r, c);
+        }}
+      />
 
 
       {/* Safety Warning Dialog */}
