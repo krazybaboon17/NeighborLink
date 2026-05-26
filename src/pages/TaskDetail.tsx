@@ -32,6 +32,7 @@ import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { ReportTaskDialog } from '@/components/ReportTaskDialog';
+import { ReviewDialog } from '@/components/ReviewDialog';
 
 interface Task {
   id: string;
@@ -597,7 +598,7 @@ export default function TaskDetail() {
 
 
 
-  const handleSubmitReview = async () => {
+  const handleSubmitReview = async (rOverride?: number, cOverride?: string) => {
     if (!task?.selected_offer_id) return;
 
     setSubmitting(true);
