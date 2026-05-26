@@ -46,6 +46,7 @@ interface Task {
   due_date: string | null;
   user_id: string;
   selected_offer_id: string | null;
+  completion_photo_url?: string | null;
   profiles: {
     full_name: string;
     avatar_url: string | null;
