@@ -33,6 +33,7 @@ import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { ReportTaskDialog } from '@/components/ReportTaskDialog';
 import { ReviewDialog } from '@/components/ReviewDialog';
+import { SEO } from '@/components/SEO';
 
 interface Task {
   id: string;
@@ -648,6 +649,21 @@ export default function TaskDetail() {
 
   return (
     <>
+      <SEO
+        title={`${task.title} — TaskIt!`}
+        description={(task.description || `${task.category} task in ${task.location}`).slice(0, 155)}
+        path={`/tasks/${task.id}`}
+        type="article"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: task.title,
+          description: task.description,
+          areaServed: task.location,
+          category: task.category,
+          provider: { "@type": "Organization", name: "TaskIt!" },
+        }}
+      />
       <Navbar />
       <DecorativeCircles />
       <div className="min-h-screen bg-background pt-28 pb-20">

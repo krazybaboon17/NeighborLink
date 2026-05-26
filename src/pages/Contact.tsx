@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +47,11 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col">
+      <SEO
+        title="Contact TaskIt! — Join the Mailing List"
+        description="Get in touch with the TaskIt! team and subscribe to updates on new features in Arlington Heights and Buffalo Grove."
+        path="/contact"
+      />
       <Navbar />
       <main className="flex-1 flex items-center justify-center px-4 py-20">
         <motion.div
