@@ -32,6 +32,7 @@ import { SafetyWarningDialog } from '@/components/SafetyWarningDialog';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { ReportTaskDialog } from '@/components/ReportTaskDialog';
+import { ReviewDialog } from '@/components/ReviewDialog';
 
 interface Task {
   id: string;
@@ -46,6 +47,7 @@ interface Task {
   due_date: string | null;
   user_id: string;
   selected_offer_id: string | null;
+  completion_photo_url?: string | null;
   profiles: {
     full_name: string;
     avatar_url: string | null;
@@ -546,7 +548,6 @@ export default function TaskDetail() {
       return;
     }
 
-
     setUploadingPhoto(true);
     try {
       const fileExt = completionPhoto.name.split('.').pop();
@@ -558,13 +559,19 @@ export default function TaskDetail() {
 
       if (uploadError) throw uploadError;
 
-      await supabase
+      // Helper submits for review: store photo + flip status to pending_review
+      const { error: updErr } = await supabase
         .from('tasks')
-        .update({ completion_photo_url: filePath } as any)
+        .update({ completion_photo_url: filePath, status: 'pending_review' } as any)
         .eq('id', id);
 
+      if (updErr) throw updErr;
+
+      toast.success('Submitted for the poster\'s approval!');
       setShowCompletionPhotoDialog(false);
-      setIsReviewOpen(true);
+      setCompletionPhoto(null);
+      setCompletionPhotoPreview(null);
+      fetchTask();
     } catch (error: any) {
       console.error('Error uploading completion photo:', error);
       toast.error(error.message || 'Error uploading photo');
@@ -573,9 +580,25 @@ export default function TaskDetail() {
     }
   };
 
+  const handleRequestChanges = async () => {
+    if (!id) return;
+    if (!window.confirm('Send this task back to the helper for changes?')) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('tasks').update({ status: 'assigned' } as any).eq('id', id);
+      if (error) throw error;
+      toast.success('Changes requested — helper has been notified.');
+      fetchTask();
+    } catch (err: any) {
+      toast.error(err.message || 'Error requesting changes');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
 
-  const handleSubmitReview = async () => {
+
+  const handleSubmitReview = async (rOverride?: number, cOverride?: string) => {
     if (!task?.selected_offer_id) return;
 
     setSubmitting(true);
@@ -590,8 +613,8 @@ export default function TaskDetail() {
       const { error } = await supabase.rpc('submit_review', {
         p_task_id: task.id,
         p_helper_id: helperId,
-        p_rating: rating,
-        p_comment: reviewComment
+        p_rating: rOverride ?? rating,
+        p_comment: cOverride ?? reviewComment
       });
 
       if (error) throw error;
@@ -943,45 +966,73 @@ export default function TaskDetail() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {task.status === 'assigned' ? (
-                      (() => {
-                        const acceptedOffer = getAcceptedOffer();
-                        const isVolunteer = acceptedOffer?.price === 0;
-                        return (
-                          <>
-                            <p className="text-sm text-muted-foreground">
-                              The task is assigned. {isVolunteer ? 'Mark it completed when the work is done.' : 'Coordinate payment with the helper in Messages, then mark it completed.'}
-                            </p>
-                            {acceptedOffer && !isVolunteer && (
-                              <div className="flex flex-col gap-2 mb-2">
-                                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                                  <span className="text-sm font-medium">Agreed Price</span>
-                                  <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
-                                </div>
-                                <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground/80">
-                                  💬 Payment is handled off-app — go to Messages to coordinate payment directly with the helper.
-                                </div>
-                                <Button
-                                  className="w-full bg-[#B22234] hover:bg-[#901c2a]"
-                                  onClick={() => navigate(`/messages?task=${id}&user=${acceptedOffer.helper_id}`)}
-                                >
-                                  <MessageCircle className="mr-2 h-4 w-4" />
-                                  Open Messages
-                                </Button>
+                    {task.status === 'assigned' && (() => {
+                      const acceptedOffer = getAcceptedOffer();
+                      const isVolunteer = acceptedOffer?.price === 0;
+                      return (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            The task is assigned. {isVolunteer ? 'The helper will submit photo proof when done.' : 'Coordinate payment with the helper in Messages. The helper will submit photo proof when done.'}
+                          </p>
+                          {acceptedOffer && !isVolunteer && (
+                            <div className="flex flex-col gap-2 mb-2">
+                              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                                <span className="text-sm font-medium">Agreed Price</span>
+                                <span className="text-xl font-bold text-accent">${acceptedOffer.price}</span>
                               </div>
-                            )}
-                            <Button
-                              className="w-full bg-green-600 hover:bg-green-700 mt-2"
-                              onClick={handlePaymentClick}
-                              disabled={submitting}
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Mark as Completed
-                            </Button>
-                          </>
-                        );
-                      })()
-                    ) : (
+                              <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground/80">
+                                💬 Payment is handled off-app — coordinate directly in Messages.
+                              </div>
+                              <Button
+                                className="w-full bg-[#B22234] hover:bg-[#901c2a]"
+                                onClick={() => navigate(`/messages?task=${id}&user=${acceptedOffer.helper_id}`)}
+                              >
+                                <MessageCircle className="mr-2 h-4 w-4" />
+                                Open Messages
+                              </Button>
+                            </div>
+                          )}
+                          <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg text-xs text-amber-700">
+                            ⏳ Waiting for the helper to submit the task for review.
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {task.status === 'pending_review' && (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          The helper submitted this task for your approval. Review the photo proof and leave a rating.
+                        </p>
+                        {task.completion_photo_url && (
+                          <CompletionPhotoPreview path={task.completion_photo_url as any} />
+                        )}
+                        <Button
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          onClick={() => setIsReviewOpen(true)}
+                          disabled={submitting}
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Approve & Review
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleRequestChanges}
+                          disabled={submitting}
+                        >
+                          Request Changes
+                        </Button>
+                      </>
+                    )}
+
+                    {task.status === 'completed' && (
+                      <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" /> Task complete. Thanks for using TaskIt!
+                      </div>
+                    )}
+
+                    {task.status === 'open' && (
                       <>
                         <p className="text-sm text-muted-foreground">
                           Review offers from helpers and accept the best one for your task.
@@ -1008,74 +1059,80 @@ export default function TaskDetail() {
                 </Card>
               )}
 
-              {hasUserOffered && !isTaskOwner && (
-                <Card className="sticky top-24">
-                  <CardHeader>
-                    <CardTitle>Offer Submitted</CardTitle>
-                    <CardDescription>
-                      Your offer has been submitted
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {task.status === 'assigned'
-                        ? "The owner will pay you once the task has been completed."
-                        : "The task owner will review your offer and get back to you."}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+              {hasUserOffered && !isTaskOwner && (() => {
+                const myOffer = offers.find(o => o.helper_id === user?.id);
+                const isMyAccepted = myOffer?.status === 'accepted' && task.selected_offer_id === myOffer?.id;
+                return (
+                  <Card className="sticky top-24">
+                    <CardHeader>
+                      <CardTitle>
+                        {isMyAccepted ? 'You\'re assigned!' : 'Offer Submitted'}
+                      </CardTitle>
+                      <CardDescription>
+                        {isMyAccepted ? 'Get the work done, then submit for the poster\'s approval.' : 'Your offer has been submitted'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {!isMyAccepted && (
+                        <p className="text-sm text-muted-foreground">
+                          {task.status === 'open'
+                            ? 'The task owner will review your offer and get back to you.'
+                            : 'This task has been assigned to another helper.'}
+                        </p>
+                      )}
+
+                      {isMyAccepted && task.status === 'assigned' && (
+                        <>
+                          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground/80">
+                            💬 Coordinate payment with the poster in Messages, then submit photo proof.
+                          </div>
+                          <Button
+                            className="w-full bg-[#B22234] hover:bg-[#901c2a]"
+                            onClick={() => navigate(`/messages?task=${id}&user=${task.user_id}`)}
+                          >
+                            <MessageCircle className="mr-2 h-4 w-4" /> Open Messages
+                          </Button>
+                          <Button
+                            className="w-full bg-green-600 hover:bg-green-700"
+                            onClick={() => setShowCompletionPhotoDialog(true)}
+                          >
+                            <Camera className="mr-2 h-4 w-4" /> Submit for Completion
+                          </Button>
+                        </>
+                      )}
+
+                      {isMyAccepted && task.status === 'pending_review' && (
+                        <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg text-sm text-amber-700">
+                          ⏳ Waiting for the poster to approve and leave a review.
+                        </div>
+                      )}
+
+                      {isMyAccepted && task.status === 'completed' && (
+                        <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" /> Task complete!
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </div>
           </div>
         </div>
       </div>
 
-      <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Complete Task & Rate Helper</DialogTitle>
-            <DialogDescription>
-              Please rate your experience with the helper. This helps build trust in the community.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Rating</Label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    className="focus:outline-none"
-                  >
-                    <Star
-                      className={`w-8 h-8 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                        }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="review">Comment</Label>
-              <Textarea
-                id="review"
-                placeholder="How was the work?"
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsReviewOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmitReview} disabled={submitting}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Submit Review
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ReviewDialog
+        open={isReviewOpen}
+        onOpenChange={setIsReviewOpen}
+        title="Approve & Rate Helper"
+        description="This approves the task as complete and saves your rating."
+        submitting={submitting}
+        onSubmit={async (r, c) => {
+          setRating(r);
+          setReviewComment(c);
+          await handleSubmitReview(r, c);
+        }}
+      />
 
 
       {/* Safety Warning Dialog */}
@@ -1175,5 +1232,27 @@ export default function TaskDetail() {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function CompletionPhotoPreview({ path }: { path: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.storage
+        .from('completion-photos')
+        .createSignedUrl(path, 60 * 60);
+      if (!cancelled) setUrl(data?.signedUrl || null);
+    })();
+    return () => { cancelled = true; };
+  }, [path]);
+  if (!url) return null;
+  return (
+    <img
+      src={url}
+      alt="Completion proof"
+      className="w-full max-h-64 object-cover rounded-lg border"
+    />
   );
 }
