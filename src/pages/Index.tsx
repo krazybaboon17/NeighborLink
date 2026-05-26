@@ -8,10 +8,27 @@ import { TrustSafety } from "@/components/TrustSafety";
 import { CTASection } from "@/components/CTASection";
 import { MailingListSection } from "@/components/MailingListSection";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="TaskIt! — Local Help in Arlington Heights & Buffalo Grove"
+        description="Hyperlocal task marketplace connecting Arlington Heights and Buffalo Grove neighbors for lawn care, errands, moving help, pet care and more."
+        path="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "TaskIt!",
+          url: "https://myneighborlink.lovable.app",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://myneighborlink.lovable.app/tasks?q={query}",
+            "query-input": "required name=query",
+          },
+        }}
+      />
       <Navbar />
       <main className="pt-20">
         <ScrollReveal>
