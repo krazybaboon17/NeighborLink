@@ -613,8 +613,8 @@ export default function TaskDetail() {
       const { error } = await supabase.rpc('submit_review', {
         p_task_id: task.id,
         p_helper_id: helperId,
-        p_rating: rating,
-        p_comment: reviewComment
+        p_rating: rOverride ?? rating,
+        p_comment: cOverride ?? reviewComment
       });
 
       if (error) throw error;
