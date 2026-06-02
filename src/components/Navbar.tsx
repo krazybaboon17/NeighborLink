@@ -132,7 +132,7 @@ export const Navbar = () => {
               </NavLink>
             )}
             {isAdmin && (
-              <NavLink href="/admin/verifications">
+              <NavLink href="/admin/tasks">
                 <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Admin</span>
               </NavLink>
             )}
