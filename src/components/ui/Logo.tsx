@@ -90,7 +90,7 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
       {showText && (
         <span className={`${textClass} font-bold tracking-tight`}>
           <span className="text-foreground">Task</span>
-          <span className="text-primary">It!</span>
+          <span className="text-primary">fy</span>
         </span>
       )}
     </span>

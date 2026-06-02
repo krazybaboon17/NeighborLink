@@ -650,7 +650,7 @@ export default function TaskDetail() {
   return (
     <>
       <SEO
-        title={`${task.title} — TaskIt!`}
+        title={`${task.title} — Taskfy`}
         description={(task.description || `${task.category} task in ${task.location}`).slice(0, 155)}
         path={`/tasks/${task.id}`}
         type="article"
@@ -661,7 +661,7 @@ export default function TaskDetail() {
           description: task.description,
           areaServed: task.location,
           category: task.category,
-          provider: { "@type": "Organization", name: "TaskIt!" },
+          provider: { "@type": "Organization", name: "Taskfy" },
         }}
       />
       <Navbar />
@@ -1044,7 +1044,7 @@ export default function TaskDetail() {
 
                     {task.status === 'completed' && (
                       <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700 flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4" /> Task complete. Thanks for using TaskIt!
+                        <CheckCircle className="w-4 h-4" /> Task complete. Thanks for using Taskfy
                       </div>
                     )}
 

@@ -481,6 +481,7 @@ export type Database = {
         Args: { target_user_id: string; verification_id: string }
         Returns: boolean
       }
+      admin_delete_task: { Args: { p_task_id: string }; Returns: boolean }
       admin_reject_verification: {
         Args: { verification_id: string }
         Returns: boolean

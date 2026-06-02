@@ -23,6 +23,7 @@ import Features from "./pages/Features";
 import Conversations from "./pages/Conversations";
 import Profile from "./pages/Profile";
 import AdminVerifications from "./pages/AdminVerifications";
+import AdminTasks from "./pages/AdminTasks";
 import ServiceHours from "./pages/ServiceHours";
 import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/verify" element={<ProtectedRoute><Verify /></ProtectedRoute>} />
                 <Route path="/admin/verifications" element={<ProtectedRoute><AdminVerifications /></ProtectedRoute>} />
+                <Route path="/admin/tasks" element={<ProtectedRoute><AdminTasks /></ProtectedRoute>} />
                 <Route path="/features" element={<Features />} />
                 <Route path="/service-hours" element={<ProtectedRoute><ServiceHours /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />

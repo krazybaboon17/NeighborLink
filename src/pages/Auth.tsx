@@ -241,7 +241,7 @@ export default function Auth() {
                 <span className="text-primary-foreground font-bold text-2xl">D</span>
               </div>
             </motion.div>
-            <CardTitle className="text-2xl">Welcome to TaskIt!</CardTitle>
+            <CardTitle className="text-2xl">Welcome to Taskfy</CardTitle>
             <CardDescription className="flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-primary" />
               Connect with your community
@@ -349,7 +349,7 @@ export default function Auth() {
                       className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                     />
                     <span>
-                      I agree to TaskIt!'s{' '}
+                      I agree to Taskfy's{' '}
                       <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">Terms of Service</a>{' '}
                       and{' '}
                       <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline">Privacy Policy</a>.
