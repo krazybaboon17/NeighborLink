@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShieldX } from 'lucide-react';
+import { AdminTabs } from '@/components/AdminTabs';
 
 type VerificationRow = {
   id: string;
@@ -144,7 +145,7 @@ export default function AdminVerifications() {
     return (
       <div className="min-h-screen bg-transparent">
         <Navbar />
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
           <p>Checking authorization...</p>
         </main>
       </div>
@@ -156,7 +157,7 @@ export default function AdminVerifications() {
     return (
       <div className="min-h-screen bg-transparent">
         <Navbar />
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
           <div className="flex flex-col items-center justify-center text-center space-y-4">
             <ShieldX className="w-16 h-16 text-destructive" />
             <h1 className="text-2xl font-bold">Access Denied</h1>
@@ -171,7 +172,8 @@ export default function AdminVerifications() {
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar />
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
+        <AdminTabs />
         <h1 className="text-2xl font-bold mb-6">Pending Verifications</h1>
         {loading ? (
           <p>Loading…</p>

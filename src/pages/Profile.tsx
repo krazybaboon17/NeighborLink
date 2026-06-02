@@ -149,7 +149,7 @@ export default function ProfilePage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-transparent py-12">
+      <div className="min-h-screen bg-transparent pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
         <div className="container mx-auto px-4 max-w-2xl space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

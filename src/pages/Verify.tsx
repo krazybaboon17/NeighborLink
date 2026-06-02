@@ -123,7 +123,7 @@ export default function Verify() {
     return (
       <div className="min-h-screen bg-transparent">
         <Navbar />
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
           <Card className="max-w-md mx-auto">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">
@@ -140,7 +140,7 @@ export default function Verify() {
     return (
       <div className="min-h-screen bg-transparent">
         <Navbar />
-        <main className="container mx-auto px-4 py-12">
+        <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
           <FaceVerification
             onVerificationComplete={handleFaceVerificationComplete}
             onCancel={() => setShowFaceVerification(false)}
@@ -153,7 +153,7 @@ export default function Verify() {
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar />
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle>Verify Your Identity</CardTitle>

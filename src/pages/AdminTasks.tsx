@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ShieldX, Trash2, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO } from '@/components/SEO';
+import { AdminTabs } from '@/components/AdminTabs';
 
 type TaskRow = {
   id: string;
@@ -110,15 +111,13 @@ export default function AdminTasks() {
       <SEO title="Admin · Tasks moderation — Taskfy" description="Moderate all platform tasks." path="/admin/tasks" />
       <Navbar />
       <main className="container mx-auto px-4 pb-16" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 5rem)' }}>
+        <AdminTabs />
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2"><ShieldCheck className="w-6 h-6 text-primary" /> Tasks moderation</h1>
             <p className="text-sm text-muted-foreground">Review and delete any task on Taskfy.</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" asChild><Link to="/admin/verifications">Verifications</Link></Button>
-            <Button variant="outline" onClick={fetchTasks}>Refresh</Button>
-          </div>
+          <Button variant="outline" onClick={fetchTasks}>Refresh</Button>
         </div>
 
         {loading ? (

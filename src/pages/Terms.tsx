@@ -12,7 +12,7 @@ export default function Terms() {
         path="/terms"
       />
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
+      <main className="flex-1 container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12 max-w-3xl">
         <h1 className="text-4xl font-bold mb-2 text-foreground">Terms of Service</h1>
         <p className="text-muted-foreground mb-8">Last updated: April 2026</p>
 

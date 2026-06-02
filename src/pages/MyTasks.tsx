@@ -169,7 +169,7 @@ export default function MyTasks() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-transparent py-12">
+      <main className="min-h-screen bg-transparent pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div>

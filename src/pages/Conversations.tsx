@@ -107,7 +107,7 @@ export default function Conversations() {
     <div className="min-h-screen bg-transparent">
       <Navbar />
       <main
-        className="container mx-auto px-4 pb-12"
+        className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 5.5rem)' }}
       >
         <Card>
