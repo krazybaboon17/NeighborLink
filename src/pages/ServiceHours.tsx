@@ -97,7 +97,7 @@ export default function ServiceHours() {
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar />
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
         <div className="max-w-5xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
