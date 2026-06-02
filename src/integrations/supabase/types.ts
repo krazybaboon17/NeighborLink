@@ -36,31 +36,50 @@ export type Database = {
         Row: {
           content: string
           created_at: string | null
+          deleted_at: string | null
+          edited_at: string | null
           id: string
+          image_url: string | null
           is_read: boolean
           receiver_id: string
+          reply_to_id: string | null
           sender_id: string
           task_id: string
         }
         Insert: {
           content: string
           created_at?: string | null
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id: string
+          reply_to_id?: string | null
           sender_id: string
           task_id: string
         }
         Update: {
           content?: string
           created_at?: string | null
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id?: string
+          reply_to_id?: string | null
           sender_id?: string
           task_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_task_id_fkey"
             columns: ["task_id"]
