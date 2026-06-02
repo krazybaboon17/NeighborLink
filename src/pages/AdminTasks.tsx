@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ShieldX, Trash2, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SEO } from '@/components/SEO';
+import { AdminTabs } from '@/components/AdminTabs';
 
 type TaskRow = {
   id: string;
