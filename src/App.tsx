@@ -23,6 +23,7 @@ import Features from "./pages/Features";
 import Conversations from "./pages/Conversations";
 import Profile from "./pages/Profile";
 import AdminVerifications from "./pages/AdminVerifications";
+import AdminTasks from "./pages/AdminTasks";
 import ServiceHours from "./pages/ServiceHours";
 import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
