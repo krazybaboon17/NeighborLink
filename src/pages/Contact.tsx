@@ -48,8 +48,8 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-transparent flex flex-col">
       <SEO
-        title="Contact TaskIt! — Join the Mailing List"
-        description="Get in touch with the TaskIt! team and subscribe to updates on new features in Arlington Heights and Buffalo Grove."
+        title="Contact Taskfy — Join the Mailing List"
+        description="Get in touch with the Taskfy team and subscribe to updates on new features in Arlington Heights and Buffalo Grove."
         path="/contact"
       />
       <Navbar />
