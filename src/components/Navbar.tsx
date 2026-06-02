@@ -236,9 +236,14 @@ export const Navbar = () => {
                 <span className="flex items-center gap-1.5"><MessageCircle className="w-4 h-4" /> Messages</span>
               </NavLink>
               {isAdmin && (
-                <NavLink href="/admin/verifications" onClick={() => setIsOpen(false)}>
-                  <span className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> Admin</span>
-                </NavLink>
+                <>
+                  <NavLink href="/admin/tasks" onClick={() => setIsOpen(false)}>
+                    <span className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> Admin · Tasks</span>
+                  </NavLink>
+                  <NavLink href="/admin/verifications" onClick={() => setIsOpen(false)}>
+                    <span className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> Admin · Verifications</span>
+                  </NavLink>
+                </>
               )}
 
               <div className="pt-4 space-y-2 border-t border-border mt-2">
