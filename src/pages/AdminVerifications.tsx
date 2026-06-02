@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShieldX } from 'lucide-react';
+import { AdminTabs } from '@/components/AdminTabs';
 
 type VerificationRow = {
   id: string;
