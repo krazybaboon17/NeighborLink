@@ -77,6 +77,8 @@ export default function Messages() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [voiceUrls, setVoiceUrls] = useState<Record<string, string>>({});
+  const [reactions, setReactions] = useState<Reaction[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
