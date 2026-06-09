@@ -40,6 +40,7 @@ export default function Tasks() {
   // Persisted location prefs (survive across sessions)
   const [savedLocation, setSavedLocation] = useLocalStorage<string>('nl_user_location', '');
   const [savedMaxMiles, setSavedMaxMiles] = useLocalStorage<number>('nl_max_miles', 5);
+  const [verifiedOnly, setVerifiedOnly] = useLocalStorage<boolean>('nl_verified_only', false);
 
   const {
     isFiltering,
@@ -97,7 +98,7 @@ export default function Tasks() {
   // Reset pagination when filters change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [debouncedSearch, categoryFilter, maxMiles, userLocation]);
+  }, [debouncedSearch, categoryFilter, maxMiles, userLocation, verifiedOnly]);
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -122,15 +123,24 @@ export default function Tasks() {
       const userIds = [...new Set(tasksData.map((t: any) => t.user_id))];
       const { data: profilesData } = await supabase
         .from('public_profiles' as any)
-        .select('id, full_name')
+        .select('id, full_name, verified, completed_tasks, rating, created_at')
         .in('id', userIds);
 
-      const profilesMap = new Map((profilesData || []).map((p: any) => [p.id, p.full_name]));
+      const profilesMap = new Map((profilesData || []).map((p: any) => [p.id, p]));
+      const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-      const formatted = tasksData.map((task: any) => ({
-        ...task,
-        posterName: profilesMap.get(task.user_id) || 'Anonymous',
-      }));
+      const formatted = tasksData.map((task: any) => {
+        const p: any = profilesMap.get(task.user_id);
+        const posterNew = !!p?.created_at && (Date.now() - new Date(p.created_at).getTime() < SEVEN_DAYS) && !p?.verified;
+        return {
+          ...task,
+          posterName: p?.full_name || 'Anonymous',
+          posterVerified: !!p?.verified,
+          posterNew,
+          posterRating: p?.rating ?? null,
+          posterCompletedTasks: p?.completed_tasks ?? 0,
+        };
+      });
       setTasks(formatted);
 
       if (user?.id) {
@@ -155,13 +165,14 @@ export default function Tasks() {
   const filteredTasks = useMemo(() => {
     const search = debouncedSearch.trim().toLowerCase();
     let result = tasks
-      .filter((task) => {
+      .filter((task: any) => {
         const matchesSearch =
           !search ||
           task.title.toLowerCase().includes(search) ||
           task.description.toLowerCase().includes(search);
         const matchesCategory = categoryFilter === 'all' || task.category === categoryFilter;
-        return matchesSearch && matchesCategory;
+        const matchesVerified = !verifiedOnly || task.posterVerified;
+        return matchesSearch && matchesCategory && matchesVerified;
       })
       .map((task) => ({ task, distance: distanceFor(task.location) }));
 
@@ -389,6 +400,18 @@ export default function Tasks() {
                 <Loader2 className="w-4 h-4 animate-spin text-primary" aria-hidden="true" />
               )}
             </div>
+
+            <label className="flex items-center gap-2 px-1 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={verifiedOnly}
+                onChange={(e) => setVerifiedOnly(e.target.checked)}
+                className="w-4 h-4 rounded border-input accent-primary"
+              />
+              <span className="text-sm font-body text-foreground">
+                Show only tasks from <span className="font-semibold text-emerald-700">verified</span> neighbors
+              </span>
+            </label>
           </div>
 
           {/* Results */}

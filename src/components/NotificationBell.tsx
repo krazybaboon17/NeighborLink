@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Check } from 'lucide-react';
+import { Bell, BellRing, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useBrowserPush } from '@/hooks/useBrowserPush';
 
 type Notification = {
   id: string;
@@ -71,6 +72,8 @@ export function NotificationBell() {
     if (n.link) navigate(n.link);
   };
 
+  const { supported: pushSupported, permission: pushPermission, request: requestPush } = useBrowserPush();
+
   if (!user) return null;
 
   return (
@@ -94,6 +97,22 @@ export function NotificationBell() {
             </button>
           )}
         </div>
+        {pushSupported && pushPermission !== 'granted' && (
+          <button
+            onClick={requestPush}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs bg-primary/5 hover:bg-primary/10 border-b text-left"
+          >
+            <BellRing className="w-3.5 h-3.5 text-primary" />
+            <span className="flex-1">
+              {pushPermission === 'denied'
+                ? 'Push notifications blocked — enable in browser settings'
+                : 'Enable push notifications'}
+            </span>
+            {pushPermission !== 'denied' && (
+              <span className="text-primary font-semibold">Turn on</span>
+            )}
+          </button>
+        )}
         <ScrollArea className="max-h-96">
           {items.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">

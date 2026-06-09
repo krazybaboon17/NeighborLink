@@ -19,6 +19,10 @@ import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { z } from 'zod';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { cn } from '@/lib/utils';
+import { MessageReactions } from '@/components/MessageReactions';
+import { VoiceRecorder } from '@/components/VoiceRecorder';
+import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
+import { FavoriteButton } from '@/components/FavoriteButton';
 
 interface Message {
   id: string;
@@ -31,8 +35,14 @@ interface Message {
   deleted_at?: string | null;
   reply_to_id?: string | null;
   image_url?: string | null;
+  voice_url?: string | null;
+  voice_duration_seconds?: number | null;
   _pending?: boolean;
   _failed?: boolean;
+}
+
+interface Reaction {
+  id: string; message_id: string; user_id: string; emoji: string;
 }
 
 interface Profile { id: string; full_name: string; avatar_url: string | null; }
@@ -67,6 +77,8 @@ export default function Messages() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [voiceUrls, setVoiceUrls] = useState<Record<string, string>>({});
+  const [reactions, setReactions] = useState<Reaction[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -121,6 +133,46 @@ export default function Messages() {
       if (Object.keys(next).length) setImageUrls(prev => ({ ...prev, ...next }));
     })();
   }, [messages]);
+
+  // Resolve signed URLs for voice notes
+  useEffect(() => {
+    const paths = messages
+      .filter(m => m.voice_url && !m.deleted_at && !voiceUrls[m.voice_url])
+      .map(m => m.voice_url!);
+    if (paths.length === 0) return;
+    (async () => {
+      const next: Record<string, string> = {};
+      for (const p of paths) {
+        if (p.startsWith('http')) { next[p] = p; continue; }
+        const { data } = await supabase.storage.from('chat-voice').createSignedUrl(p, 3600);
+        if (data?.signedUrl) next[p] = data.signedUrl;
+      }
+      if (Object.keys(next).length) setVoiceUrls(prev => ({ ...prev, ...next }));
+    })();
+  }, [messages]);
+
+  const fetchReactions = useCallback(async () => {
+    if (messages.length === 0) { setReactions([]); return; }
+    const ids = messages.map(m => m.id).filter(id => !id.startsWith('temp-'));
+    if (ids.length === 0) return;
+    const { data } = await supabase.from('message_reactions' as any)
+      .select('*').in('message_id', ids);
+    setReactions(((data as any) || []) as Reaction[]);
+  }, [messages]);
+
+  useEffect(() => { fetchReactions(); }, [fetchReactions]);
+
+  // Subscribe to reaction changes
+  useEffect(() => {
+    if (!taskId || !user) return;
+    const ch = supabase
+      .channel(`reactions-${taskId}-${user.id}`)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'message_reactions' },
+        () => fetchReactions())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [taskId, user, fetchReactions]);
 
   const fetchTask = async () => {
     const { data } = await supabase.from('tasks').select('*').eq('id', taskId).single();
@@ -229,6 +281,22 @@ export default function Messages() {
       setReplyTo(null);
     } catch { toast.error('Failed to send image'); }
     finally { setSending(false); }
+  };
+
+  const handleVoiceRecorded = async (blob: Blob, durationSec: number) => {
+    if (!user || !taskId || !otherId) return;
+    const path = `${user.id}/${taskId}/${Date.now()}.webm`;
+    const { error: upErr } = await supabase.storage
+      .from('chat-voice')
+      .upload(path, blob, { upsert: false, contentType: blob.type || 'audio/webm' });
+    if (upErr) { toast.error('Voice upload failed'); return; }
+    const { error } = await supabase.from('messages').insert({
+      task_id: taskId, sender_id: user.id, receiver_id: otherId,
+      content: '', voice_url: path, voice_duration_seconds: durationSec,
+      reply_to_id: replyTo?.id ?? null,
+    } as any);
+    if (error) { toast.error('Failed to send voice note'); return; }
+    setReplyTo(null);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -340,6 +408,7 @@ export default function Messages() {
                     </button>
                   )}
                 </div>
+                {otherId && <FavoriteButton helperId={otherId} />}
                 <Button variant="ghost" size="icon" onClick={() => { setSearchOpen(s => !s); if (searchOpen) setSearchTerm(''); }}>
                   <Search className="w-4 h-4" />
                 </Button>
@@ -431,6 +500,13 @@ export default function Messages() {
                                   />
                                 </a>
                               )}
+                              {message.voice_url && (
+                                <VoiceNotePlayer
+                                  src={voiceUrls[message.voice_url]}
+                                  durationSec={message.voice_duration_seconds || undefined}
+                                  mine={mine}
+                                />
+                              )}
                               {message.content && (
                                 <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                               )}
@@ -456,6 +532,16 @@ export default function Messages() {
                           </Button>
                         )}
                       </div>
+                      {!isDeleted && !message._pending && !message.id.startsWith('temp-') && (
+                        <div className={cn('mt-1 px-2', mine ? 'flex justify-end' : 'flex justify-start')}>
+                          <MessageReactions
+                            messageId={message.id}
+                            mine={mine}
+                            reactions={reactions.filter(r => r.message_id === message.id)}
+                            onChanged={fetchReactions}
+                          />
+                        </div>
+                      )}
                     </div>
                   );
                 })
@@ -492,12 +578,13 @@ export default function Messages() {
                   </Button>
                 </div>
               )}
-              <form onSubmit={handleSendMessage} className="flex gap-2 p-3">
+              <form onSubmit={handleSendMessage} className="flex gap-2 p-3 items-center">
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onPickImage} />
                 <Button type="button" size="icon" variant="ghost" className="rounded-full shrink-0"
                   onClick={() => fileInputRef.current?.click()} disabled={sending || !!editing} aria-label="Attach image">
                   <Paperclip className="w-4 h-4" />
                 </Button>
+                <VoiceRecorder onRecorded={handleVoiceRecorded} disabled={sending || !!editing} />
                 <Input
                   value={newMessage}
                   onChange={(e) => { setNewMessage(e.target.value); broadcastTyping(); }}
