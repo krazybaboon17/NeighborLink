@@ -400,6 +400,18 @@ export default function Tasks() {
                 <Loader2 className="w-4 h-4 animate-spin text-primary" aria-hidden="true" />
               )}
             </div>
+
+            <label className="flex items-center gap-2 px-1 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={verifiedOnly}
+                onChange={(e) => setVerifiedOnly(e.target.checked)}
+                className="w-4 h-4 rounded border-input accent-primary"
+              />
+              <span className="text-sm font-body text-foreground">
+                Show only tasks from <span className="font-semibold text-emerald-700">verified</span> neighbors
+              </span>
+            </label>
           </div>
 
           {/* Results */}
