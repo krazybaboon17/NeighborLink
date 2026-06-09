@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { MapPin, Clock, Navigation } from "lucide-react";
+import { MapPin, Clock, Navigation, Star } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { formatDistance } from "@/lib/distance";
+import { PosterTrustBadge } from "@/components/PosterTrustBadge";
 
 export interface TaskCardData {
   id: string;
@@ -16,6 +17,11 @@ export interface TaskCardData {
   due_date?: string | null;
   status?: string;
   posterName?: string;
+  posterVerified?: boolean;
+  posterNew?: boolean;
+  posterCompletedTasks?: number;
+  posterRating?: number | null;
+  user_id?: string;
 }
 
 interface TaskCardProps {
