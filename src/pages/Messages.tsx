@@ -299,6 +299,7 @@ export default function Messages() {
     setReplyTo(null);
   };
 
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !taskId || !otherId || sending) return;
     const validation = messageSchema.safeParse({ content: newMessage });
