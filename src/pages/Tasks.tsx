@@ -165,13 +165,14 @@ export default function Tasks() {
   const filteredTasks = useMemo(() => {
     const search = debouncedSearch.trim().toLowerCase();
     let result = tasks
-      .filter((task) => {
+      .filter((task: any) => {
         const matchesSearch =
           !search ||
           task.title.toLowerCase().includes(search) ||
           task.description.toLowerCase().includes(search);
         const matchesCategory = categoryFilter === 'all' || task.category === categoryFilter;
-        return matchesSearch && matchesCategory;
+        const matchesVerified = !verifiedOnly || task.posterVerified;
+        return matchesSearch && matchesCategory && matchesVerified;
       })
       .map((task) => ({ task, distance: distanceFor(task.location) }));
 
