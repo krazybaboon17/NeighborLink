@@ -499,6 +499,13 @@ export default function Messages() {
                                   />
                                 </a>
                               )}
+                              {message.voice_url && (
+                                <VoiceNotePlayer
+                                  src={voiceUrls[message.voice_url]}
+                                  durationSec={message.voice_duration_seconds || undefined}
+                                  mine={mine}
+                                />
+                              )}
                               {message.content && (
                                 <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                               )}
