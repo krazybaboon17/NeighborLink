@@ -122,15 +122,24 @@ export default function Tasks() {
       const userIds = [...new Set(tasksData.map((t: any) => t.user_id))];
       const { data: profilesData } = await supabase
         .from('public_profiles' as any)
-        .select('id, full_name')
+        .select('id, full_name, verified, completed_tasks, rating, created_at')
         .in('id', userIds);
 
-      const profilesMap = new Map((profilesData || []).map((p: any) => [p.id, p.full_name]));
+      const profilesMap = new Map((profilesData || []).map((p: any) => [p.id, p]));
+      const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-      const formatted = tasksData.map((task: any) => ({
-        ...task,
-        posterName: profilesMap.get(task.user_id) || 'Anonymous',
-      }));
+      const formatted = tasksData.map((task: any) => {
+        const p: any = profilesMap.get(task.user_id);
+        const posterNew = !!p?.created_at && (Date.now() - new Date(p.created_at).getTime() < SEVEN_DAYS) && !p?.verified;
+        return {
+          ...task,
+          posterName: p?.full_name || 'Anonymous',
+          posterVerified: !!p?.verified,
+          posterNew,
+          posterRating: p?.rating ?? null,
+          posterCompletedTasks: p?.completed_tasks ?? 0,
+        };
+      });
       setTasks(formatted);
 
       if (user?.id) {
