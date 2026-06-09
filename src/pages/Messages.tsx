@@ -531,6 +531,16 @@ export default function Messages() {
                           </Button>
                         )}
                       </div>
+                      {!isDeleted && !message._pending && !message.id.startsWith('temp-') && (
+                        <div className={cn('mt-1 px-2', mine ? 'flex justify-end' : 'flex justify-start')}>
+                          <MessageReactions
+                            messageId={message.id}
+                            mine={mine}
+                            reactions={reactions.filter(r => r.message_id === message.id)}
+                            onChanged={fetchReactions}
+                          />
+                        </div>
+                      )}
                     </div>
                   );
                 })
