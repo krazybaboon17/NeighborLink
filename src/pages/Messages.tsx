@@ -134,6 +134,46 @@ export default function Messages() {
     })();
   }, [messages]);
 
+  // Resolve signed URLs for voice notes
+  useEffect(() => {
+    const paths = messages
+      .filter(m => m.voice_url && !m.deleted_at && !voiceUrls[m.voice_url])
+      .map(m => m.voice_url!);
+    if (paths.length === 0) return;
+    (async () => {
+      const next: Record<string, string> = {};
+      for (const p of paths) {
+        if (p.startsWith('http')) { next[p] = p; continue; }
+        const { data } = await supabase.storage.from('chat-voice').createSignedUrl(p, 3600);
+        if (data?.signedUrl) next[p] = data.signedUrl;
+      }
+      if (Object.keys(next).length) setVoiceUrls(prev => ({ ...prev, ...next }));
+    })();
+  }, [messages]);
+
+  const fetchReactions = useCallback(async () => {
+    if (messages.length === 0) { setReactions([]); return; }
+    const ids = messages.map(m => m.id).filter(id => !id.startsWith('temp-'));
+    if (ids.length === 0) return;
+    const { data } = await supabase.from('message_reactions' as any)
+      .select('*').in('message_id', ids);
+    setReactions(((data as any) || []) as Reaction[]);
+  }, [messages]);
+
+  useEffect(() => { fetchReactions(); }, [fetchReactions]);
+
+  // Subscribe to reaction changes
+  useEffect(() => {
+    if (!taskId || !user) return;
+    const ch = supabase
+      .channel(`reactions-${taskId}-${user.id}`)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'message_reactions' },
+        () => fetchReactions())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [taskId, user, fetchReactions]);
+
   const fetchTask = async () => {
     const { data } = await supabase.from('tasks').select('*').eq('id', taskId).single();
     setTask(data);
