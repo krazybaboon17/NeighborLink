@@ -19,6 +19,10 @@ import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { z } from 'zod';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { cn } from '@/lib/utils';
+import { MessageReactions } from '@/components/MessageReactions';
+import { VoiceRecorder } from '@/components/VoiceRecorder';
+import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
+import { FavoriteButton } from '@/components/FavoriteButton';
 
 interface Message {
   id: string;
