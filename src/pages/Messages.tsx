@@ -35,8 +35,14 @@ interface Message {
   deleted_at?: string | null;
   reply_to_id?: string | null;
   image_url?: string | null;
+  voice_url?: string | null;
+  voice_duration_seconds?: number | null;
   _pending?: boolean;
   _failed?: boolean;
+}
+
+interface Reaction {
+  id: string; message_id: string; user_id: string; emoji: string;
 }
 
 interface Profile { id: string; full_name: string; avatar_url: string | null; }
