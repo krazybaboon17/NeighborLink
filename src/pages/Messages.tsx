@@ -283,7 +283,22 @@ export default function Messages() {
     finally { setSending(false); }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleVoiceRecorded = async (blob: Blob, durationSec: number) => {
+    if (!user || !taskId || !otherId) return;
+    const path = `${user.id}/${taskId}/${Date.now()}.webm`;
+    const { error: upErr } = await supabase.storage
+      .from('chat-voice')
+      .upload(path, blob, { upsert: false, contentType: blob.type || 'audio/webm' });
+    if (upErr) { toast.error('Voice upload failed'); return; }
+    const { error } = await supabase.from('messages').insert({
+      task_id: taskId, sender_id: user.id, receiver_id: otherId,
+      content: '', voice_url: path, voice_duration_seconds: durationSec,
+      reply_to_id: replyTo?.id ?? null,
+    } as any);
+    if (error) { toast.error('Failed to send voice note'); return; }
+    setReplyTo(null);
+  };
+
     e.preventDefault();
     if (!user || !taskId || !otherId || sending) return;
     const validation = messageSchema.safeParse({ content: newMessage });
