@@ -150,11 +150,21 @@ export const TaskCard = ({
         </div>
 
         {(timeAgo || task.posterName) && (
-          <div className="flex items-center justify-between mt-3 text-xs">
+          <div className="flex items-center justify-between mt-3 text-xs gap-2">
             {task.posterName && (
-              <span className="font-body text-muted-foreground truncate">
-                by <span className="font-medium text-foreground">{task.posterName}</span>
-              </span>
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <span className="font-body text-muted-foreground truncate">
+                  by <span className="font-medium text-foreground">{task.posterName}</span>
+                </span>
+                <PosterTrustBadge verified={!!task.posterVerified} newUser={!!task.posterNew} />
+                {!!task.posterRating && task.posterRating > 0 && (
+                  <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground shrink-0">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    {task.posterRating.toFixed(1)}
+                    {!!task.posterCompletedTasks && ` · ${task.posterCompletedTasks}`}
+                  </span>
+                )}
+              </div>
             )}
             {timeAgo && (
               <span className="font-body font-medium text-primary shrink-0">{timeAgo}</span>
