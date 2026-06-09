@@ -577,12 +577,13 @@ export default function Messages() {
                   </Button>
                 </div>
               )}
-              <form onSubmit={handleSendMessage} className="flex gap-2 p-3">
+              <form onSubmit={handleSendMessage} className="flex gap-2 p-3 items-center">
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onPickImage} />
                 <Button type="button" size="icon" variant="ghost" className="rounded-full shrink-0"
                   onClick={() => fileInputRef.current?.click()} disabled={sending || !!editing} aria-label="Attach image">
                   <Paperclip className="w-4 h-4" />
                 </Button>
+                <VoiceRecorder onRecorded={handleVoiceRecorded} disabled={sending || !!editing} />
                 <Input
                   value={newMessage}
                   onChange={(e) => { setNewMessage(e.target.value); broadcastTyping(); }}
