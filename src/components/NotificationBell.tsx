@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Check } from 'lucide-react';
+import { Bell, BellRing, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useBrowserPush } from '@/hooks/useBrowserPush';
 
 type Notification = {
   id: string;
