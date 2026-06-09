@@ -40,6 +40,7 @@ export default function Tasks() {
   // Persisted location prefs (survive across sessions)
   const [savedLocation, setSavedLocation] = useLocalStorage<string>('nl_user_location', '');
   const [savedMaxMiles, setSavedMaxMiles] = useLocalStorage<number>('nl_max_miles', 5);
+  const [verifiedOnly, setVerifiedOnly] = useLocalStorage<boolean>('nl_verified_only', false);
 
   const {
     isFiltering,
