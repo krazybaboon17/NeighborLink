@@ -98,7 +98,7 @@ export default function Tasks() {
   // Reset pagination when filters change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [debouncedSearch, categoryFilter, maxMiles, userLocation]);
+  }, [debouncedSearch, categoryFilter, maxMiles, userLocation, verifiedOnly]);
 
   const fetchTasks = async () => {
     setLoading(true);
