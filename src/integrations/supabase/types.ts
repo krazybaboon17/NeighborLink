@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      favorite_helpers: {
+        Row: {
+          created_at: string
+          helper_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          helper_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          helper_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mailing_list: {
         Row: {
           created_at: string | null
@@ -32,6 +53,38 @@ export type Database = {
         }
         Relationships: []
       }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -45,6 +98,8 @@ export type Database = {
           reply_to_id: string | null
           sender_id: string
           task_id: string
+          voice_duration_seconds: number | null
+          voice_url: string | null
         }
         Insert: {
           content: string
@@ -58,6 +113,8 @@ export type Database = {
           reply_to_id?: string | null
           sender_id: string
           task_id: string
+          voice_duration_seconds?: number | null
+          voice_url?: string | null
         }
         Update: {
           content?: string
@@ -71,6 +128,8 @@ export type Database = {
           reply_to_id?: string | null
           sender_id?: string
           task_id?: string
+          voice_duration_seconds?: number | null
+          voice_url?: string | null
         }
         Relationships: [
           {
@@ -182,11 +241,15 @@ export type Database = {
           completed_tasks: number | null
           created_at: string | null
           current_state: string | null
+          email_verified: boolean
           full_name: string | null
           id: string
           is_helper: boolean | null
           is_young_neighbor: boolean | null
           location: string | null
+          phone_number: string | null
+          phone_verified: boolean
+          prefer_verified_only: boolean
           rating: number | null
           skills: string[] | null
           updated_at: string | null
@@ -199,11 +262,15 @@ export type Database = {
           completed_tasks?: number | null
           created_at?: string | null
           current_state?: string | null
+          email_verified?: boolean
           full_name?: string | null
           id: string
           is_helper?: boolean | null
           is_young_neighbor?: boolean | null
           location?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean
+          prefer_verified_only?: boolean
           rating?: number | null
           skills?: string[] | null
           updated_at?: string | null
@@ -216,11 +283,15 @@ export type Database = {
           completed_tasks?: number | null
           created_at?: string | null
           current_state?: string | null
+          email_verified?: boolean
           full_name?: string | null
           id?: string
           is_helper?: boolean | null
           is_young_neighbor?: boolean | null
           location?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean
+          prefer_verified_only?: boolean
           rating?: number | null
           skills?: string[] | null
           updated_at?: string | null
