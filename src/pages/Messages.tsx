@@ -408,6 +408,7 @@ export default function Messages() {
                     </button>
                   )}
                 </div>
+                {otherId && <FavoriteButton helperId={otherId} />}
                 <Button variant="ghost" size="icon" onClick={() => { setSearchOpen(s => !s); if (searchOpen) setSearchTerm(''); }}>
                   <Search className="w-4 h-4" />
                 </Button>
