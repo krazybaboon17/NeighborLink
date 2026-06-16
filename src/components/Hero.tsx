@@ -109,6 +109,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{ y: heroTextY, opacity: heroOpacity }}
           >
             <h1 className="editorial-headline text-5xl sm:text-6xl lg:text-[5rem] text-foreground">
               Your <em className="italic font-light text-primary">neighborhood</em>,
@@ -176,6 +177,7 @@ export const Hero = () => {
                   boxShadow: "0 20px 60px hsl(60 3% 17% / 0.12)",
                   transform: `rotate(${card.rotate})`,
                   animation: `float-gentle 6s ease-in-out ${card.delay} infinite`,
+                  y: cardYs[i],
                 }}
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
