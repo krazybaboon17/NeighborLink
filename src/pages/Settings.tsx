@@ -219,8 +219,11 @@ export default function Settings() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  if (user) localStorage.removeItem(`taskfy.tour.v1.${user.id}`);
+                onClick={async () => {
+                  if (user) {
+                    localStorage.removeItem(`taskfy.tour.v1.${user.id}`);
+                    await supabase.from('profiles').update({ has_seen_tour: false } as any).eq('id', user.id);
+                  }
                   window.dispatchEvent(new Event('taskfy:start-tour'));
                   toast.success('Starting the tour…');
                 }}

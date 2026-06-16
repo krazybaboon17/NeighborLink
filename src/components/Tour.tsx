@@ -1,8 +1,9 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, ArrowRight, Check, SkipForward, MapPin } from 'lucide-react';
 
 type Step = {
@@ -104,15 +105,32 @@ export function Tour() {
   const navigate = useNavigate();
   const [active, setActive] = useState(false);
   const [index, setIndex] = useState(0);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Start tour for first-time users.
+  // Start tour for first-time users (backed by DB so it persists across devices).
   useEffect(() => {
     if (!user) return;
     const flag = localStorage.getItem(KEY(user.id));
-    if (!flag) {
-      const t = setTimeout(() => setActive(true), 800); // let UI settle
-      return () => clearTimeout(t);
-    }
+    if (flag) return; // fast path — already seen on this device
+
+    // Check DB in case this is a new device for a returning user
+    supabase
+      .from('profiles')
+      .select('has_seen_tour')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        const seen = !!(data as any)?.has_seen_tour;
+        if (seen) {
+          localStorage.setItem(KEY(user.id), 'done');
+        } else {
+          timeoutRef.current = setTimeout(() => setActive(true), 800);
+        }
+      });
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [user]);
 
   // Allow external trigger: window.dispatchEvent(new Event('taskfy:start-tour'))
@@ -126,7 +144,10 @@ export function Tour() {
   const rect = useTargetRect(active ? step?.target : undefined);
 
   const finish = (skipped = false) => {
-    if (user) localStorage.setItem(KEY(user.id), skipped ? 'skipped' : 'done');
+    if (user) {
+      localStorage.setItem(KEY(user.id), skipped ? 'skipped' : 'done');
+      supabase.from('profiles').update({ has_seen_tour: true } as any).eq('id', user.id);
+    }
     setActive(false);
     setIndex(0);
   };
