@@ -179,6 +179,11 @@ export default function ProfilePage() {
 
   return (
     <>
+      <SEO
+        title="Your profile — Taskfy"
+        description="Manage your Taskfy profile, contact preferences, verification status, and reviews from neighbors you've helped or hired."
+        path="/profile"
+      />
       <Navbar />
       <div className="min-h-screen bg-transparent pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
         <div className="container mx-auto px-4 max-w-3xl space-y-6">
