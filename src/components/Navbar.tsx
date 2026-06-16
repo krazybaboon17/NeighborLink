@@ -4,7 +4,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, Plus, Check, Clock, Shield, Sparkles, ShieldCheck, ShieldX, MessageCircle } from "lucide-react";
+import { Menu, X, User, LogOut, Plus, Check, Clock, Shield, Sparkles, ShieldCheck, ShieldX, MessageCircle, Settings as SettingsIcon } from "lucide-react";
 import { UnverifiedBadge } from "@/components/UnverifiedBadge";
 import { YoungNeighborBadge } from "@/components/YoungNeighborBadge";
 import { useState, useEffect } from "react";
@@ -188,6 +188,9 @@ export const Navbar = () => {
                         <Clock className="mr-2 h-4 w-4" /> Service Hours
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                      <SettingsIcon className="mr-2 h-4 w-4" /> Settings
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" /> Sign Out
