@@ -144,7 +144,10 @@ export function Tour() {
   const rect = useTargetRect(active ? step?.target : undefined);
 
   const finish = (skipped = false) => {
-    if (user) localStorage.setItem(KEY(user.id), skipped ? 'skipped' : 'done');
+    if (user) {
+      localStorage.setItem(KEY(user.id), skipped ? 'skipped' : 'done');
+      supabase.from('profiles').update({ has_seen_tour: true } as any).eq('id', user.id);
+    }
     setActive(false);
     setIndex(0);
   };
