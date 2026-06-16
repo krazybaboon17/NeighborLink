@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Clock, Navigation, Star } from "lucide-react";
+import { MapPin, Clock, Navigation, Star, Sparkles } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { formatDistance } from "@/lib/distance";
@@ -27,6 +27,8 @@ export interface TaskCardData {
 interface TaskCardProps {
   task: TaskCardData;
   featured?: boolean;
+  /** Highlights the card as a personalized AI recommendation. */
+  recommended?: boolean;
   delay?: number;
   applied?: boolean;
   /** Distance from the current user in miles. null when unknown. */
@@ -36,6 +38,7 @@ interface TaskCardProps {
 export const TaskCard = ({
   task,
   featured = false,
+  recommended = false,
   delay = 0,
   applied = false,
   distanceMiles = null,
@@ -73,17 +76,42 @@ export const TaskCard = ({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay, duration: 0.5 }}
-      className={featured ? "task-card-float" : ""}
+      whileHover={{ y: -6 }}
+      className={`relative h-full ${featured ? "task-card-float" : ""}`}
       style={
         featured
           ? { animation: "float-gentle 6s ease-in-out infinite" }
           : undefined
       }
     >
+      {recommended && (
+        <>
+          {/* Glow halo */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-br from-primary/40 via-accent/30 to-primary/40 opacity-70 blur-md"
+            style={{ animation: "glow-pulse 3.2s ease-in-out infinite" }}
+          />
+          {/* For You ribbon */}
+          <motion.span
+            initial={{ opacity: 0, y: -6, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="absolute -top-3 left-5 z-10 inline-flex items-center gap-1 bg-gradient-to-r from-primary to-accent text-primary-foreground text-[10px] font-display font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-wider"
+          >
+            <Sparkles className="w-3 h-3" strokeWidth={2.5} aria-hidden="true" />
+            For You
+          </motion.span>
+        </>
+      )}
       <button
         type="button"
         onClick={() => navigate(`/tasks/${task.id}`)}
-        className="group w-full text-left bg-card rounded-3xl p-7 border-2 border-transparent hover:border-primary transition-all duration-[400ms] hover:-translate-y-2 flex flex-col h-full"
+        className={`relative group w-full text-left bg-card rounded-3xl p-7 border-2 transition-all duration-[400ms] hover:-translate-y-2 flex flex-col h-full ${
+          recommended
+            ? "border-primary/60 hover:border-primary"
+            : "border-transparent hover:border-primary"
+        }`}
         style={{
           boxShadow: "0 20px 60px hsl(60 3% 17% / 0.08)",
         }}
