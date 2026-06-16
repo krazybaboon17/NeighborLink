@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Clock, Calendar, Award, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
+import { SEO } from "@/components/SEO";
 
 type VolunteerHourEntry = {
   id: string;
@@ -96,6 +97,11 @@ export default function ServiceHours() {
 
   return (
     <div className="min-h-screen bg-transparent">
+      <SEO
+        title="Your service hours — Taskfy"
+        description="Track volunteer service hours earned by helping neighbors on Taskfy. Export verified hours for school, scouts, or community programs."
+        path="/service-hours"
+      />
       <Navbar />
       <main className="container mx-auto px-4 pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
         <div className="max-w-5xl mx-auto space-y-8">

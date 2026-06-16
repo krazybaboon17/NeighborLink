@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { SKILLS, CURRENT_STATES } from '@/components/OnboardingQuestions';
+import { SEO } from '@/components/SEO';
 
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, 'Please enter your full name').max(100, 'Name is too long (max 100 characters)'),
@@ -179,6 +180,11 @@ export default function ProfilePage() {
 
   return (
     <>
+      <SEO
+        title="Your profile — Taskfy"
+        description="Manage your Taskfy profile, contact preferences, verification status, and reviews from neighbors you've helped or hired."
+        path="/profile"
+      />
       <Navbar />
       <div className="min-h-screen bg-transparent pt-[calc(env(safe-area-inset-top)+5rem)] pb-12">
         <div className="container mx-auto px-4 max-w-3xl space-y-6">

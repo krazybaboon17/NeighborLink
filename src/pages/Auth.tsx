@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SEO } from '@/components/SEO';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Sparkles } from 'lucide-react';
@@ -221,6 +222,12 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent p-4 relative overflow-hidden">
+      <SEO
+        title="Sign in or sign up — Taskfy"
+        description="Create your free Taskfy account to post tasks, send offers, and connect with verified neighbors in Arlington Heights and Buffalo Grove."
+        path="/auth"
+      />
+
       <FloatingBubbles />
 
       <motion.div

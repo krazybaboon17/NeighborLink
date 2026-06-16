@@ -650,8 +650,13 @@ export default function TaskDetail() {
   return (
     <>
       <SEO
-        title={`${task.title} — Taskfy`}
-        description={(task.description || `${task.category} task in ${task.location}`).slice(0, 155)}
+        title={`${task.title} — ${task.category} in ${task.location} | Taskfy`.slice(0, 60)}
+        description={(() => {
+          const base = (task.description || "").trim();
+          const suffix = ` ${task.category} task posted on Taskfy in ${task.location}. Send an offer to help your neighbor today.`;
+          const combined = base ? `${base}${base.length < 80 ? suffix : ""}` : `Help a neighbor with a ${task.category} task in ${task.location}. Post offers on Taskfy and connect with local, verified helpers.`;
+          return combined.slice(0, 155);
+        })()}
         path={`/tasks/${task.id}`}
         type="article"
         jsonLd={{
