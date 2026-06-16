@@ -1,7 +1,7 @@
-import { Search, ShieldCheck, Star, MapPin, Check, Dog, Sprout, Package, Wrench, Baby, BookOpen, type LucideIcon } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, ShieldCheck, Star, MapPin, Check, Dog, Sprout, Package, Wrench, Baby, BookOpen, ChevronDown, type LucideIcon } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface HelperTag {
@@ -64,6 +64,18 @@ const helperCards: HelperCard[] = [
 export const Hero = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  // Floating cards drift up at different speeds as you scroll down.
+  const yCard0 = useTransform(scrollYProgress, [0, 1], [0, -180]);
+  const yCard1 = useTransform(scrollYProgress, [0, 1], [0, -260]);
+  const yCard2 = useTransform(scrollYProgress, [0, 1], [0, -340]);
+  const cardYs = [yCard0, yCard1, yCard2];
+  const heroTextY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +90,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-background pt-12 lg:pt-20 pb-32">
+    <section ref={sectionRef} className="relative overflow-hidden bg-background pt-12 lg:pt-20 pb-32">
       {/* Decorative circles */}
       <div
         className="pointer-events-none fixed -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-primary/[0.05] -z-10"
