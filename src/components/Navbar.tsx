@@ -188,6 +188,9 @@ export const Navbar = () => {
                         <Clock className="mr-2 h-4 w-4" /> Service Hours
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                      <SettingsIcon className="mr-2 h-4 w-4" /> Settings
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" /> Sign Out
