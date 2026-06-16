@@ -124,8 +124,8 @@ export const Navbar = () => {
           </Link>
 
           <div className="hidden md:flex items-center space-x-6">
-            <NavLink href="/tasks">Browse Tasks</NavLink>
-            <NavLink href="/my-tasks">My Tasks</NavLink>
+            <span data-tour="nav-browse"><NavLink href="/tasks">Browse Tasks</NavLink></span>
+            <span data-tour="nav-mytasks"><NavLink href="/my-tasks">My Tasks</NavLink></span>
             {hasVolunteerHours && (
               <NavLink href="/service-hours">
                 <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Service Hours</span>
@@ -136,21 +136,24 @@ export const Navbar = () => {
                 <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> Admin</span>
               </NavLink>
             )}
-            <NavLink href="/conversations" badge={unreadCount}>
-              <span className="flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" /> Messages</span>
-            </NavLink>
+            <span data-tour="nav-messages">
+              <NavLink href="/conversations" badge={unreadCount}>
+                <span className="flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" /> Messages</span>
+              </NavLink>
+            </span>
           </div>
+
 
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
-                <Button variant="default" size="sm" onClick={() => navigate('/post-task')} className="gap-1.5">
+                <Button data-tour="post-task" variant="default" size="sm" onClick={() => navigate('/post-task')} className="gap-1.5">
                   <Plus className="w-4 h-4" /> Post Task
                 </Button>
-                <NotificationBell />
+                <span data-tour="notification-bell"><NotificationBell /></span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Button data-tour="profile-menu" variant="ghost" className="relative h-10 w-10 rounded-full">
                       <div className="relative">
                         <Avatar className="h-9 w-9">
                           <AvatarImage src={profile?.avatar_url || ''} />
@@ -166,6 +169,7 @@ export const Navbar = () => {
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
+
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
