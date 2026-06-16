@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { Parallax, ScrollScale, ScrollProgressBar } from "@/components/ui/Parallax";
 import { Hero } from "@/components/Hero";
 import { TaskCategories } from "@/components/TaskCategories";
 import { FeaturedTasks } from "@/components/FeaturedTasks";
@@ -12,7 +13,7 @@ import { SEO } from "@/components/SEO";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <SEO
         title="Taskfy — Local Help in Arlington Heights & Buffalo Grove"
         description="Hyperlocal task marketplace connecting Arlington Heights and Buffalo Grove neighbors for lawn care, errands, moving help, pet care and more."
@@ -29,34 +30,49 @@ const Index = () => {
           },
         }}
       />
+      <ScrollProgressBar />
       <Navbar />
+
+      {/* Background parallax blobs */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden>
+        <Parallax offset={-160} className="absolute top-[10%] -left-32 w-[420px] h-[420px]">
+          <div className="w-full h-full rounded-full bg-primary/[0.07] blur-3xl" />
+        </Parallax>
+        <Parallax offset={200} className="absolute top-[40%] -right-40 w-[500px] h-[500px]">
+          <div className="w-full h-full rounded-full bg-accent/[0.08] blur-3xl" />
+        </Parallax>
+        <Parallax offset={-120} className="absolute top-[80%] left-1/3 w-[360px] h-[360px]">
+          <div className="w-full h-full rounded-full bg-primary/[0.05] blur-3xl" />
+        </Parallax>
+      </div>
+
       <main className="pt-20">
         <ScrollReveal>
           <Hero />
         </ScrollReveal>
 
         <div id="categories">
-          <ScrollReveal delay={0.1}>
+          <ScrollScale>
             <TaskCategories />
-          </ScrollReveal>
+          </ScrollScale>
         </div>
 
         <div id="how-it-works">
-          <ScrollReveal delay={0.1}>
+          <ScrollScale>
             <HowItWorks />
-          </ScrollReveal>
+          </ScrollScale>
         </div>
 
         <div id="featured-tasks">
-          <ScrollReveal delay={0.1}>
+          <ScrollScale>
             <FeaturedTasks />
-          </ScrollReveal>
+          </ScrollScale>
         </div>
 
         <div id="safety">
-          <ScrollReveal delay={0.1}>
+          <ScrollScale>
             <TrustSafety />
-          </ScrollReveal>
+          </ScrollScale>
         </div>
 
         <ScrollReveal delay={0.1}>

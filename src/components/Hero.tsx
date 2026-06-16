@@ -1,7 +1,7 @@
-import { Search, ShieldCheck, Star, MapPin, Check, Dog, Sprout, Package, Wrench, Baby, BookOpen, type LucideIcon } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, ShieldCheck, Star, MapPin, Check, Dog, Sprout, Package, Wrench, Baby, BookOpen, ChevronDown, type LucideIcon } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface HelperTag {
@@ -64,6 +64,18 @@ const helperCards: HelperCard[] = [
 export const Hero = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  // Floating cards drift up at different speeds as you scroll down.
+  const yCard0 = useTransform(scrollYProgress, [0, 1], [0, -180]);
+  const yCard1 = useTransform(scrollYProgress, [0, 1], [0, -260]);
+  const yCard2 = useTransform(scrollYProgress, [0, 1], [0, -340]);
+  const cardYs = [yCard0, yCard1, yCard2];
+  const heroTextY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +90,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-background pt-12 lg:pt-20 pb-32">
+    <section ref={sectionRef} className="relative overflow-hidden bg-background pt-12 lg:pt-20 pb-32">
       {/* Decorative circles */}
       <div
         className="pointer-events-none fixed -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-primary/[0.05] -z-10"
@@ -97,6 +109,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{ y: heroTextY, opacity: heroOpacity }}
           >
             <h1 className="editorial-headline text-5xl sm:text-6xl lg:text-[5rem] text-foreground">
               Your <em className="italic font-light text-primary">neighborhood</em>,
@@ -164,6 +177,7 @@ export const Hero = () => {
                   boxShadow: "0 20px 60px hsl(60 3% 17% / 0.12)",
                   transform: `rotate(${card.rotate})`,
                   animation: `float-gentle 6s ease-in-out ${card.delay} infinite`,
+                  y: cardYs[i],
                 }}
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -254,6 +268,23 @@ export const Hero = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Scroll cue */}
+        <motion.div
+          className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground/70"
+          style={{ opacity: heroOpacity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+        >
+          <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em]">Scroll</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronDown className="w-5 h-5" aria-hidden="true" />
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
