@@ -4,6 +4,17 @@ import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
+import { useBrand } from "@/contexts/BrandContext";
+
+const FooterCopy = () => {
+  const { name } = useBrand();
+  return (
+    <p className="text-sm text-muted-foreground">
+      © {new Date().getFullYear()} {name}. All rights reserved.
+    </p>
+  );
+};
+
 
 export const Footer = () => {
   return (
@@ -78,9 +89,8 @@ export const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            © 2025 Taskfy. All rights reserved.
-          </p>
+          <FooterCopy />
+
           <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-muted-foreground justify-center md:justify-end">
             <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { BrandProvider } from "@/contexts/BrandContext";
 import { ChatWidget } from "@/components/ChatWidget";
 import { Tour } from "@/components/Tour";
 import { GlobalWaves } from "@/components/ui/GlobalWaves";
@@ -26,6 +27,8 @@ import Profile from "./pages/Profile";
 import AdminVerifications from "./pages/AdminVerifications";
 import AdminTasks from "./pages/AdminTasks";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminAppSettings from "./pages/AdminAppSettings";
+import AdminTestimonials from "./pages/AdminTestimonials";
 import ServiceHours from "./pages/ServiceHours";
 import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
@@ -49,6 +52,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+              <BrandProvider>
               {/* VerificationPrompt removed — verification is opt-in from Profile tab */}
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -65,6 +69,8 @@ const App = () => (
                 <Route path="/admin/verifications" element={<ProtectedRoute><AdminVerifications /></ProtectedRoute>} />
                 <Route path="/admin/tasks" element={<ProtectedRoute><AdminTasks /></ProtectedRoute>} />
                 <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin/app-settings" element={<ProtectedRoute><AdminAppSettings /></ProtectedRoute>} />
+                <Route path="/admin/testimonials" element={<ProtectedRoute><AdminTestimonials /></ProtectedRoute>} />
                 <Route path="/features" element={<Features />} />
                 <Route path="/service-hours" element={<ProtectedRoute><ServiceHours /></ProtectedRoute>} />
                 <Route path="/contact" element={<Contact />} />
@@ -77,6 +83,7 @@ const App = () => (
               <ChatWidget />
               <Tour />
               <CookieBanner />
+              </BrandProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

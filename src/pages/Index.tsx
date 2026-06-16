@@ -10,6 +10,10 @@ import { CTASection } from "@/components/CTASection";
 import { MailingListSection } from "@/components/MailingListSection";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
+import { StatsCounter } from "@/components/home/StatsCounter";
+import { CategoryMarquee } from "@/components/home/CategoryMarquee";
+import { Testimonials } from "@/components/home/Testimonials";
+import { HowItWorksTimeline } from "@/components/home/HowItWorksTimeline";
 
 const Index = () => {
   return (
@@ -57,17 +61,21 @@ const Index = () => {
           </ScrollScale>
         </div>
 
+        <CategoryMarquee />
+
         <div id="how-it-works">
-          <ScrollScale>
-            <HowItWorks />
-          </ScrollScale>
+          <HowItWorksTimeline />
         </div>
+
+        <StatsCounter />
 
         <div id="featured-tasks">
           <ScrollScale>
             <FeaturedTasks />
           </ScrollScale>
         </div>
+
+        <Testimonials />
 
         <div id="safety">
           <ScrollScale>

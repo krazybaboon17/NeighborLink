@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          app_name: string
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          app_name?: string
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          app_name?: string
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       favorite_helpers: {
         Row: {
           created_at: string
@@ -415,6 +433,42 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          author_name: string
+          author_role: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          location: string | null
+          quote: string
+          rating: number | null
+          sort_order: number
+        }
+        Insert: {
+          author_name: string
+          author_role?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          location?: string | null
+          quote: string
+          rating?: number | null
+          sort_order?: number
+        }
+        Update: {
+          author_name?: string
+          author_role?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          location?: string | null
+          quote?: string
+          rating?: number | null
+          sort_order?: number
         }
         Relationships: []
       }
