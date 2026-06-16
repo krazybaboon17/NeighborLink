@@ -215,7 +215,21 @@ export default function Settings() {
             <Row label="Reduce motion" hint="Tone down animations across the app.">
               <Switch checked={reduceMotion} onCheckedChange={(v) => setReduceMotion(!!v)} />
             </Row>
+            <Row label="Replay welcome tour" hint="Walk through the app's main features again.">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (user) localStorage.removeItem(`taskfy.tour.v1.${user.id}`);
+                  window.dispatchEvent(new Event('taskfy:start-tour'));
+                  toast.success('Starting the tour…');
+                }}
+              >
+                Start tour
+              </Button>
+            </Row>
           </Section>
+
 
           {/* About & Legal */}
           <Section icon={<FileText className="w-4 h-4" />} title="About & Support" description="Learn more, get help, or reach out.">
