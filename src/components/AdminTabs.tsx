@@ -1,8 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { Shield, ShieldCheck } from "lucide-react";
+import { Shield, ShieldCheck, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
+  { to: "/admin/dashboard", label: "Dashboard", icon: BarChart3 },
   { to: "/admin/tasks", label: "Tasks moderation", icon: ShieldCheck },
   { to: "/admin/verifications", label: "Verifications", icon: Shield },
 ];
