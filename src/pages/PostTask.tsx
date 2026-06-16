@@ -1,31 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { Loader2, DollarSign, Wand2, ShieldAlert, Users } from 'lucide-react';
+import {
+  Loader2,
+  DollarSign,
+  Wand2,
+  ShieldAlert,
+  Users,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Pencil,
+  Tag,
+  FileText,
+  MapPin,
+  CalendarDays,
+  Sparkles,
+} from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentModeration } from '@/hooks/useContentModeration';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 const categories = [
-  'Lawn Care', 'Snow Removal', 'Moving Help', 'Grocery Runs',
-  'Home Repairs', 'Babysitting', 'Pet Care', 'Handyman', 'Errands', 'Other'
+  { name: 'Lawn Care', emoji: '🌱' },
+  { name: 'Snow Removal', emoji: '❄️' },
+  { name: 'Moving Help', emoji: '📦' },
+  { name: 'Grocery Runs', emoji: '🛒' },
+  { name: 'Home Repairs', emoji: '🔧' },
+  { name: 'Babysitting', emoji: '👶' },
+  { name: 'Pet Care', emoji: '🐶' },
+  { name: 'Handyman', emoji: '🛠️' },
+  { name: 'Errands', emoji: '🏃' },
+  { name: 'Other', emoji: '✨' },
 ];
 
-const fieldShellClass =
-  "bg-card rounded-2xl px-5 py-4 transition-shadow";
-const fieldShellShadow = { boxShadow: '0 10px 40px hsl(60 3% 17% / 0.06)' };
+type StepKey = 'title' | 'category' | 'description' | 'location' | 'budget' | 'due' | 'parental' | 'review';
 
 export default function PostTask() {
   const [searchParams] = useSearchParams();
@@ -40,21 +57,19 @@ export default function PostTask() {
   const [dueDate, setDueDate] = useState('');
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const navigate = useNavigate();
-  
-  // Young Neighbor state
+
   const [isYoungNeighbor, setIsYoungNeighbor] = useState(false);
   const [parentName, setParentName] = useState('');
   const [parentEmail, setParentEmail] = useState('');
   const [hasParentalApproval, setHasParentalApproval] = useState(false);
-  
-  // Content moderation
+
   const { isChecking: isModeratingContent, moderateTask } = useContentModeration();
 
-  // Check Young Neighbor status on mount
+  const [stepIndex, setStepIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+
   useEffect(() => {
-    if (user) {
-      checkYoungNeighborStatus();
-    }
+    if (user) checkYoungNeighborStatus();
   }, [user]);
 
   const checkYoungNeighborStatus = async () => {
@@ -64,14 +79,30 @@ export default function PostTask() {
         .select('is_young_neighbor')
         .eq('id', user!.id)
         .single();
-      
-      if (data) {
-        setIsYoungNeighbor(data?.is_young_neighbor || false);
-      }
+      if (data) setIsYoungNeighbor(data?.is_young_neighbor || false);
     } catch (err) {
       console.error('Error checking Young Neighbor status:', err);
     }
   };
+
+  const steps = useMemo(() => {
+    const base: { key: StepKey; title: string; subtitle: string; icon: any }[] = [
+      { key: 'title', title: 'What do you need help with?', subtitle: 'A short, clear title works best.', icon: Pencil },
+      { key: 'category', title: 'What kind of task is it?', subtitle: 'Pick the category that fits best.', icon: Tag },
+      { key: 'description', title: 'Tell the story', subtitle: 'Share details that will help neighbors decide.', icon: FileText },
+      { key: 'location', title: 'Where is this happening?', subtitle: 'Your neighborhood helps us match you nearby.', icon: MapPin },
+      { key: 'budget', title: "What's your budget?", subtitle: 'Give a range — payment is coordinated off-app.', icon: DollarSign },
+      { key: 'due', title: 'When do you need it done?', subtitle: 'Optional — leave blank if flexible.', icon: CalendarDays },
+    ];
+    if (isYoungNeighbor) {
+      base.push({ key: 'parental', title: 'Parental approval', subtitle: 'Required for Young Neighbors before posting.', icon: Users });
+    }
+    base.push({ key: 'review', title: "Ready to post?", subtitle: 'Quick look before we share it with neighbors.', icon: Sparkles });
+    return base;
+  }, [isYoungNeighbor]);
+
+  const step = steps[stepIndex];
+  const progress = ((stepIndex + 1) / steps.length) * 100;
 
   const handleAIDescription = async () => {
     if (!title.trim()) return toast.error('Please enter a title first');
@@ -117,15 +148,62 @@ export default function PostTask() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Check Young Neighbor parental consent
-    if (isYoungNeighbor && (!hasParentalApproval || !parentName.trim() || !parentEmail.trim())) {
-      toast.error('Parental approval and contact info are required to post.');
+  const canAdvance = () => {
+    switch (step.key) {
+      case 'title': return title.trim().length >= 3;
+      case 'category': return !!category;
+      case 'description': return description.trim().length >= 10;
+      case 'location': return location.trim().length > 0;
+      case 'budget': {
+        const a = parseInt(budgetMin), b = parseInt(budgetMax);
+        return !isNaN(a) && !isNaN(b) && a >= 0 && b >= a;
+      }
+      case 'due': return true;
+      case 'parental': return hasParentalApproval && parentName.trim().length > 0 && parentEmail.trim().length > 0;
+      case 'review': return true;
+    }
+  };
+
+  const advanceError = () => {
+    switch (step.key) {
+      case 'title': return 'Add a title of at least 3 characters.';
+      case 'category': return 'Pick a category to continue.';
+      case 'description': return 'Add a few more details (10+ characters).';
+      case 'location': return 'Add a location.';
+      case 'budget': return 'Enter a valid budget range (max ≥ min).';
+      case 'parental': return 'Parent name, email, and approval are required.';
+      default: return 'Please complete this step.';
+    }
+  };
+
+  const next = () => {
+    if (!canAdvance()) {
+      toast.error(advanceError()!);
       return;
     }
-    
+    setDirection(1);
+    setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+  };
+
+  const back = () => {
+    setDirection(-1);
+    setStepIndex((i) => Math.max(i - 1, 0));
+  };
+
+  const jumpTo = (key: StepKey) => {
+    const idx = steps.findIndex((s) => s.key === key);
+    if (idx >= 0) {
+      setDirection(idx > stepIndex ? 1 : -1);
+      setStepIndex(idx);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (isYoungNeighbor && (!hasParentalApproval || !parentName.trim() || !parentEmail.trim())) {
+      toast.error('Parental approval and contact info are required to post.');
+      jumpTo('parental');
+      return;
+    }
     setLoading(true);
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -135,7 +213,6 @@ export default function PostTask() {
         return;
       }
 
-      // Anti-spam: limit open tasks and tasks per 24h
       const { count: openCount } = await supabase
         .from('tasks')
         .select('id', { count: 'exact', head: true })
@@ -159,34 +236,29 @@ export default function PostTask() {
         return;
       }
 
-      // AI Content Moderation
       const moderationResult = await moderateTask(title, description, category, isYoungNeighbor);
-      
       if (!moderationResult.allowed) {
-        const severityLabel = moderationResult.severity === 'high' 
-          ? '🚫 Content Blocked' 
-          : '⚠️ Content Flagged';
+        const severityLabel = moderationResult.severity === 'high' ? '🚫 Content Blocked' : '⚠️ Content Flagged';
         toast.error(`${severityLabel}: ${moderationResult.reason || 'This content violates our community guidelines.'}`);
         setLoading(false);
         return;
       }
 
-      // Append parental approval metadata if YN
       let finalDescription = description;
       if (isYoungNeighbor) {
         const approvalData = {
           parentName: parentName.trim(),
           parentEmail: parentEmail.trim(),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
         finalDescription += `\n\n[YN_APPROVAL:${JSON.stringify(approvalData)}]`;
       }
 
       const { error } = await supabase.from('tasks').insert({
         user_id: currentUser.id,
-        title, 
-        description: finalDescription, 
-        category, 
+        title,
+        description: finalDescription,
+        category,
         location,
         budget_min: parseInt(budgetMin),
         budget_max: parseInt(budgetMax),
@@ -203,219 +275,300 @@ export default function PostTask() {
     }
   };
 
+  const Icon = step.icon;
+  const variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
+  };
+
   return (
     <>
       <Navbar />
       <DecorativeCircles />
-      <div className="min-h-screen bg-background pt-28 pb-20">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <header className="text-center mb-12">
-              <h1 className="editorial-headline text-5xl lg:text-[4rem] mb-4">
-                Post a <em className="italic font-light text-primary">task</em>
-              </h1>
-              <p className="font-body text-lg text-muted-foreground max-w-xl mx-auto">
-                Tell your neighbors what you need help with. We'll match you with someone nearby.
-              </p>
-              {isYoungNeighbor && (
-                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-sm text-amber-700 dark:text-amber-300">
-                  <Users className="w-4 h-4" />
-                  Young Neighbor — parental approval required for this task
-                </div>
-              )}
-            </header>
-
-            <form onSubmit={handleSubmit} className="space-y-10">
-              {/* Section: The basics */}
-              <section>
-                <h2 className="font-display font-bold text-2xl mb-5 text-foreground">
-                  The basics
-                </h2>
-                <div className="space-y-4">
-                  <div className={fieldShellClass} style={fieldShellShadow}>
-                    <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
-                      Task title
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., Mow my lawn this weekend"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                      className="w-full bg-transparent border-0 outline-none font-body text-base placeholder:text-muted-foreground/60"
-                    />
-                  </div>
-
-                  <div className={fieldShellClass} style={fieldShellShadow}>
-                    <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
-                      Category
-                    </label>
-                    <Select value={category} onValueChange={setCategory} required>
-                      <SelectTrigger className="border-0 px-0 h-auto py-1 bg-transparent font-body text-base shadow-none focus:ring-0">
-                        <SelectValue placeholder="Choose a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </section>
-
-              {/* Section: Tell the story */}
-              <section>
-                <div className="flex items-end justify-between mb-5">
-                  <h2 className="font-display font-bold text-2xl text-foreground">
-                    Tell the story
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={handleAIDescription}
-                    disabled={aiLoading === 'description'}
-                    className="font-body text-xs font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    {aiLoading === 'description' ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Wand2 className="w-3 h-3" />
-                    )}
-                    Help me write it
-                  </button>
-                </div>
-                <div className={fieldShellClass} style={fieldShellShadow}>
-                  <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    placeholder="Describe what you need, when, and any details that matter…"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={5}
-                    required
-                    className="w-full bg-transparent border-0 outline-none font-body text-base resize-none placeholder:text-muted-foreground/60"
-                  />
-                </div>
-              </section>
-
-              {/* Section: Where & how much */}
-              <section>
-                <h2 className="font-display font-bold text-2xl mb-5 text-foreground">
-                  Where & how much
-                </h2>
-                <div className="space-y-4">
-                  <div className={fieldShellClass} style={fieldShellShadow}>
-                    <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
-                      Location
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., Arlington Heights, IL"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      required
-                      className="w-full bg-transparent border-0 outline-none font-body text-base placeholder:text-muted-foreground/60"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="font-body text-sm text-muted-foreground">Budget range</span>
-                    <button
-                      type="button"
-                      onClick={handleAIPricing}
-                      disabled={aiLoading === 'pricing'}
-                      className="font-body text-xs font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      {aiLoading === 'pricing' ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <DollarSign className="w-3 h-3" />
-                      )}
-                      Suggest a price
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className={fieldShellClass} style={fieldShellShadow}>
-                      <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
-                        Min ($)
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="20"
-                        value={budgetMin}
-                        onChange={(e) => setBudgetMin(e.target.value)}
-                        min="0"
-                        required
-                        className="w-full bg-transparent border-0 outline-none font-body text-base placeholder:text-muted-foreground/60"
-                      />
-                    </div>
-                    <div className={fieldShellClass} style={fieldShellShadow}>
-                      <label className="font-body text-xs font-bold uppercase tracking-wider text-primary block mb-1">
-                        Max ($)
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="50"
-                        value={budgetMax}
-                        onChange={(e) => setBudgetMax(e.target.value)}
-                        min="0"
-                        required
-                        className="w-full bg-transparent border-0 outline-none font-body text-base placeholder:text-muted-foreground/60"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* Young Neighbor Parental Approval */}
-              {isYoungNeighbor && (
-                <section className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-amber-600" />
-                    <h2 className="font-display font-bold text-base text-foreground">Parental Approval</h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input type="text" placeholder="Parent Name" value={parentName} onChange={(e) => setParentName(e.target.value)} required className="w-full bg-white/50 border border-amber-500/20 rounded-lg px-3 py-2 text-sm outline-none" />
-                    <input type="email" placeholder="Parent Email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} required className="w-full bg-white/50 border border-amber-500/20 rounded-lg px-3 py-2 text-sm outline-none" />
-                  </div>
-
-                  <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-                    <input type="checkbox" checked={hasParentalApproval} onChange={(e) => setHasParentalApproval(e.target.checked)} className="rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
-                    I confirm parental approval for this task.
-                  </label>
-                </section>
-              )}
-
-              {/* AI Safety Notice */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/30 rounded-xl px-4 py-3">
-                <ShieldAlert className="w-4 h-4 text-primary shrink-0" />
-                <span>
-                  All task postings are reviewed by AI for community safety. 
-                  {isYoungNeighbor && <strong> Stricter safety rules apply for Young Neighbors.</strong>}
-                </span>
+      <div className="min-h-screen bg-background" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 6rem)', paddingBottom: '5rem' }}>
+        <div className="container mx-auto px-4 max-w-2xl">
+          <header className="text-center mb-8">
+            <h1 className="editorial-headline text-4xl lg:text-5xl mb-3">
+              Post a <em className="italic font-light text-primary">task</em>
+            </h1>
+            <p className="font-body text-muted-foreground max-w-md mx-auto">
+              A few quick questions and your neighbors will see your task.
+            </p>
+            {isYoungNeighbor && (
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-sm text-amber-700 dark:text-amber-300">
+                <Users className="w-4 h-4" />
+                Young Neighbor — parental approval required
               </div>
+            )}
+          </header>
 
-              <Button
-                type="submit"
-                disabled={loading || isModeratingContent}
-                className="w-full h-14 rounded-full text-base font-semibold"
-              >
-                {(loading || isModeratingContent) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isModeratingContent ? 'Checking content safety...' : 'Post task'}
+          <Card className="w-full glass-card border-2 overflow-hidden">
+            <div className="px-6 pt-6 pb-2 space-y-3">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Step {stepIndex + 1} of {steps.length}</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-1.5" />
+            </div>
+
+            <CardContent className="pt-6 pb-8 min-h-[420px]">
+              <AnimatePresence custom={direction} mode="wait">
+                <motion.div
+                  key={step.key}
+                  custom={direction}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+                  className="space-y-6"
+                >
+                  <div className="flex flex-col items-center text-center space-y-3">
+                    <motion.div
+                      initial={{ scale: 0.6, rotate: -8 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+                      className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20"
+                    >
+                      <Icon className="w-7 h-7 text-primary" />
+                    </motion.div>
+                    <h2 className="text-2xl font-bold tracking-tight">{step.title}</h2>
+                    <p className="text-sm text-muted-foreground max-w-sm">{step.subtitle}</p>
+                  </div>
+
+                  <div className="pt-2">
+                    {step.key === 'title' && (
+                      <div className="max-w-md mx-auto space-y-2">
+                        <Label htmlFor="title" className="sr-only">Title</Label>
+                        <Input
+                          id="title"
+                          autoFocus
+                          placeholder="e.g., Mow my lawn this weekend"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && next()}
+                          className="text-center text-lg h-14"
+                        />
+                      </div>
+                    )}
+
+                    {step.key === 'category' && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {categories.map((c) => {
+                          const active = category === c.name;
+                          return (
+                            <button
+                              key={c.name}
+                              type="button"
+                              onClick={() => setCategory(c.name)}
+                              className={`flex flex-col items-center gap-1 rounded-xl border-2 px-3 py-4 transition-all ${
+                                active
+                                  ? 'border-primary bg-primary/5 shadow-sm'
+                                  : 'border-border hover:border-primary/40 hover:bg-accent/40'
+                              }`}
+                            >
+                              <span className="text-2xl">{c.emoji}</span>
+                              <span className="text-sm font-medium">{c.name}</span>
+                              {active && <Check className="w-3.5 h-3.5 text-primary" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {step.key === 'description' && (
+                      <div className="space-y-2">
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleAIDescription}
+                            disabled={aiLoading === 'description'}
+                            className="text-xs font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1.5 disabled:opacity-50"
+                          >
+                            {aiLoading === 'description' ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Wand2 className="w-3 h-3" />
+                            )}
+                            Help me write it
+                          </button>
+                        </div>
+                        <textarea
+                          autoFocus
+                          placeholder="Describe what you need, when, and any details that matter…"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          rows={6}
+                          className="w-full bg-card rounded-xl border-2 border-border focus:border-primary/40 outline-none px-4 py-3 text-base resize-none transition-colors"
+                        />
+                      </div>
+                    )}
+
+                    {step.key === 'location' && (
+                      <div className="max-w-md mx-auto">
+                        <Input
+                          autoFocus
+                          placeholder="e.g., Arlington Heights, IL"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && next()}
+                          className="text-center text-lg h-14"
+                        />
+                      </div>
+                    )}
+
+                    {step.key === 'budget' && (
+                      <div className="space-y-4 max-w-md mx-auto">
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleAIPricing}
+                            disabled={aiLoading === 'pricing'}
+                            className="text-xs font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1.5 disabled:opacity-50"
+                          >
+                            {aiLoading === 'pricing' ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <DollarSign className="w-3 h-3" />
+                            )}
+                            Suggest a price
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs">Min ($)</Label>
+                            <Input
+                              type="number"
+                              placeholder="20"
+                              value={budgetMin}
+                              onChange={(e) => setBudgetMin(e.target.value)}
+                              min={0}
+                              className="h-12 text-lg"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Max ($)</Label>
+                            <Input
+                              type="number"
+                              placeholder="50"
+                              value={budgetMax}
+                              onChange={(e) => setBudgetMax(e.target.value)}
+                              min={0}
+                              className="h-12 text-lg"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">
+                          💬 Payment is coordinated directly with your helper — Taskfy doesn't handle money.
+                        </p>
+                      </div>
+                    )}
+
+                    {step.key === 'due' && (
+                      <div className="max-w-xs mx-auto space-y-2">
+                        <Label className="text-xs">Due date (optional)</Label>
+                        <Input
+                          type="date"
+                          value={dueDate}
+                          onChange={(e) => setDueDate(e.target.value)}
+                          className="h-12 text-base"
+                        />
+                        {dueDate && (
+                          <button
+                            type="button"
+                            onClick={() => setDueDate('')}
+                            className="text-xs text-muted-foreground hover:text-foreground"
+                          >
+                            Clear date
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {step.key === 'parental' && (
+                      <div className="space-y-3 max-w-md mx-auto">
+                        <Input
+                          placeholder="Parent name"
+                          value={parentName}
+                          onChange={(e) => setParentName(e.target.value)}
+                          className="h-12"
+                        />
+                        <Input
+                          type="email"
+                          placeholder="Parent email"
+                          value={parentEmail}
+                          onChange={(e) => setParentEmail(e.target.value)}
+                          className="h-12"
+                        />
+                        <label className="flex items-start gap-2 text-sm text-foreground cursor-pointer p-3 border-2 rounded-xl hover:border-primary/40 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={hasParentalApproval}
+                            onChange={(e) => setHasParentalApproval(e.target.checked)}
+                            className="mt-0.5 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                          />
+                          <span>I confirm a parent or guardian has approved this task.</span>
+                        </label>
+                      </div>
+                    )}
+
+                    {step.key === 'review' && (
+                      <div className="space-y-3 max-w-md mx-auto">
+                        {[
+                          { label: 'Title', value: title || '—', key: 'title' as StepKey },
+                          { label: 'Category', value: category || '—', key: 'category' as StepKey },
+                          { label: 'Description', value: description ? (description.length > 80 ? description.slice(0, 80) + '…' : description) : '—', key: 'description' as StepKey },
+                          { label: 'Location', value: location || '—', key: 'location' as StepKey },
+                          { label: 'Budget', value: budgetMin && budgetMax ? `$${budgetMin} – $${budgetMax}` : '—', key: 'budget' as StepKey },
+                          { label: 'Due date', value: dueDate || 'Flexible', key: 'due' as StepKey },
+                        ].map((row) => (
+                          <div key={row.label} className="flex items-start justify-between gap-3 rounded-xl border bg-card/50 p-3 text-sm">
+                            <div className="min-w-0">
+                              <div className="text-xs text-muted-foreground">{row.label}</div>
+                              <div className="font-medium truncate">{row.value}</div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => jumpTo(row.key)}
+                              className="text-xs text-primary hover:underline shrink-0"
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        ))}
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/30 rounded-xl px-4 py-3">
+                          <ShieldAlert className="w-4 h-4 text-primary shrink-0" />
+                          <span>
+                            All postings are reviewed by AI for community safety.
+                            {isYoungNeighbor && <strong> Stricter rules apply for Young Neighbors.</strong>}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </CardContent>
+
+            <div className="flex items-center justify-between gap-3 px-6 py-4 border-t bg-muted/20">
+              <Button variant="ghost" onClick={back} disabled={stepIndex === 0 || loading}>
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back
               </Button>
-            </form>
-          </motion.div>
+              {step.key === 'review' ? (
+                <Button onClick={handleSubmit} disabled={loading || isModeratingContent} className="min-w-[160px]">
+                  {(loading || isModeratingContent) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {isModeratingContent ? 'Checking safety…' : 'Post task'}
+                </Button>
+              ) : (
+                <Button onClick={next} disabled={!canAdvance()} className="min-w-[120px]">
+                  Next <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
-
-
     </>
   );
 }
