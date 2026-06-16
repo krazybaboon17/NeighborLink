@@ -268,6 +268,23 @@ export const Hero = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Scroll cue */}
+        <motion.div
+          className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground/70"
+          style={{ opacity: heroOpacity }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+        >
+          <span className="text-[10px] font-display font-bold uppercase tracking-[0.2em]">Scroll</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronDown className="w-5 h-5" aria-hidden="true" />
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
