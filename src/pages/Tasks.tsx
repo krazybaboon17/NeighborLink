@@ -226,12 +226,8 @@ export default function Tasks() {
   );
 
   const showRecs = !!user && recTasks.length > 0;
-  const padded = showRecs
-    ? [
-        ...recTasks,
-        ...filteredTasks.filter((ft) => !recIds.has(ft.task.id) && !appliedTaskIds.has(ft.task.id)),
-      ].slice(0, 3)
-    : [];
+  // Only show actual AI-recommended tasks in the "For You" strip — no padding with non-recommended.
+  const padded = showRecs ? recTasks.slice(0, 6) : [];
   const paddedIds = new Set(padded.map((p) => p.task.id));
   const remaining = filteredTasks.filter((ft) => !paddedIds.has(ft.task.id));
   const visibleRemaining = remaining.slice(0, visibleCount);
@@ -420,19 +416,27 @@ export default function Tasks() {
           ) : (
             <>
               {showRecs && padded.length > 0 && (
-                <div className="mb-10">
-                  <div className="flex items-center gap-2 mb-4">
+                <div className="mb-12">
+                  <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-4 h-4 text-primary" aria-hidden="true" />
                     <span className="font-display font-bold text-sm uppercase tracking-wider text-primary">
                       Recommended for you
                     </span>
                   </div>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {padded.map((p, i) => (
+                  <p className="font-body text-sm text-muted-foreground mb-5">
+                    Hand-picked by AI based on your skills and location. Look for the{" "}
+                    <span className="inline-flex items-center gap-1 align-middle bg-gradient-to-r from-primary to-accent text-primary-foreground text-[10px] font-display font-bold px-2 py-0.5 rounded-full">
+                      <Sparkles className="w-2.5 h-2.5" aria-hidden="true" /> For You
+                    </span>{" "}
+                    badge.
+                  </p>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-3">
+                    {padded.map((p) => (
                       <TaskCard
                         key={p.task.id}
                         task={p.task}
-                        featured={i < recTasks.length}
+                        featured
+                        recommended
                         applied={false}
                         distanceMiles={p.distance}
                       />
