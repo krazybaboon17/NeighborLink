@@ -243,6 +243,7 @@ export type Database = {
           current_state: string | null
           email_verified: boolean
           full_name: string | null
+          has_seen_tour: boolean | null
           id: string
           is_helper: boolean | null
           is_young_neighbor: boolean | null
@@ -264,6 +265,7 @@ export type Database = {
           current_state?: string | null
           email_verified?: boolean
           full_name?: string | null
+          has_seen_tour?: boolean | null
           id: string
           is_helper?: boolean | null
           is_young_neighbor?: boolean | null
@@ -285,6 +287,7 @@ export type Database = {
           current_state?: string | null
           email_verified?: boolean
           full_name?: string | null
+          has_seen_tour?: boolean | null
           id?: string
           is_helper?: boolean | null
           is_young_neighbor?: boolean | null
