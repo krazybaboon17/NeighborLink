@@ -4,6 +4,17 @@ import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
+import { useBrand } from "@/contexts/BrandContext";
+
+const FooterCopy = () => {
+  const { name } = useBrand();
+  return (
+    <p className="text-sm text-muted-foreground">
+      © {new Date().getFullYear()} {name}. All rights reserved.
+    </p>
+  );
+};
+
 
 export const Footer = () => {
   return (
