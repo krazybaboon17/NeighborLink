@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentModeration } from '@/hooks/useContentModeration';
+import { SEO } from '@/components/SEO';
 
 const categories = [
   { name: 'Lawn Care', emoji: '🌱' },
