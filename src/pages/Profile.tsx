@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { SKILLS, CURRENT_STATES } from '@/components/OnboardingQuestions';
+import { SEO } from '@/components/SEO';
 
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, 'Please enter your full name').max(100, 'Name is too long (max 100 characters)'),

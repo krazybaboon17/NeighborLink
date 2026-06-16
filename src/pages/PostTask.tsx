@@ -284,6 +284,11 @@ export default function PostTask() {
 
   return (
     <>
+      <SEO
+        title="Post a task — Taskfy"
+        description="Tell your neighborhood what you need help with. Post a task on Taskfy in under a minute and get offers from local, verified helpers near you."
+        path="/post-task"
+      />
       <Navbar />
       <DecorativeCircles />
       <div className="min-h-screen bg-background" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 6rem)', paddingBottom: '5rem' }}>
