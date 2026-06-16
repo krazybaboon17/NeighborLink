@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ChatWidget } from "@/components/ChatWidget";
+import { Tour } from "@/components/Tour";
 import { GlobalWaves } from "@/components/ui/GlobalWaves";
 // VerificationPrompt removed — verification is now opt-in from the Profile tab
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -72,6 +73,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <ChatWidget />
+              <Tour />
               <CookieBanner />
             </AuthProvider>
           </BrowserRouter>
