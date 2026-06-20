@@ -157,7 +157,7 @@ export default function PostTask() {
       case 'title': return title.trim().length >= 3;
       case 'category': return !!category;
       case 'description': return description.trim().length >= 10;
-      case 'location': return location.trim().length > 0;
+      case 'location': return !!pickedLocation;
       case 'budget': {
         const a = parseInt(budgetMin), b = parseInt(budgetMax);
         return !isNaN(a) && !isNaN(b) && a >= 0 && b >= a;
