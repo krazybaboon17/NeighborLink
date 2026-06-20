@@ -94,7 +94,7 @@ export default function PostTask() {
       { key: 'title', title: 'What do you need help with?', subtitle: 'A short, clear title works best.', icon: Pencil },
       { key: 'category', title: 'What kind of task is it?', subtitle: 'Pick the category that fits best.', icon: Tag },
       { key: 'description', title: 'Tell the story', subtitle: 'Share details that will help neighbors decide.', icon: FileText },
-      { key: 'location', title: 'Where is this happening?', subtitle: 'Your neighborhood helps us match you nearby.', icon: MapPin },
+      { key: 'location', title: 'Where is this happening?', subtitle: 'Your exact address stays private until you accept a helper. Others see a general circle on the map.', icon: MapPin },
       { key: 'budget', title: "What's your budget?", subtitle: 'Give a range — payment is coordinated off-app.', icon: DollarSign },
       { key: 'due', title: 'When do you need it done?', subtitle: 'Optional — leave blank if flexible.', icon: CalendarDays },
     ];
