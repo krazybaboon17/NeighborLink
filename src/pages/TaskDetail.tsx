@@ -34,6 +34,7 @@ import { useContentModeration } from '@/hooks/useContentModeration';
 import { ReportTaskDialog } from '@/components/ReportTaskDialog';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { SEO } from '@/components/SEO';
+import { TaskLocationMap } from '@/components/TaskMap';
 
 interface Task {
   id: string;
