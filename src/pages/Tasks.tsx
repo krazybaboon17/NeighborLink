@@ -270,15 +270,40 @@ export default function Tasks() {
                 Find a way to help a neighbor today.
               </p>
             </div>
-            <Button
-              size="lg"
-              onClick={() => navigate('/post-task')}
-              className="rounded-full px-8 h-12 self-start md:self-auto min-h-[44px]"
-              aria-label="Post a new task"
-            >
-              Post a Task
-            </Button>
-          </motion.div>
+            <div className="flex items-center gap-2 self-start md:self-auto">
+              <div className="inline-flex items-center rounded-full border bg-card p-1" role="tablist" aria-label="View tasks">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === 'list'}
+                  onClick={() => setViewMode('list')}
+                  className={`inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-sm font-medium transition-colors ${
+                    viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <List className="w-4 h-4" /> List
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === 'map'}
+                  onClick={() => setViewMode('map')}
+                  className={`inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-sm font-medium transition-colors ${
+                    viewMode === 'map' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <MapIcon className="w-4 h-4" /> Map
+                </button>
+              </div>
+              <Button
+                size="lg"
+                onClick={() => navigate('/post-task')}
+                className="rounded-full px-8 h-12 min-h-[44px]"
+                aria-label="Post a new task"
+              >
+                Post a Task
+              </Button>
+            </div>
 
           {/* Search bar */}
           <div
