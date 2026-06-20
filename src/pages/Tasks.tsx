@@ -34,6 +34,7 @@ export default function Tasks() {
   const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [zipInput, setZipInput] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [viewMode, setViewMode] = useLocalStorage<'list' | 'map'>('nl_tasks_view', 'list');
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
