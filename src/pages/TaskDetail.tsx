@@ -34,6 +34,7 @@ import { useContentModeration } from '@/hooks/useContentModeration';
 import { ReportTaskDialog } from '@/components/ReportTaskDialog';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { SEO } from '@/components/SEO';
+import { TaskLocationMap } from '@/components/TaskMap';
 
 interface Task {
   id: string;
@@ -48,6 +49,8 @@ interface Task {
   due_date: string | null;
   user_id: string;
   selected_offer_id: string | null;
+  approx_lat?: number | null;
+  approx_lng?: number | null;
   completion_photo_url?: string | null;
   profiles: {
     full_name: string;
@@ -99,6 +102,7 @@ export default function TaskDetail() {
   const [completionPhotoPreview, setCompletionPhotoPreview] = useState<string | null>(null);
   const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [preciseLocation, setPreciseLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
 
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
@@ -146,6 +150,25 @@ export default function TaskDetail() {
       fetchOffers();
     }
   }, [id]);
+
+  // Try to fetch precise location — RLS only returns a row if the user is
+  // the task owner, the accepted helper, or an admin.
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('task_locations')
+        .select('lat, lng, address')
+        .eq('task_id', id)
+        .maybeSingle();
+      if (!cancelled && data) {
+        setPreciseLocation({ lat: Number(data.lat), lng: Number(data.lng), address: data.address });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, user?.id]);
+
 
   // Fetch current user's Young Neighbor / verification status
   useEffect(() => {
@@ -729,6 +752,37 @@ export default function TaskDetail() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Location map */}
+              {(preciseLocation || (task.approx_lat != null && task.approx_lng != null)) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      {preciseLocation ? 'Exact location' : 'General area'}
+                    </CardTitle>
+                    {!preciseLocation && (
+                      <CardDescription>
+                        The exact address is hidden until the poster accepts your offer. The circle shows the general area.
+                      </CardDescription>
+                    )}
+                    {preciseLocation && (
+                      <CardDescription className="font-medium text-foreground">
+                        {preciseLocation.address}
+                      </CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <TaskLocationMap
+                      lat={preciseLocation ? preciseLocation.lat : task.approx_lat!}
+                      lng={preciseLocation ? preciseLocation.lng : task.approx_lng!}
+                      precise={!!preciseLocation}
+                      label={preciseLocation?.address}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
 
               {/* Poster Info */}
               <Card>

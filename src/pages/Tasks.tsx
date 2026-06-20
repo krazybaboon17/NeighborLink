@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Navbar } from '@/components/Navbar';
-import { Search, Locate, Loader2, Sparkles, MapPin, Inbox } from 'lucide-react';
+import { Search, Locate, Loader2, Sparkles, MapPin, Inbox, List, Map as MapIcon } from 'lucide-react';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
 import { useTaskRecommendations } from '@/hooks/useTaskRecommendations';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,8 @@ import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { motion } from 'framer-motion';
+import { TaskMap } from '@/components/TaskMap';
+import { parseCoords } from '@/lib/distance';
 
 interface Task extends TaskCardData {
   user_id?: string;
@@ -32,6 +34,7 @@ export default function Tasks() {
   const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [zipInput, setZipInput] = useState('');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [viewMode, setViewMode] = useLocalStorage<'list' | 'map'>('nl_tasks_view', 'list');
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -267,14 +270,40 @@ export default function Tasks() {
                 Find a way to help a neighbor today.
               </p>
             </div>
-            <Button
-              size="lg"
-              onClick={() => navigate('/post-task')}
-              className="rounded-full px-8 h-12 self-start md:self-auto min-h-[44px]"
-              aria-label="Post a new task"
-            >
-              Post a Task
-            </Button>
+            <div className="flex items-center gap-2 self-start md:self-auto">
+              <div className="inline-flex items-center rounded-full border bg-card p-1" role="tablist" aria-label="View tasks">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === 'list'}
+                  onClick={() => setViewMode('list')}
+                  className={`inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-sm font-medium transition-colors ${
+                    viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <List className="w-4 h-4" /> List
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === 'map'}
+                  onClick={() => setViewMode('map')}
+                  className={`inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-sm font-medium transition-colors ${
+                    viewMode === 'map' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <MapIcon className="w-4 h-4" /> Map
+                </button>
+              </div>
+              <Button
+                size="lg"
+                onClick={() => navigate('/post-task')}
+                className="rounded-full px-8 h-12 min-h-[44px]"
+                aria-label="Post a new task"
+              >
+                Post a Task
+              </Button>
+            </div>
           </motion.div>
 
           {/* Search bar */}
@@ -413,6 +442,34 @@ export default function Tasks() {
           {/* Results */}
           {loading ? (
             <TaskCardSkeletonGrid count={6} />
+          ) : viewMode === 'map' ? (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <MapIcon className="w-4 h-4 text-primary" />
+                Circles show the general area of each task. The exact address is only shared once the poster accepts your offer.
+              </div>
+              <TaskMap
+                tasks={filteredTasks.map((ft) => ({
+                  id: ft.task.id,
+                  title: ft.task.title,
+                  category: ft.task.category,
+                  location: ft.task.location,
+                  approx_lat: (ft.task as any).approx_lat ?? null,
+                  approx_lng: (ft.task as any).approx_lng ?? null,
+                }))}
+                center={(() => {
+                  const c = parseCoords(userLocation);
+                  return c ? { lat: c.lat, lng: c.lng } : null;
+                })()}
+                height={560}
+                onTaskClick={(id) => navigate(`/tasks/${id}`)}
+              />
+              {filteredTasks.every((ft) => !(ft.task as any).approx_lat) && (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No mapped tasks yet — newly posted tasks will appear here with location pins.
+                </p>
+              )}
+            </div>
           ) : (
             <>
               {showRecs && padded.length > 0 && (

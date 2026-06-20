@@ -358,6 +358,41 @@ export type Database = {
           },
         ]
       }
+      task_locations: {
+        Row: {
+          address: string
+          created_at: string
+          lat: number
+          lng: number
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          lat: number
+          lng: number
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          lat?: number
+          lng?: number
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_locations_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: true
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_reports: {
         Row: {
           created_at: string
@@ -387,6 +422,8 @@ export type Database = {
       }
       tasks: {
         Row: {
+          approx_lat: number | null
+          approx_lng: number | null
           budget_max: number
           budget_min: number
           category: string
@@ -403,6 +440,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approx_lat?: number | null
+          approx_lng?: number | null
           budget_max: number
           budget_min: number
           category: string
@@ -419,6 +458,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approx_lat?: number | null
+          approx_lng?: number | null
           budget_max?: number
           budget_min?: number
           category?: string

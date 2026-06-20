@@ -29,6 +29,8 @@ import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { SEO } from '@/components/SEO';
+import { LocationPicker, type PickedLocation } from '@/components/LocationPicker';
+import { approximate } from '@/lib/geo';
 
 const categories = [
   { name: 'Lawn Care', emoji: '🌱' },
@@ -53,6 +55,7 @@ export default function PostTask() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
+  const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null);
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -91,7 +94,7 @@ export default function PostTask() {
       { key: 'title', title: 'What do you need help with?', subtitle: 'A short, clear title works best.', icon: Pencil },
       { key: 'category', title: 'What kind of task is it?', subtitle: 'Pick the category that fits best.', icon: Tag },
       { key: 'description', title: 'Tell the story', subtitle: 'Share details that will help neighbors decide.', icon: FileText },
-      { key: 'location', title: 'Where is this happening?', subtitle: 'Your neighborhood helps us match you nearby.', icon: MapPin },
+      { key: 'location', title: 'Where is this happening?', subtitle: 'Your exact address stays private until you accept a helper. Others see a general circle on the map.', icon: MapPin },
       { key: 'budget', title: "What's your budget?", subtitle: 'Give a range — payment is coordinated off-app.', icon: DollarSign },
       { key: 'due', title: 'When do you need it done?', subtitle: 'Optional — leave blank if flexible.', icon: CalendarDays },
     ];
@@ -154,7 +157,7 @@ export default function PostTask() {
       case 'title': return title.trim().length >= 3;
       case 'category': return !!category;
       case 'description': return description.trim().length >= 10;
-      case 'location': return location.trim().length > 0;
+      case 'location': return !!pickedLocation;
       case 'budget': {
         const a = parseInt(budgetMin), b = parseInt(budgetMax);
         return !isNaN(a) && !isNaN(b) && a >= 0 && b >= a;
@@ -170,7 +173,7 @@ export default function PostTask() {
       case 'title': return 'Add a title of at least 3 characters.';
       case 'category': return 'Pick a category to continue.';
       case 'description': return 'Add a few more details (10+ characters).';
-      case 'location': return 'Add a location.';
+      case 'location': return 'Pick your address from the suggestions.';
       case 'budget': return 'Enter a valid budget range (max ≥ min).';
       case 'parental': return 'Parent name, email, and approval are required.';
       default: return 'Please complete this step.';
@@ -255,7 +258,8 @@ export default function PostTask() {
         finalDescription += `\n\n[YN_APPROVAL:${JSON.stringify(approvalData)}]`;
       }
 
-      const { error } = await supabase.from('tasks').insert({
+      const approx = pickedLocation ? approximate({ lat: pickedLocation.lat, lng: pickedLocation.lng }) : null;
+      const { data: inserted, error } = await supabase.from('tasks').insert({
         user_id: currentUser.id,
         title,
         description: finalDescription,
@@ -265,8 +269,21 @@ export default function PostTask() {
         budget_max: parseInt(budgetMax),
         due_date: dueDate ? new Date(dueDate).toISOString() : null,
         status: 'open',
-      } as any);
+        approx_lat: approx?.lat ?? null,
+        approx_lng: approx?.lng ?? null,
+      } as any).select('id').single();
       if (error) throw error;
+
+      if (inserted && pickedLocation) {
+        const { error: locErr } = await supabase.from('task_locations').insert({
+          task_id: inserted.id,
+          lat: pickedLocation.lat,
+          lng: pickedLocation.lng,
+          address: pickedLocation.address,
+        } as any);
+        if (locErr) console.error('task_locations insert failed', locErr);
+      }
+
       toast.success('Task posted!');
       navigate('/tasks');
     } catch (error: any) {
@@ -412,16 +429,13 @@ export default function PostTask() {
                     )}
 
                     {step.key === 'location' && (
-                      <div className="max-w-md mx-auto">
-                        <Input
-                          autoFocus
-                          placeholder="e.g., Arlington Heights, IL"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && next()}
-                          className="text-center text-lg h-14"
-                        />
-                      </div>
+                      <LocationPicker
+                        value={pickedLocation}
+                        onChange={(v) => {
+                          setPickedLocation(v);
+                          setLocation(v?.label ?? '');
+                        }}
+                      />
                     )}
 
                     {step.key === 'budget' && (
