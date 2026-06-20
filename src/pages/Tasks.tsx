@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Navbar } from '@/components/Navbar';
-import { Search, Locate, Loader2, Sparkles, MapPin, Inbox } from 'lucide-react';
+import { Search, Locate, Loader2, Sparkles, MapPin, Inbox, List, Map as MapIcon } from 'lucide-react';
 import { useLocationFilter } from '@/hooks/useLocationFilter';
 import { useTaskRecommendations } from '@/hooks/useTaskRecommendations';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,8 @@ import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { motion } from 'framer-motion';
+import { TaskMap } from '@/components/TaskMap';
+import { parseCoords } from '@/lib/distance';
 
 interface Task extends TaskCardData {
   user_id?: string;
