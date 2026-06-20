@@ -304,6 +304,7 @@ export default function Tasks() {
                 Post a Task
               </Button>
             </div>
+          </motion.div>
 
           {/* Search bar */}
           <div
