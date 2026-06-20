@@ -55,6 +55,7 @@ export default function PostTask() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
+  const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null);
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
   const [dueDate, setDueDate] = useState('');
