@@ -753,6 +753,37 @@ export default function TaskDetail() {
                 </CardContent>
               </Card>
 
+              {/* Location map */}
+              {(preciseLocation || (task.approx_lat != null && task.approx_lng != null)) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      {preciseLocation ? 'Exact location' : 'General area'}
+                    </CardTitle>
+                    {!preciseLocation && (
+                      <CardDescription>
+                        The exact address is hidden until the poster accepts your offer. The circle shows the general area.
+                      </CardDescription>
+                    )}
+                    {preciseLocation && (
+                      <CardDescription className="font-medium text-foreground">
+                        {preciseLocation.address}
+                      </CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <TaskLocationMap
+                      lat={preciseLocation ? preciseLocation.lat : task.approx_lat!}
+                      lng={preciseLocation ? preciseLocation.lng : task.approx_lng!}
+                      precise={!!preciseLocation}
+                      label={preciseLocation?.address}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+
               {/* Poster Info */}
               <Card>
                 <CardHeader>
