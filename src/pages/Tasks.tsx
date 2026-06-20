@@ -442,6 +442,34 @@ export default function Tasks() {
           {/* Results */}
           {loading ? (
             <TaskCardSkeletonGrid count={6} />
+          ) : viewMode === 'map' ? (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <MapIcon className="w-4 h-4 text-primary" />
+                Circles show the general area of each task. The exact address is only shared once the poster accepts your offer.
+              </div>
+              <TaskMap
+                tasks={filteredTasks.map((ft) => ({
+                  id: ft.task.id,
+                  title: ft.task.title,
+                  category: ft.task.category,
+                  location: ft.task.location,
+                  approx_lat: (ft.task as any).approx_lat ?? null,
+                  approx_lng: (ft.task as any).approx_lng ?? null,
+                }))}
+                center={(() => {
+                  const c = parseCoords(userLocation);
+                  return c ? { lat: c.lat, lng: c.lng } : null;
+                })()}
+                height={560}
+                onTaskClick={(id) => navigate(`/tasks/${id}`)}
+              />
+              {filteredTasks.every((ft) => !(ft.task as any).approx_lat) && (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  No mapped tasks yet — newly posted tasks will appear here with location pins.
+                </p>
+              )}
+            </div>
           ) : (
             <>
               {showRecs && padded.length > 0 && (
