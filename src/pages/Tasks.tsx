@@ -312,14 +312,14 @@ export default function Tasks() {
             style={{ boxShadow: '0 20px 60px hsl(60 3% 17% / 0.08)' }}
           >
             <label className="flex items-center flex-1 px-4">
-              <Search className="w-5 h-5 text-muted-foreground/60 mr-3 shrink-0" aria-hidden="true" />
+              <Search className="w-5 h-5 text-muted-foreground mr-3 shrink-0" aria-hidden="true" />
               <span className="sr-only">Search tasks</span>
               <input
                 type="search"
                 placeholder="Search tasks…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground/60 min-h-[44px]"
+                className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground min-h-[44px]"
               />
             </label>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>

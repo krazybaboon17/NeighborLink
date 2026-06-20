@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,36 +10,45 @@ import { BrandProvider } from "@/contexts/BrandContext";
 import { ChatWidget } from "@/components/ChatWidget";
 import { Tour } from "@/components/Tour";
 import { GlobalWaves } from "@/components/ui/GlobalWaves";
-// VerificationPrompt removed — verification is now opt-in from the Profile tab
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { CookieBanner } from "@/components/CookieBanner";
+
+// Keep the landing page eager so first paint isn't gated on a chunk fetch.
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Tasks from "./pages/Tasks";
-import PostTask from "./pages/PostTask";
-import MyTasks from "./pages/MyTasks";
-import TaskDetail from "./pages/TaskDetail";
-import Messages from "./pages/Messages";
-import Features from "./pages/Features";
-import Conversations from "./pages/Conversations";
-import Profile from "./pages/Profile";
-import AdminVerifications from "./pages/AdminVerifications";
-import AdminTasks from "./pages/AdminTasks";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminAppSettings from "./pages/AdminAppSettings";
-import AdminTestimonials from "./pages/AdminTestimonials";
-import ServiceHours from "./pages/ServiceHours";
-import NotFound from "./pages/NotFound";
-import Verify from "./pages/Verify";
-import ResetPassword from "./pages/ResetPassword";
-import Contact from "./pages/Contact";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import Settings from "./pages/Settings";
+
+// Lazy-load everything else — cuts initial JS sent on the LCP route.
+const Auth = lazy(() => import("./pages/Auth"));
+const Tasks = lazy(() => import("./pages/Tasks"));
+const PostTask = lazy(() => import("./pages/PostTask"));
+const MyTasks = lazy(() => import("./pages/MyTasks"));
+const TaskDetail = lazy(() => import("./pages/TaskDetail"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Features = lazy(() => import("./pages/Features"));
+const Conversations = lazy(() => import("./pages/Conversations"));
+const Profile = lazy(() => import("./pages/Profile"));
+const AdminVerifications = lazy(() => import("./pages/AdminVerifications"));
+const AdminTasks = lazy(() => import("./pages/AdminTasks"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminAppSettings = lazy(() => import("./pages/AdminAppSettings"));
+const AdminTestimonials = lazy(() => import("./pages/AdminTestimonials"));
+const ServiceHours = lazy(() => import("./pages/ServiceHours"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Verify = lazy(() => import("./pages/Verify"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 const queryClient = new QueryClient();
+
+const RouteFallback = () => (
+  <div className="min-h-dvh flex items-center justify-center" aria-busy="true" aria-live="polite">
+    <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" aria-label="Loading" />
+  </div>
+);
 
 const App = () => (
   <ErrorBoundary>
@@ -53,7 +63,8 @@ const App = () => (
           <BrowserRouter>
             <AuthProvider>
               <BrandProvider>
-              {/* VerificationPrompt removed — verification is opt-in from Profile tab */}
+              <Suspense fallback={<RouteFallback />}>
+
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -80,6 +91,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
               <ChatWidget />
               <Tour />
               <CookieBanner />

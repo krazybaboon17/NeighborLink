@@ -129,13 +129,13 @@ export const Hero = () => {
               style={{ boxShadow: "0 20px 60px hsl(60 3% 17% / 0.08)" }}
             >
               <div className="flex items-center flex-1 px-4">
-                <Search className="w-5 h-5 text-muted-foreground/60 mr-3 shrink-0" />
+                <Search className="w-5 h-5 text-muted-foreground mr-3 shrink-0" aria-hidden="true" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="What do you need help with?"
-                  className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground/60"
+                  className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground"
                 />
               </div>
               <button
