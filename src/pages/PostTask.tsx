@@ -29,6 +29,8 @@ import { DecorativeCircles } from '@/components/ui/DecorativeCircles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useContentModeration } from '@/hooks/useContentModeration';
 import { SEO } from '@/components/SEO';
+import { LocationPicker, type PickedLocation } from '@/components/LocationPicker';
+import { approximate } from '@/lib/geo';
 
 const categories = [
   { name: 'Lawn Care', emoji: '🌱' },
