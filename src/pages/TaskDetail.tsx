@@ -151,6 +151,25 @@ export default function TaskDetail() {
     }
   }, [id]);
 
+  // Try to fetch precise location — RLS only returns a row if the user is
+  // the task owner, the accepted helper, or an admin.
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('task_locations')
+        .select('lat, lng, address')
+        .eq('task_id', id)
+        .maybeSingle();
+      if (!cancelled && data) {
+        setPreciseLocation({ lat: Number(data.lat), lng: Number(data.lng), address: data.address });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, user?.id]);
+
+
   // Fetch current user's Young Neighbor / verification status
   useEffect(() => {
     if (user) {
