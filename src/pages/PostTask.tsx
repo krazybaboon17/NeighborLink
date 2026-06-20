@@ -173,7 +173,7 @@ export default function PostTask() {
       case 'title': return 'Add a title of at least 3 characters.';
       case 'category': return 'Pick a category to continue.';
       case 'description': return 'Add a few more details (10+ characters).';
-      case 'location': return 'Add a location.';
+      case 'location': return 'Pick your address from the suggestions.';
       case 'budget': return 'Enter a valid budget range (max ≥ min).';
       case 'parental': return 'Parent name, email, and approval are required.';
       default: return 'Please complete this step.';
