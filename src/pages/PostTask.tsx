@@ -258,7 +258,8 @@ export default function PostTask() {
         finalDescription += `\n\n[YN_APPROVAL:${JSON.stringify(approvalData)}]`;
       }
 
-      const { error } = await supabase.from('tasks').insert({
+      const approx = pickedLocation ? approximate({ lat: pickedLocation.lat, lng: pickedLocation.lng }) : null;
+      const { data: inserted, error } = await supabase.from('tasks').insert({
         user_id: currentUser.id,
         title,
         description: finalDescription,
@@ -268,8 +269,21 @@ export default function PostTask() {
         budget_max: parseInt(budgetMax),
         due_date: dueDate ? new Date(dueDate).toISOString() : null,
         status: 'open',
-      } as any);
+        approx_lat: approx?.lat ?? null,
+        approx_lng: approx?.lng ?? null,
+      } as any).select('id').single();
       if (error) throw error;
+
+      if (inserted && pickedLocation) {
+        const { error: locErr } = await supabase.from('task_locations').insert({
+          task_id: inserted.id,
+          lat: pickedLocation.lat,
+          lng: pickedLocation.lng,
+          address: pickedLocation.address,
+        } as any);
+        if (locErr) console.error('task_locations insert failed', locErr);
+      }
+
       toast.success('Task posted!');
       navigate('/tasks');
     } catch (error: any) {
