@@ -415,16 +415,13 @@ export default function PostTask() {
                     )}
 
                     {step.key === 'location' && (
-                      <div className="max-w-md mx-auto">
-                        <Input
-                          autoFocus
-                          placeholder="e.g., Arlington Heights, IL"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && next()}
-                          className="text-center text-lg h-14"
-                        />
-                      </div>
+                      <LocationPicker
+                        value={pickedLocation}
+                        onChange={(v) => {
+                          setPickedLocation(v);
+                          setLocation(v?.label ?? '');
+                        }}
+                      />
                     )}
 
                     {step.key === 'budget' && (
