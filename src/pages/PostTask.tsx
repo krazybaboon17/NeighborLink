@@ -96,7 +96,7 @@ export default function PostTask() {
       { key: 'description', title: 'Tell the story', subtitle: 'Share details that will help neighbors decide.', icon: FileText },
       { key: 'location', title: 'Where is this happening?', subtitle: 'Your exact address stays private until you accept a helper. Others see a general circle on the map.', icon: MapPin },
       { key: 'budget', title: "What's your budget?", subtitle: 'Give a range — payment is coordinated off-app.', icon: DollarSign },
-      { key: 'due', title: 'When do you need it done?', subtitle: 'Optional — leave blank if flexible.', icon: CalendarDays },
+      { key: 'due', title: 'Propose a date & time', subtitle: 'Optional — used as the proposed meeting time. Helpers can one-click add it to Google Calendar.', icon: CalendarDays },
     ];
     if (isYoungNeighbor) {
       base.push({ key: 'parental', title: 'Parental approval', subtitle: 'Required for Young Neighbors before posting.', icon: Users });

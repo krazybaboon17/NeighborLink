@@ -35,6 +35,7 @@ import { ReportTaskDialog } from '@/components/ReportTaskDialog';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { SEO } from '@/components/SEO';
 import { TaskLocationMap } from '@/components/TaskMap';
+import { googleCalendarUrl, downloadIcs } from '@/lib/calendar';
 
 interface Task {
   id: string;
@@ -742,12 +743,57 @@ export default function TaskDetail() {
                     </span>
                   </div>
                   {task.due_date && (
-                    <div className="flex items-center text-foreground bg-primary/5 rounded-2xl px-4 py-3">
-                      <Clock className="w-5 h-5 mr-2 text-primary" />
-                      <span className="font-body">
-                        <span className="font-bold text-primary">Needed by:</span>{' '}
-                        {format(new Date(task.due_date), "MMM d, yyyy 'at' h:mm a")}
-                      </span>
+                    <div className="space-y-2">
+                      <div className="flex items-center text-foreground bg-primary/5 rounded-2xl px-4 py-3">
+                        <Clock className="w-5 h-5 mr-2 text-primary" />
+                        <span className="font-body">
+                          <span className="font-bold text-primary">Proposed time:</span>{' '}
+                          {format(new Date(task.due_date), "MMM d, yyyy 'at' h:mm a")}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            window.open(
+                              googleCalendarUrl({
+                                title: `Taskfy: ${task.title}`,
+                                description: `${task.description}\n\nView task: ${window.location.href}`,
+                                location: preciseLocation?.address || task.location || undefined,
+                                start: new Date(task.due_date!),
+                                durationMinutes: 60,
+                              }),
+                              '_blank',
+                              'noopener,noreferrer',
+                            )
+                          }
+                        >
+                          <Clock className="w-4 h-4 mr-1.5" /> Add to Google Calendar
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            downloadIcs(`taskfy-${task.id}`, {
+                              title: `Taskfy: ${task.title}`,
+                              description: `${task.description}\n\nView task: ${window.location.href}`,
+                              location: preciseLocation?.address || task.location || undefined,
+                              start: new Date(task.due_date!),
+                              durationMinutes: 60,
+                            })
+                          }
+                        >
+                          Apple / Outlook (.ics)
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {preciseLocation
+                          ? 'Event includes the exact address.'
+                          : 'Exact address is hidden until the poster accepts an offer — the event uses the general area for now.'}
+                      </p>
                     </div>
                   )}
                 </CardContent>
