@@ -260,6 +260,8 @@ export default function PostTask() {
       }
 
       const approx = pickedLocation ? approximate({ lat: pickedLocation.lat, lng: pickedLocation.lng }) : null;
+      const validSlots = timeSlots.filter((s) => s.start);
+      const primarySlot = validSlots[0]?.start || dueDate;
       const { data: inserted, error } = await supabase.from('tasks').insert({
         user_id: currentUser.id,
         title,
@@ -268,7 +270,7 @@ export default function PostTask() {
         location,
         budget_min: parseInt(budgetMin),
         budget_max: parseInt(budgetMax),
-        due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        due_date: primarySlot ? new Date(primarySlot).toISOString() : null,
         status: 'open',
         approx_lat: approx?.lat ?? null,
         approx_lng: approx?.lng ?? null,
@@ -283,6 +285,17 @@ export default function PostTask() {
           address: pickedLocation.address,
         } as any);
         if (locErr) console.error('task_locations insert failed', locErr);
+      }
+
+      if (inserted && validSlots.length > 0) {
+        const { error: slotsErr } = await supabase.from('task_time_slots' as any).insert(
+          validSlots.map((s) => ({
+            task_id: inserted.id,
+            start_at: new Date(s.start).toISOString(),
+            duration_minutes: s.duration || 60,
+          })),
+        );
+        if (slotsErr) console.error('task_time_slots insert failed', slotsErr);
       }
 
       toast.success('Task posted!');
