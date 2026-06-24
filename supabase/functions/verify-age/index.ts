@@ -29,6 +29,8 @@ serve(async (req) => {
   }
 
   try {
+    const unauthorized = await requireAuth(req, corsHeaders);
+    if (unauthorized) return unauthorized;
     const { imageBase64 } = await req.json();
 
     if (!imageBase64 || typeof imageBase64 !== "string") {
