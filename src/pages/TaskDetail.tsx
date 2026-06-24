@@ -104,6 +104,7 @@ export default function TaskDetail() {
   const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [preciseLocation, setPreciseLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [timeSlots, setTimeSlots] = useState<{ id: string; start_at: string; duration_minutes: number }[]>([]);
 
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
@@ -169,6 +170,23 @@ export default function TaskDetail() {
     })();
     return () => { cancelled = true; };
   }, [id, user?.id]);
+
+  // Fetch proposed time slots for this task (publicly readable)
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('task_time_slots' as any)
+        .select('id, start_at, duration_minutes')
+        .eq('task_id', id)
+        .order('start_at', { ascending: true });
+      if (!cancelled && Array.isArray(data)) {
+        setTimeSlots(data as any);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
 
 
   // Fetch current user's Young Neighbor / verification status
@@ -742,60 +760,75 @@ export default function TaskDetail() {
                       ${task.budget_min} - ${task.budget_max}
                     </span>
                   </div>
-                  {task.due_date && (
-                    <div className="space-y-2">
-                      <div className="flex items-center text-foreground bg-primary/5 rounded-2xl px-4 py-3">
-                        <Clock className="w-5 h-5 mr-2 text-primary" />
-                        <span className="font-body">
-                          <span className="font-bold text-primary">Proposed time:</span>{' '}
-                          {format(new Date(task.due_date), "MMM d, yyyy 'at' h:mm a")}
-                        </span>
+                  {(() => {
+                    const slots = timeSlots.length > 0
+                      ? timeSlots.map((s) => ({ start: new Date(s.start_at), duration: s.duration_minutes || 60, key: s.id }))
+                      : task.due_date
+                        ? [{ start: new Date(task.due_date), duration: 60, key: 'due' }]
+                        : [];
+                    if (slots.length === 0) return null;
+                    return (
+                      <div className="space-y-3">
+                        <div className="text-sm font-semibold text-primary">
+                          {slots.length > 1 ? 'Proposed time slots' : 'Proposed time'}
+                        </div>
+                        {slots.map((s) => (
+                          <div key={s.key} className="space-y-2 rounded-2xl bg-primary/5 px-4 py-3">
+                            <div className="flex items-center text-foreground">
+                              <Clock className="w-5 h-5 mr-2 text-primary" />
+                              <span className="font-body">
+                                {format(s.start, "EEE, MMM d 'at' h:mm a")}
+                                <span className="text-xs text-muted-foreground ml-2">({s.duration} min)</span>
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  window.open(
+                                    googleCalendarUrl({
+                                      title: `Taskfy: ${task.title}`,
+                                      description: `${task.description}\n\nView task: ${window.location.href}`,
+                                      location: preciseLocation?.address || task.location || undefined,
+                                      start: s.start,
+                                      durationMinutes: s.duration,
+                                    }),
+                                    '_blank',
+                                    'noopener,noreferrer',
+                                  )
+                                }
+                              >
+                                <Clock className="w-4 h-4 mr-1.5" /> Add to Google Calendar
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  downloadIcs(`taskfy-${task.id}-${s.key}`, {
+                                    title: `Taskfy: ${task.title}`,
+                                    description: `${task.description}\n\nView task: ${window.location.href}`,
+                                    location: preciseLocation?.address || task.location || undefined,
+                                    start: s.start,
+                                    durationMinutes: s.duration,
+                                  })
+                                }
+                              >
+                                Apple / Outlook (.ics)
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <p className="text-xs text-muted-foreground">
+                          {preciseLocation
+                            ? 'Events include the exact address.'
+                            : 'Exact address is hidden until the poster accepts an offer — events use the general area for now.'}
+                        </p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            window.open(
-                              googleCalendarUrl({
-                                title: `Taskfy: ${task.title}`,
-                                description: `${task.description}\n\nView task: ${window.location.href}`,
-                                location: preciseLocation?.address || task.location || undefined,
-                                start: new Date(task.due_date!),
-                                durationMinutes: 60,
-                              }),
-                              '_blank',
-                              'noopener,noreferrer',
-                            )
-                          }
-                        >
-                          <Clock className="w-4 h-4 mr-1.5" /> Add to Google Calendar
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() =>
-                            downloadIcs(`taskfy-${task.id}`, {
-                              title: `Taskfy: ${task.title}`,
-                              description: `${task.description}\n\nView task: ${window.location.href}`,
-                              location: preciseLocation?.address || task.location || undefined,
-                              start: new Date(task.due_date!),
-                              durationMinutes: 60,
-                            })
-                          }
-                        >
-                          Apple / Outlook (.ics)
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {preciseLocation
-                          ? 'Event includes the exact address.'
-                          : 'Exact address is hidden until the poster accepts an offer — the event uses the general area for now.'}
-                      </p>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </CardContent>
               </Card>
 

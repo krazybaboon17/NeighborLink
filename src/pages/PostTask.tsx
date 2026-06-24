@@ -59,6 +59,7 @@ export default function PostTask() {
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [timeSlots, setTimeSlots] = useState<{ start: string; duration: number }[]>([]);
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -259,6 +260,8 @@ export default function PostTask() {
       }
 
       const approx = pickedLocation ? approximate({ lat: pickedLocation.lat, lng: pickedLocation.lng }) : null;
+      const validSlots = timeSlots.filter((s) => s.start);
+      const primarySlot = validSlots[0]?.start || dueDate;
       const { data: inserted, error } = await supabase.from('tasks').insert({
         user_id: currentUser.id,
         title,
@@ -267,7 +270,7 @@ export default function PostTask() {
         location,
         budget_min: parseInt(budgetMin),
         budget_max: parseInt(budgetMax),
-        due_date: dueDate ? new Date(dueDate).toISOString() : null,
+        due_date: primarySlot ? new Date(primarySlot).toISOString() : null,
         status: 'open',
         approx_lat: approx?.lat ?? null,
         approx_lng: approx?.lng ?? null,
@@ -282,6 +285,17 @@ export default function PostTask() {
           address: pickedLocation.address,
         } as any);
         if (locErr) console.error('task_locations insert failed', locErr);
+      }
+
+      if (inserted && validSlots.length > 0) {
+        const { error: slotsErr } = await supabase.from('task_time_slots' as any).insert(
+          validSlots.map((s) => ({
+            task_id: inserted.id,
+            start_at: new Date(s.start).toISOString(),
+            duration_minutes: s.duration || 60,
+          })),
+        );
+        if (slotsErr) console.error('task_time_slots insert failed', slotsErr);
       }
 
       toast.success('Task posted!');
@@ -486,23 +500,64 @@ export default function PostTask() {
                     )}
 
                     {step.key === 'due' && (
-                      <div className="max-w-xs mx-auto space-y-2">
-                        <Label className="text-xs">Due date (optional)</Label>
+                      <div className="max-w-md mx-auto space-y-3">
+                        <Label className="text-xs">Fallback due date (optional)</Label>
                         <Input
                           type="date"
                           value={dueDate}
                           onChange={(e) => setDueDate(e.target.value)}
                           className="h-12 text-base"
                         />
-                        {dueDate && (
+                        <div className="pt-2">
+                          <Label className="text-xs">Proposed time slots (optional)</Label>
+                          <p className="text-[11px] text-muted-foreground mb-2">
+                            Add one or more meeting times. Helpers see a one-click "Add to Google Calendar" button for each.
+                          </p>
+                          <div className="space-y-2">
+                            {timeSlots.map((slot, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                <Input
+                                  type="datetime-local"
+                                  value={slot.start}
+                                  onChange={(e) => {
+                                    const next = [...timeSlots];
+                                    next[i] = { ...next[i], start: e.target.value };
+                                    setTimeSlots(next);
+                                  }}
+                                  className="h-11 text-sm flex-1"
+                                />
+                                <Input
+                                  type="number"
+                                  min={15}
+                                  step={15}
+                                  value={slot.duration}
+                                  onChange={(e) => {
+                                    const next = [...timeSlots];
+                                    next[i] = { ...next[i], duration: parseInt(e.target.value) || 60 };
+                                    setTimeSlots(next);
+                                  }}
+                                  className="h-11 text-sm w-20"
+                                  title="Duration in minutes"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setTimeSlots(timeSlots.filter((_, j) => j !== i))}
+                                  className="text-xs text-muted-foreground hover:text-destructive px-2"
+                                  aria-label="Remove slot"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                           <button
                             type="button"
-                            onClick={() => setDueDate('')}
-                            className="text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => setTimeSlots([...timeSlots, { start: '', duration: 60 }])}
+                            className="mt-2 text-xs text-primary hover:underline"
                           >
-                            Clear date
+                            + Add time slot
                           </button>
-                        )}
+                        </div>
                       </div>
                     )}
 
