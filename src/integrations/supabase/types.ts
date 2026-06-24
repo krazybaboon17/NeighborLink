@@ -251,6 +251,54 @@ export type Database = {
           },
         ]
       }
+      parental_consents: {
+        Row: {
+          approved_at: string
+          created_at: string
+          id: string
+          offer_id: string | null
+          parent_email: string
+          parent_name: string
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          parent_email: string
+          parent_name: string
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          approved_at?: string
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          parent_email?: string
+          parent_name?: string
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parental_consents_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parental_consents_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age: number | null
@@ -707,6 +755,7 @@ export type Database = {
         Returns: boolean
       }
       check_is_admin: { Args: never; Returns: boolean }
+      contains_prohibited_content: { Args: { input: string }; Returns: boolean }
       create_notification: {
         Args: {
           p_body: string
