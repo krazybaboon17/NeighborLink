@@ -500,23 +500,64 @@ export default function PostTask() {
                     )}
 
                     {step.key === 'due' && (
-                      <div className="max-w-xs mx-auto space-y-2">
-                        <Label className="text-xs">Due date (optional)</Label>
+                      <div className="max-w-md mx-auto space-y-3">
+                        <Label className="text-xs">Fallback due date (optional)</Label>
                         <Input
                           type="date"
                           value={dueDate}
                           onChange={(e) => setDueDate(e.target.value)}
                           className="h-12 text-base"
                         />
-                        {dueDate && (
+                        <div className="pt-2">
+                          <Label className="text-xs">Proposed time slots (optional)</Label>
+                          <p className="text-[11px] text-muted-foreground mb-2">
+                            Add one or more meeting times. Helpers see a one-click "Add to Google Calendar" button for each.
+                          </p>
+                          <div className="space-y-2">
+                            {timeSlots.map((slot, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                <Input
+                                  type="datetime-local"
+                                  value={slot.start}
+                                  onChange={(e) => {
+                                    const next = [...timeSlots];
+                                    next[i] = { ...next[i], start: e.target.value };
+                                    setTimeSlots(next);
+                                  }}
+                                  className="h-11 text-sm flex-1"
+                                />
+                                <Input
+                                  type="number"
+                                  min={15}
+                                  step={15}
+                                  value={slot.duration}
+                                  onChange={(e) => {
+                                    const next = [...timeSlots];
+                                    next[i] = { ...next[i], duration: parseInt(e.target.value) || 60 };
+                                    setTimeSlots(next);
+                                  }}
+                                  className="h-11 text-sm w-20"
+                                  title="Duration in minutes"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setTimeSlots(timeSlots.filter((_, j) => j !== i))}
+                                  className="text-xs text-muted-foreground hover:text-destructive px-2"
+                                  aria-label="Remove slot"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                           <button
                             type="button"
-                            onClick={() => setDueDate('')}
-                            className="text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => setTimeSlots([...timeSlots, { start: '', duration: 60 }])}
+                            className="mt-2 text-xs text-primary hover:underline"
                           >
-                            Clear date
+                            + Add time slot
                           </button>
-                        )}
+                        </div>
                       </div>
                     )}
 
