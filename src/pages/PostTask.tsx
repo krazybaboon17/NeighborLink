@@ -59,6 +59,7 @@ export default function PostTask() {
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [timeSlots, setTimeSlots] = useState<{ start: string; duration: number }[]>([]);
   const [aiLoading, setAiLoading] = useState<string | null>(null);
   const navigate = useNavigate();
 
