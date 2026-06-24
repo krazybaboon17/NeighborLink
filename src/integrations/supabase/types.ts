@@ -420,6 +420,38 @@ export type Database = {
         }
         Relationships: []
       }
+      task_time_slots: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          start_at: string
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          start_at: string
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          start_at?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_time_slots_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           approx_lat: number | null
