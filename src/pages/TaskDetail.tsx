@@ -104,6 +104,7 @@ export default function TaskDetail() {
   const [showCompletionPhotoDialog, setShowCompletionPhotoDialog] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [preciseLocation, setPreciseLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [timeSlots, setTimeSlots] = useState<{ id: string; start_at: string; duration_minutes: number }[]>([]);
 
   // Safety check state
   const { isChecking, safetyResult, checkHelperSafety, clearResult } = useHelperSafetyCheck();
