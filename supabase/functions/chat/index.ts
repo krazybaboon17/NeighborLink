@@ -61,7 +61,7 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (!["system", "user", "assistant"].includes(msg.role)) {
+      if (!["user", "assistant"].includes(msg.role)) {
         return new Response(JSON.stringify({ error: "Invalid message role" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
