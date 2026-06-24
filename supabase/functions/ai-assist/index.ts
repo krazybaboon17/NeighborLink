@@ -29,6 +29,8 @@ serve(async (req) => {
   }
 
   try {
+    const unauthorized = await requireAuth(req, corsHeaders);
+    if (unauthorized) return unauthorized;
     const { type, data } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
