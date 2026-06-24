@@ -171,6 +171,23 @@ export default function TaskDetail() {
     return () => { cancelled = true; };
   }, [id, user?.id]);
 
+  // Fetch proposed time slots for this task (publicly readable)
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('task_time_slots' as any)
+        .select('id, start_at, duration_minutes')
+        .eq('task_id', id)
+        .order('start_at', { ascending: true });
+      if (!cancelled && Array.isArray(data)) {
+        setTimeSlots(data as any);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
+
 
   // Fetch current user's Young Neighbor / verification status
   useEffect(() => {
