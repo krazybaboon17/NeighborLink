@@ -226,32 +226,48 @@ export const Navbar = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="md:hidden py-4 space-y-1 border-t border-border"
+              className="md:hidden py-3 flex flex-col border-t border-border"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <NavLink href="/tasks" onClick={() => setIsOpen(false)}>Browse Tasks</NavLink>
-              <NavLink href="/my-tasks" onClick={() => setIsOpen(false)}>My Tasks</NavLink>
-              {hasVolunteerHours && (
-                <NavLink href="/service-hours" onClick={() => setIsOpen(false)}>
-                  <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> Service Hours</span>
-                </NavLink>
-              )}
-              <NavLink href="/conversations" onClick={() => setIsOpen(false)} badge={unreadCount}>
-                <span className="flex items-center gap-1.5"><MessageCircle className="w-4 h-4" /> Messages</span>
-              </NavLink>
-              {isAdmin && (
-                <>
-                  <NavLink href="/admin/tasks" onClick={() => setIsOpen(false)}>
-                    <span className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> Admin · Tasks</span>
-                  </NavLink>
-                  <NavLink href="/admin/verifications" onClick={() => setIsOpen(false)}>
-                    <span className="flex items-center gap-1.5"><Shield className="w-4 h-4" /> Admin · Verifications</span>
-                  </NavLink>
-                </>
-              )}
+              {(() => {
+                const itemCls = "block w-full px-3 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors";
+                return (
+                  <>
+                    <Link to="/tasks" onClick={() => setIsOpen(false)} className={itemCls}>
+                      Browse Tasks
+                    </Link>
+                    <Link to="/my-tasks" onClick={() => setIsOpen(false)} className={itemCls}>
+                      My Tasks
+                    </Link>
+                    {hasVolunteerHours && (
+                      <Link to="/service-hours" onClick={() => setIsOpen(false)} className={`${itemCls} flex items-center gap-2`}>
+                        <Clock className="w-4 h-4" /> Service Hours
+                      </Link>
+                    )}
+                    <Link to="/conversations" onClick={() => setIsOpen(false)} className={`${itemCls} flex items-center gap-2`}>
+                      <MessageCircle className="w-4 h-4" /> Messages
+                      {unreadCount > 0 && (
+                        <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#B22234] text-white text-[10px] font-bold leading-none">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                    {isAdmin && (
+                      <>
+                        <Link to="/admin/tasks" onClick={() => setIsOpen(false)} className={`${itemCls} flex items-center gap-2`}>
+                          <Shield className="w-4 h-4" /> Admin · Tasks
+                        </Link>
+                        <Link to="/admin/verifications" onClick={() => setIsOpen(false)} className={`${itemCls} flex items-center gap-2`}>
+                          <Shield className="w-4 h-4" /> Admin · Verifications
+                        </Link>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
 
               <div className="pt-4 space-y-2 border-t border-border mt-2">
                 {user ? (
