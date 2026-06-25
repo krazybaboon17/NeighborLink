@@ -244,14 +244,14 @@ export function Tour() {
   // Tooltip position
   const tooltipStyle = useMemo<React.CSSProperties>(() => {
     if (!active) return {};
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 360;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 640;
+    const tipW = Math.min(340, vw - 24);
     if (!rect || step.placement === 'center' || !step.target) {
-      return { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' };
+      return { left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: tipW };
     }
     const pad = 12;
-    const tipW = 340;
-    const tipH = 220;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const tipH = 240;
     // Prefer below, else above
     const below = rect.bottom + pad + tipH < vh;
     const top = below ? rect.bottom + pad : Math.max(pad, rect.top - tipH - pad);
