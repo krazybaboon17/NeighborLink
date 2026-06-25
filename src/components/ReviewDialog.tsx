@@ -8,6 +8,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { useContentModeration } from '@/hooks/useContentModeration';
 
 export const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
