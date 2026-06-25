@@ -20,6 +20,17 @@ import {
   TrendingUp,
   ExternalLink,
   Search,
+  UserCheck,
+  Shield,
+  Baby,
+  MessageSquare,
+  Star,
+  Clock,
+  Heart,
+  Flag,
+  Mail,
+  CalendarClock,
+  Handshake,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
