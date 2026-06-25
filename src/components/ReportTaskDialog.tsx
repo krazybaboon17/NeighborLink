@@ -29,6 +29,7 @@ export function ReportTaskDialog({ taskId }: ReportTaskDialogProps) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
+  const { moderateText, isChecking } = useContentModeration();
 
   const handleSubmit = async () => {
     if (!user) {
@@ -39,6 +40,14 @@ export function ReportTaskDialog({ taskId }: ReportTaskDialogProps) {
     setLoading(true);
     try {
       const cleanReason = sanitizeTextMax(reason, 1000);
+      if (cleanReason && cleanReason.trim().length > 0) {
+        const check = await moderateText(cleanReason, 'Task report reason');
+        if (!check.allowed) {
+          toast.warning(check.reason || 'Please rephrase your report — keep it factual and respectful.');
+          setLoading(false);
+          return;
+        }
+      }
       const { error } = await supabase.from('task_reports' as any).insert({
         task_id: taskId,
         reporter_id: user.id,
