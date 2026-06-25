@@ -84,11 +84,14 @@ const PIE_COLORS = [
   'hsl(240 60% 60%)',
 ];
 
+type PlatformStats = Record<string, number>;
+
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [platform, setPlatform] = useState<PlatformStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -108,12 +111,21 @@ export default function AdminDashboard() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('id,title,category,location,status,budget_min,budget_max,created_at,updated_at,user_id')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      setTasks((data as Task[]) || []);
+      const [tasksRes, statsRes] = await Promise.all([
+        supabase
+          .from('tasks')
+          .select('id,title,category,location,status,budget_min,budget_max,created_at,updated_at,user_id')
+          .order('created_at', { ascending: false }),
+        (supabase as any).rpc('admin_get_platform_stats'),
+      ]);
+      if (tasksRes.error) throw tasksRes.error;
+      setTasks((tasksRes.data as Task[]) || []);
+      if (statsRes.error) {
+        console.error(statsRes.error);
+        toast.error('Failed to load platform stats');
+      } else {
+        setPlatform((statsRes.data as PlatformStats) || null);
+      }
     } catch (e) {
       console.error(e);
       toast.error('Failed to load dashboard data');
