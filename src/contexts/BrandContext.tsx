@@ -13,7 +13,7 @@ interface BrandValue {
 }
 
 const BrandContext = createContext<BrandValue>({
-  name: "Taskfy",
+  name: "Taskify",
   mainPart: "Task",
   accentPart: "fy",
   refresh: async () => {},
@@ -39,7 +39,7 @@ export function splitBrandName(name: string): [string, string] {
 }
 
 export function BrandProvider({ children }: { children: ReactNode }) {
-  const [name, setName] = useState("Taskfy");
+  const [name, setName] = useState("Taskify");
 
   const fetchName = async () => {
     const { data } = await (supabase as any)
@@ -63,7 +63,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
 
   // Update <title> base + favicon? Just keep simple — only document title prefix updates.
   useEffect(() => {
-    document.title = document.title.replace(/^(Taskfy|[^—|]+?)\s*(—|\|)/, `${name} $2`);
+    document.title = document.title.replace(/^(Taskify|[^—|]+?)\s*(—|\|)/, `${name} $2`);
   }, [name]);
 
   return (

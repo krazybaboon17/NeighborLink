@@ -43,7 +43,7 @@ export function buildIcs(e: CalendarEvent): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Taskfy//Tasks//EN',
+    'PRODID:-//Taskify//Tasks//EN',
     'BEGIN:VEVENT',
     `UID:${uid}`,
     `DTSTAMP:${formatUtc(new Date())}`,

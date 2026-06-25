@@ -238,10 +238,10 @@ export default function Tasks() {
   return (
     <>
       <Helmet>
-        <title>Browse Tasks — Taskfy</title>
+        <title>Browse Tasks — Taskify</title>
         <meta name="description" content="Find local tasks in Arlington Heights and Buffalo Grove: pet care, lawn care, moving help, errands and more." />
         <link rel="canonical" href="https://myneighborlink.lovable.app/tasks" />
-        <meta property="og:title" content="Browse Tasks — Taskfy" />
+        <meta property="og:title" content="Browse Tasks — Taskify" />
         <meta property="og:description" content="Find local tasks in Arlington Heights and Buffalo Grove: pet care, lawn care, moving help, errands and more." />
         <meta property="og:url" content="https://myneighborlink.lovable.app/tasks" />
         <meta property="og:type" content="website" />

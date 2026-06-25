@@ -18,7 +18,7 @@ type Step = {
 const STEPS: Step[] = [
   {
     id: 'welcome',
-    title: 'Welcome to Taskfy 👋',
+    title: 'Welcome to Taskify 👋',
     body: 'A quick 30-second tour of the basics — neighbors helping neighbors, off-app payments, all in one place.',
     placement: 'center',
   },
@@ -46,7 +46,7 @@ const STEPS: Step[] = [
   {
     id: 'messages',
     title: 'Messages',
-    body: 'Coordinate details and payment directly with neighbors. Taskfy never touches your money — pay off-app.',
+    body: 'Coordinate details and payment directly with neighbors. Taskify never touches your money — pay off-app.',
     target: '[data-tour="nav-messages"]',
     route: { path: '/conversations', label: 'Open Messages' },
   },

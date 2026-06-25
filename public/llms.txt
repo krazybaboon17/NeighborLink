@@ -1,15 +1,15 @@
-# Taskfy
+# Taskify
 
 > Hyperlocal task marketplace connecting Arlington Heights and Buffalo Grove, IL neighbors for lawn care, errands, moving help, pet care and more.
 
-Taskfy lets homeowners post small tasks and pay verified local helpers (including young neighbors with parental consent) directly. Payment is coordinated off-app between neighbors.
+Taskify lets homeowners post small tasks and pay verified local helpers (including young neighbors with parental consent) directly. Payment is coordinated off-app between neighbors.
 
 ## Pages
 
-- [Home](/): Overview of Taskfy and how the community marketplace works.
+- [Home](/): Overview of Taskify and how the community marketplace works.
 - [Browse Tasks](/tasks): Search and filter open tasks in Arlington Heights and Buffalo Grove.
 - [Post a Task](/post-task): Describe a task and budget so neighbors can apply.
-- [Features](/features): How Taskfy works, trust and safety, and supported task categories.
+- [Features](/features): How Taskify works, trust and safety, and supported task categories.
 - [Contact](/contact): Get in touch and join the mailing list.
 - [Terms](/terms): Terms of service.
 - [Privacy](/privacy): Privacy policy, including face verification data handling.

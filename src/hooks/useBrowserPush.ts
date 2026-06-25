@@ -35,7 +35,7 @@ export function useBrowserPush() {
         (payload) => {
           const n = payload.new as any;
           try {
-            const note = new Notification(n.title || 'Taskfy', {
+            const note = new Notification(n.title || 'Taskify', {
               body: n.body || '',
               icon: '/favicon.ico',
               tag: n.id,

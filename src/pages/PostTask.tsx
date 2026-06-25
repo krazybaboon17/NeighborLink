@@ -317,8 +317,8 @@ export default function PostTask() {
   return (
     <>
       <SEO
-        title="Post a task — Taskfy"
-        description="Tell your neighborhood what you need help with. Post a task on Taskfy in under a minute and get offers from local, verified helpers near you."
+        title="Post a task — Taskify"
+        description="Tell your neighborhood what you need help with. Post a task on Taskify in under a minute and get offers from local, verified helpers near you."
         path="/post-task"
       />
       <Navbar />
@@ -494,7 +494,7 @@ export default function PostTask() {
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground text-center">
-                          💬 Payment is coordinated directly with your helper — Taskfy doesn't handle money.
+                          💬 Payment is coordinated directly with your helper — Taskify doesn't handle money.
                         </p>
                       </div>
                     )}
