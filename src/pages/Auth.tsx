@@ -16,6 +16,31 @@ import { lovable } from '@/integrations/lovable';
 import { motion } from 'framer-motion';
 import { FloatingBubbles } from '@/components/ui/FloatingBubbles';
 
+function CommunityMark({ className }: { className?: string }) {
+  // Three neighbors linked around a shared hearth — a community ring.
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      {/* connecting ring */}
+      <circle cx="24" cy="24" r="9" opacity="0.35" strokeDasharray="2 3" />
+      {/* shared hearth / home in the center */}
+      <path d="M21 25.5l3-3 3 3v3.5h-6z" fill="currentColor" stroke="none" opacity="0.9" />
+      {/* three neighbors around the ring */}
+      <g>
+        <circle cx="24" cy="9.5" r="2.6" fill="currentColor" stroke="none" />
+        <path d="M19.5 16.5c.8-2.4 2.6-3.8 4.5-3.8s3.7 1.4 4.5 3.8" />
+      </g>
+      <g>
+        <circle cx="9.5" cy="33" r="2.6" fill="currentColor" stroke="none" />
+        <path d="M5 40c.8-2.4 2.6-3.8 4.5-3.8S13.2 37.6 14 40" />
+      </g>
+      <g>
+        <circle cx="38.5" cy="33" r="2.6" fill="currentColor" stroke="none" />
+        <path d="M34 40c.8-2.4 2.6-3.8 4.5-3.8S42.2 37.6 43 40" />
+      </g>
+    </svg>
+  );
+}
+
 const signUpSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address').max(255),
   password: z.string().min(6, 'Password should be at least 6 characters').max(72, 'Password is too long (max 72 characters)'),
