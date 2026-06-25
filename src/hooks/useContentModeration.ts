@@ -66,9 +66,21 @@ export function useContentModeration() {
     return moderateTask('Offer Message', message, 'message', isYoungNeighbor);
   }, [moderateTask]);
 
+  const moderateText = useCallback(async (
+    text: string,
+    context: string,
+    isYoungNeighbor: boolean = false
+  ): Promise<ModerationResult> => {
+    const trimmed = (text || '').trim();
+    // Skip tiny inputs — nothing meaningful to moderate; keeps it gentle and fast
+    if (trimmed.length < 8) return { allowed: true };
+    return moderateTask(context, trimmed, context, isYoungNeighbor);
+  }, [moderateTask]);
+
   return {
     isChecking,
     moderateTask,
-    moderateMessage
+    moderateMessage,
+    moderateText,
   };
 }

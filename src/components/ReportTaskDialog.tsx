@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { sanitizeTextMax } from '@/lib/sanitize';
+import { useContentModeration } from '@/hooks/useContentModeration';
 
 interface ReportTaskDialogProps {
   taskId: string;
@@ -28,6 +29,7 @@ export function ReportTaskDialog({ taskId }: ReportTaskDialogProps) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
+  const { moderateText, isChecking } = useContentModeration();
 
   const handleSubmit = async () => {
     if (!user) {
@@ -38,6 +40,14 @@ export function ReportTaskDialog({ taskId }: ReportTaskDialogProps) {
     setLoading(true);
     try {
       const cleanReason = sanitizeTextMax(reason, 1000);
+      if (cleanReason && cleanReason.trim().length > 0) {
+        const check = await moderateText(cleanReason, 'Task report reason');
+        if (!check.allowed) {
+          toast.warning(check.reason || 'Please rephrase your report — keep it factual and respectful.');
+          setLoading(false);
+          return;
+        }
+      }
       const { error } = await supabase.from('task_reports' as any).insert({
         task_id: taskId,
         reporter_id: user.id,
@@ -92,8 +102,8 @@ export function ReportTaskDialog({ taskId }: ReportTaskDialogProps) {
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleSubmit} disabled={loading}>
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          <Button variant="destructive" onClick={handleSubmit} disabled={loading || isChecking}>
+            {(loading || isChecking) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Submit report
           </Button>
         </DialogFooter>

@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { SKILLS, CURRENT_STATES } from '@/components/OnboardingQuestions';
 import { SEO } from '@/components/SEO';
+import { useContentModeration } from '@/hooks/useContentModeration';
 
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, 'Please enter your full name').max(100, 'Name is too long (max 100 characters)'),
@@ -35,6 +36,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
+  const { moderateText, isChecking: isModerating } = useContentModeration();
 
   const [fullName, setFullName] = useState('');
   const [bio, setBio] = useState('');
@@ -116,6 +118,14 @@ export default function ProfilePage() {
 
     setSubmitting(true);
     try {
+      if (bio && bio.trim().length > 0) {
+        const check = await moderateText(bio, 'Profile bio');
+        if (!check.allowed) {
+          toast.warning(check.reason || 'Please rephrase your bio to keep things friendly for the community.');
+          setSubmitting(false);
+          return;
+        }
+      }
       let publicUrl = avatarUrl;
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
