@@ -275,7 +275,8 @@ export default function AdminDashboard() {
 
           <AdminTabs />
 
-          {/* KPI cards */}
+          {/* Task KPIs */}
+          <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground mb-2">Tasks</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <KpiCard icon={ListTodo} label="Total tasks" value={stats.total} tint="hsl(210 80% 55%)" />
             <KpiCard icon={CheckCircle2} label="Completed" value={stats.completed} tint="hsl(140 60% 45%)" sub={`${stats.completionRate}% completion rate`} />
@@ -286,6 +287,36 @@ export default function AdminDashboard() {
             <KpiCard icon={Tag} label="Categories used" value={categoryData.length} tint="hsl(320 65% 55%)" />
             <KpiCard icon={MapPin} label="Locations served" value={new Set(tasks.map(t => (t.location || '').trim()).filter(Boolean)).size} tint="hsl(180 60% 45%)" />
           </div>
+
+          {/* People KPIs */}
+          {platform && (
+            <>
+              <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground mb-2">People</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <KpiCard icon={Users} label="Users registered" value={platform.users_total} tint="hsl(210 80% 55%)" sub={`+${platform.users_new_7d} this week · +${platform.users_new_30d} this month`} />
+                <KpiCard icon={Handshake} label="Helpers" value={platform.users_helpers} tint="hsl(25 85% 55%)" sub={`${platform.unique_helpers_applied} have applied to tasks`} />
+                <KpiCard icon={UserCheck} label="Verified users" value={platform.users_verified} tint="hsl(140 60% 45%)" sub={`${platform.users_email_verified} email · ${platform.users_phone_verified} phone`} />
+                <KpiCard icon={Baby} label="Young neighbors" value={platform.users_young_neighbors} tint="hsl(320 65% 55%)" sub="Profiles flagged under 18" />
+                <KpiCard icon={Shield} label="Admins" value={platform.admins_total} tint="hsl(0 75% 55%)" />
+                <KpiCard icon={Users} label="Profiles with bio" value={platform.users_with_bio} tint="hsl(280 70% 60%)" sub={`${platform.users_with_skills} list skills`} />
+                <KpiCard icon={Mail} label="Mailing list" value={platform.mailing_subscribers} tint="hsl(45 90% 55%)" />
+                <KpiCard icon={Heart} label="Favorited helpers" value={platform.favorites_total} tint="hsl(0 75% 55%)" />
+              </div>
+
+              {/* Engagement KPIs */}
+              <h2 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground mb-2">Engagement</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <KpiCard icon={Handshake} label="Applications (offers)" value={platform.offers_total} tint="hsl(25 85% 55%)" sub={`${platform.offers_accepted} accepted · ${platform.offers_pending} pending · ${platform.offers_rejected} rejected`} />
+                <KpiCard icon={MessageSquare} label="Messages sent" value={platform.messages_total} tint="hsl(210 80% 55%)" sub={`${platform.messages_7d} in last 7 days · ${platform.conversations} conversations`} />
+                <KpiCard icon={Star} label="Reviews" value={platform.reviews_total} tint="hsl(45 90% 55%)" sub={`Avg rating ${platform.reviews_avg_rating}`} />
+                <KpiCard icon={Clock} label="Volunteer hours" value={platform.volunteer_hours_total} tint="hsl(140 60% 45%)" sub={`${platform.volunteer_entries} entries · ${platform.volunteers_unique} volunteers`} />
+                <KpiCard icon={CalendarClock} label="Time slots proposed" value={platform.time_slots_total} tint="hsl(180 60% 45%)" />
+                <KpiCard icon={UserCheck} label="Verifications" value={platform.verifications_pending + platform.verifications_approved + platform.verifications_rejected} tint="hsl(280 70% 60%)" sub={`${platform.verifications_pending} pending · ${platform.verifications_approved} approved · ${platform.verifications_rejected} rejected`} />
+                <KpiCard icon={Flag} label="Task reports" value={platform.reports_total} tint="hsl(0 75% 55%)" sub={`${platform.reports_open} open`} />
+                <KpiCard icon={Shield} label="Parental consents" value={platform.parental_consents} tint="hsl(140 60% 45%)" sub="Captured for minors" />
+              </div>
+            </>
+          )}
 
           {/* Trend */}
           <Card className="mb-6">
