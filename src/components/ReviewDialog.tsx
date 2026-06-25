@@ -31,12 +31,20 @@ export function ReviewDialog({
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState<number | null>(null);
   const [comment, setComment] = useState('');
+  const { moderateText, isChecking } = useContentModeration();
 
   const handleSubmit = async () => {
     const parsed = reviewSchema.safeParse({ rating, comment: comment || undefined });
     if (!parsed.success) {
       toast.error(parsed.error.errors[0].message);
       return;
+    }
+    if (comment.trim().length > 0) {
+      const check = await moderateText(comment, 'Review comment');
+      if (!check.allowed) {
+        toast.warning(check.reason || 'Please rephrase your review to keep it respectful.');
+        return;
+      }
     }
     await onSubmit(rating, comment);
   };
