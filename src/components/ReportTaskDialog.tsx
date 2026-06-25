@@ -102,8 +102,8 @@ export function ReportTaskDialog({ taskId }: ReportTaskDialogProps) {
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleSubmit} disabled={loading}>
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          <Button variant="destructive" onClick={handleSubmit} disabled={loading || isChecking}>
+            {(loading || isChecking) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Submit report
           </Button>
         </DialogFooter>
