@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SEO } from '@/components/SEO';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, Mail, Lock, User as UserIcon, ArrowRight, ShieldCheck, MapPin, Users } from 'lucide-react';
 import { z } from 'zod';
 import { OnboardingQuestions } from '@/components/OnboardingQuestions';
 import { lovable } from '@/integrations/lovable';
