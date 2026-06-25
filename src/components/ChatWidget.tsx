@@ -16,7 +16,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: "Hey there, neighbor! I'm Taskfy Assistant, your friendly guide to Taskfy. What can I help you with today?" }
+    { role: 'assistant', content: "Hey there, neighbor! I'm Taskify Assistant, your friendly guide to Taskify. What can I help you with today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -138,7 +138,7 @@ export function ChatWidget() {
           <CardHeader className="pb-3 bg-primary text-primary-foreground rounded-t-lg">
             <CardTitle className="text-lg flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
-              Taskfy Assistant
+              Taskify Assistant
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">

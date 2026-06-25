@@ -7,8 +7,8 @@ export default function Terms() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Terms of Service — Taskfy"
-        description="Read the Taskfy terms of service for the Arlington Heights and Buffalo Grove neighborhood task marketplace."
+        title="Terms of Service — Taskify"
+        description="Read the Taskify terms of service for the Arlington Heights and Buffalo Grove neighborhood task marketplace."
         path="/terms"
       />
       <Navbar />
@@ -22,7 +22,7 @@ export default function Terms() {
               <h2 className="text-xl font-semibold">1. Acceptance of Terms</h2>
               <p>
                 By posting tasks, sending offers, accepting offers, or otherwise using
-                Taskfy ("the Platform"), you agree to be bound by these Terms of
+                Taskify ("the Platform"), you agree to be bound by these Terms of
                 Service. If you do not agree, do not use the Platform.
               </p>
             </section>
@@ -42,7 +42,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold">3. Marketplace Role</h2>
               <p>
-                Taskfy is a peer-to-peer community marketplace. We do not employ
+                Taskify is a peer-to-peer community marketplace. We do not employ
                 helpers, do not perform tasks ourselves, and are not a party to any
                 agreement between users. All arrangements, payments, and task
                 completion are solely between the requester and the helper.
@@ -52,7 +52,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold">4. Payments (Off-App)</h2>
               <p>
-                Taskfy does not process, hold, or facilitate payments. Payment is
+                Taskify does not process, hold, or facilitate payments. Payment is
                 handled entirely off-app — users coordinate and arrange payment
                 directly with each other through Messages using whatever method
                 they agree on (cash, Venmo, Zelle, etc.). You are solely
@@ -87,7 +87,7 @@ export default function Terms() {
               <h2 className="text-xl font-semibold">7. Disputes</h2>
               <p>
                 Disputes between users must be resolved between the parties directly.
-                Taskfy may, at its discretion, suspend accounts but is not
+                Taskify may, at its discretion, suspend accounts but is not
                 obligated to mediate, refund, or arbitrate disputes.
               </p>
             </section>
@@ -96,7 +96,7 @@ export default function Terms() {
               <h2 className="text-xl font-semibold">8. Liability</h2>
               <p>
                 The Platform is provided "as is" without warranties of any kind.
-                Taskfy is not liable for any damages, injuries, losses, or
+                Taskify is not liable for any damages, injuries, losses, or
                 disputes arising from your use of the Platform or interactions with
                 other users. You use the Platform at your own risk.
               </p>

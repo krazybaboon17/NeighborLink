@@ -116,8 +116,8 @@ export default function Features() {
   return (
     <div className="min-h-screen bg-transparent">
       <SEO
-        title="Features — How Taskfy Works"
-        description="See how Taskfy connects neighbors: post tasks, get offers, verified helpers, off-app payments, and trust & safety tools."
+        title="Features — How Taskify Works"
+        description="See how Taskify connects neighbors: post tasks, get offers, verified helpers, off-app payments, and trust & safety tools."
         path="/features"
       />
       <Navbar />
@@ -134,7 +134,7 @@ export default function Features() {
               <span className="text-primary">Help & Be Helped</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Taskfy makes it easy to find help, offer assistance, and build stronger community connections.
+              Taskify makes it easy to find help, offer assistance, and build stronger community connections.
             </p>
           </div>
 
@@ -172,7 +172,7 @@ export default function Features() {
           {/* Highlights Section */}
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Why Choose Taskfy?</h2>
+              <h2 className="text-2xl font-bold mb-2">Why Choose Taskify?</h2>
               <p className="text-muted-foreground">Built with community values at its core</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

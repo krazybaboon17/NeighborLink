@@ -98,8 +98,8 @@ export default function ServiceHours() {
   return (
     <div className="min-h-screen bg-transparent">
       <SEO
-        title="Your service hours — Taskfy"
-        description="Track volunteer service hours earned by helping neighbors on Taskfy. Export verified hours for school, scouts, or community programs."
+        title="Your service hours — Taskify"
+        description="Track volunteer service hours earned by helping neighbors on Taskify. Export verified hours for school, scouts, or community programs."
         path="/service-hours"
       />
       <Navbar />

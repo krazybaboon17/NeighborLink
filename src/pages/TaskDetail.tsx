@@ -692,11 +692,11 @@ export default function TaskDetail() {
   return (
     <>
       <SEO
-        title={`${task.title} — ${task.category} in ${task.location} | Taskfy`.slice(0, 60)}
+        title={`${task.title} — ${task.category} in ${task.location} | Taskify`.slice(0, 60)}
         description={(() => {
           const base = (task.description || "").trim();
-          const suffix = ` ${task.category} task posted on Taskfy in ${task.location}. Send an offer to help your neighbor today.`;
-          const combined = base ? `${base}${base.length < 80 ? suffix : ""}` : `Help a neighbor with a ${task.category} task in ${task.location}. Post offers on Taskfy and connect with local, verified helpers.`;
+          const suffix = ` ${task.category} task posted on Taskify in ${task.location}. Send an offer to help your neighbor today.`;
+          const combined = base ? `${base}${base.length < 80 ? suffix : ""}` : `Help a neighbor with a ${task.category} task in ${task.location}. Post offers on Taskify and connect with local, verified helpers.`;
           return combined.slice(0, 155);
         })()}
         path={`/tasks/${task.id}`}
@@ -708,7 +708,7 @@ export default function TaskDetail() {
           description: task.description,
           areaServed: task.location,
           category: task.category,
-          provider: { "@type": "Organization", name: "Taskfy" },
+          provider: { "@type": "Organization", name: "Taskify" },
         }}
       />
       <Navbar />
@@ -789,7 +789,7 @@ export default function TaskDetail() {
                                 onClick={() =>
                                   window.open(
                                     googleCalendarUrl({
-                                      title: `Taskfy: ${task.title}`,
+                                      title: `Taskify: ${task.title}`,
                                       description: `${task.description}\n\nView task: ${window.location.href}`,
                                       location: preciseLocation?.address || task.location || undefined,
                                       start: s.start,
@@ -808,7 +808,7 @@ export default function TaskDetail() {
                                 variant="ghost"
                                 onClick={() =>
                                   downloadIcs(`taskfy-${task.id}-${s.key}`, {
-                                    title: `Taskfy: ${task.title}`,
+                                    title: `Taskify: ${task.title}`,
                                     description: `${task.description}\n\nView task: ${window.location.href}`,
                                     location: preciseLocation?.address || task.location || undefined,
                                     start: s.start,
@@ -1182,7 +1182,7 @@ export default function TaskDetail() {
 
                     {task.status === 'completed' && (
                       <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm text-green-700 flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4" /> Task complete. Thanks for using Taskfy
+                        <CheckCircle className="w-4 h-4" /> Task complete. Thanks for using Taskify
                       </div>
                     )}
 

@@ -181,8 +181,8 @@ export default function ProfilePage() {
   return (
     <>
       <SEO
-        title="Your profile — Taskfy"
-        description="Manage your Taskfy profile, contact preferences, verification status, and reviews from neighbors you've helped or hired."
+        title="Your profile — Taskify"
+        description="Manage your Taskify profile, contact preferences, verification status, and reviews from neighbors you've helped or hired."
         path="/profile"
       />
       <Navbar />

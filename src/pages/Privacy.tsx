@@ -7,8 +7,8 @@ export default function Privacy() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
-        title="Privacy Policy — Taskfy"
-        description="How Taskfy handles your data, including face verification frames that are processed in-memory and never stored."
+        title="Privacy Policy — Taskify"
+        description="How Taskify handles your data, including face verification frames that are processed in-memory and never stored."
         path="/privacy"
       />
       <Navbar />
@@ -36,7 +36,7 @@ export default function Privacy() {
                 We don't sell your data. We don't run third-party advertising
                 trackers. We don't collect or store any payment information —
                 payments are arranged and sent directly between users off-app,
-                outside of Taskfy. We don't store the camera frames used for age
+                outside of Taskify. We don't store the camera frames used for age
                 verification.
               </p>
             </section>

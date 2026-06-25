@@ -264,7 +264,7 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <SEO title="Admin Dashboard — Taskfy" description="Platform analytics and task completion stats." path="/admin/dashboard" />
+      <SEO title="Admin Dashboard — Taskify" description="Platform analytics and task completion stats." path="/admin/dashboard" />
       <Navbar />
       <div className="min-h-screen pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-7xl">

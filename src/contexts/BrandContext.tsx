@@ -13,9 +13,9 @@ interface BrandValue {
 }
 
 const BrandContext = createContext<BrandValue>({
-  name: "Taskfy",
+  name: "Taskify",
   mainPart: "Task",
-  accentPart: "fy",
+  accentPart: "ify",
   refresh: async () => {},
 });
 
@@ -23,23 +23,27 @@ const BrandContext = createContext<BrandValue>({
 export function splitBrandName(name: string): [string, string] {
   const n = (name || "").trim();
   if (n.length <= 2) return ["", n];
+  // Common suffix patterns get a clean split
+  const suffixes = ["ify", "ize", "ish", "ous", "ity", "ing", "ery", "ary", "ory"];
+  for (const s of suffixes) {
+    if (n.toLowerCase().endsWith(s) && n.length > s.length + 1) {
+      return [n.slice(0, n.length - s.length), n.slice(n.length - s.length)];
+    }
+  }
   const vowels = "aeiouyAEIOUY";
-  // find last vowel position
   let lastVowel = -1;
   for (let i = n.length - 1; i >= 0; i--) {
     if (vowels.includes(n[i])) { lastVowel = i; break; }
   }
   if (lastVowel === -1) return [n.slice(0, -1), n.slice(-1)];
-  // walk back over preceding consonants to include them in accent
   let start = lastVowel;
   while (start > 0 && !vowels.includes(n[start - 1])) start--;
-  // ensure main has at least 1 char
   if (start === 0) start = Math.max(1, n.length - 2);
   return [n.slice(0, start), n.slice(start)];
 }
 
 export function BrandProvider({ children }: { children: ReactNode }) {
-  const [name, setName] = useState("Taskfy");
+  const [name, setName] = useState("Taskify");
 
   const fetchName = async () => {
     const { data } = await (supabase as any)
@@ -63,7 +67,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
 
   // Update <title> base + favicon? Just keep simple — only document title prefix updates.
   useEffect(() => {
-    document.title = document.title.replace(/^(Taskfy|[^—|]+?)\s*(—|\|)/, `${name} $2`);
+    document.title = document.title.replace(/^(Taskify|[^—|]+?)\s*(—|\|)/, `${name} $2`);
   }, [name]);
 
   return (

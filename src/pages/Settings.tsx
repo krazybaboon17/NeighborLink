@@ -242,7 +242,7 @@ export default function Settings() {
             <LinkRow to="/privacy" label="Privacy Policy" />
             <Row label="Made with" hint="Built for neighbors in Arlington Heights & Buffalo Grove.">
               <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                <Heart className="w-3.5 h-3.5 text-[#B22234]" /> Taskfy
+                <Heart className="w-3.5 h-3.5 text-[#B22234]" /> Taskify
               </span>
             </Row>
           </Section>
@@ -253,7 +253,7 @@ export default function Settings() {
               <CardTitle className="text-base flex items-center gap-2 text-destructive">
                 <Trash2 className="w-4 h-4" /> Danger zone
               </CardTitle>
-              <CardDescription>Sign out or permanently delete your Taskfy profile.</CardDescription>
+              <CardDescription>Sign out or permanently delete your Taskify profile.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
@@ -270,7 +270,7 @@ export default function Settings() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This removes your profile, tasks, offers, and messages from Taskfy.
+                        This removes your profile, tasks, offers, and messages from Taskify.
                         This action can't be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>

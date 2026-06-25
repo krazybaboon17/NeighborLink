@@ -223,8 +223,8 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent p-4 relative overflow-hidden">
       <SEO
-        title="Sign in or sign up — Taskfy"
-        description="Create your free Taskfy account to post tasks, send offers, and connect with verified neighbors in Arlington Heights and Buffalo Grove."
+        title="Sign in or sign up — Taskify"
+        description="Create your free Taskify account to post tasks, send offers, and connect with verified neighbors in Arlington Heights and Buffalo Grove."
         path="/auth"
       />
 
@@ -245,13 +245,13 @@ export default function Auth() {
               transition={{ delay: 0.2, type: "spring", stiffness: 500, damping: 15 }}
             >
               <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center glow-pulse">
-                <span className="text-primary-foreground font-bold text-2xl">D</span>
+                <span className="text-primary-foreground font-bold text-2xl">T</span>
               </div>
             </motion.div>
-            <CardTitle className="text-2xl">Welcome to Taskfy</CardTitle>
+            <CardTitle className="text-2xl">Welcome to Taskify</CardTitle>
             <CardDescription className="flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-primary" />
-              Connect with your community
+              Your local marketplace for getting things done
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -356,7 +356,7 @@ export default function Auth() {
                       className="mt-0.5 h-4 w-4 rounded border-input text-primary focus:ring-primary"
                     />
                     <span>
-                      I agree to Taskfy's{' '}
+                      I agree to Taskify's{' '}
                       <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">Terms of Service</a>{' '}
                       and{' '}
                       <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline">Privacy Policy</a>.

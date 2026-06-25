@@ -19,13 +19,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <SEO
-        title="Taskfy — Local Help in Arlington Heights & Buffalo Grove"
+        title="Taskify — Local Help in Arlington Heights & Buffalo Grove"
         description="Hyperlocal task marketplace connecting Arlington Heights and Buffalo Grove neighbors for lawn care, errands, moving help, pet care and more."
         path="/"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "Taskfy",
+          name: "Taskify",
           url: "https://myneighborlink.lovable.app",
           potentialAction: {
             "@type": "SearchAction",
