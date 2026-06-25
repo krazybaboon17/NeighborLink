@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { sanitizeTextMax } from '@/lib/sanitize';
+import { useContentModeration } from '@/hooks/useContentModeration';
 
 interface ReportTaskDialogProps {
   taskId: string;
