@@ -15,7 +15,7 @@ type Step = {
   placement?: 'auto' | 'center';
 };
 
-const STEPS: Step[] = [
+const DESKTOP_STEPS: Step[] = [
   {
     id: 'welcome',
     title: 'Welcome to Taskify 👋',
@@ -70,6 +70,58 @@ const STEPS: Step[] = [
   },
 ];
 
+// Mobile version — nav lives behind a hamburger, so we keep everything
+// centered with descriptive copy + "take me there" buttons instead of
+// trying to point at hidden elements.
+const MOBILE_STEPS: Step[] = [
+  {
+    id: 'welcome',
+    title: 'Welcome to Taskify 👋',
+    body: 'Your local marketplace for getting things done. Here\'s a 30-second tour.',
+    placement: 'center',
+  },
+  {
+    id: 'browse',
+    title: 'Browse Tasks',
+    body: 'See what neighbors need help with — filter by category, distance, or verified posters.',
+    placement: 'center',
+    route: { path: '/tasks', label: 'Open Browse Tasks' },
+  },
+  {
+    id: 'post',
+    title: 'Post a Task',
+    body: 'Need a hand? Tap the menu, then Post Task. Pick a budget range — neighbors will send offers.',
+    placement: 'center',
+    route: { path: '/post-task', label: 'Post your first task' },
+  },
+  {
+    id: 'mytasks',
+    title: 'My Tasks',
+    body: 'Track tasks you posted and offers you sent. Approve completions and leave reviews here.',
+    placement: 'center',
+    route: { path: '/my-tasks', label: 'Open My Tasks' },
+  },
+  {
+    id: 'messages',
+    title: 'Messages',
+    body: 'Coordinate details and payment directly with neighbors. Taskify never touches your money — pay off-app.',
+    placement: 'center',
+    route: { path: '/conversations', label: 'Open Messages' },
+  },
+  {
+    id: 'profile',
+    title: 'Profile & Settings',
+    body: 'Tap your avatar in the menu to edit your bio, verify your identity, or tweak preferences.',
+    placement: 'center',
+  },
+  {
+    id: 'done',
+    title: "You're all set! 🎉",
+    body: 'Replay this tour anytime from Settings → Appearance.',
+    placement: 'center',
+  },
+];
+
 const KEY = (userId: string) => `taskfy.tour.v1.${userId}`;
 
 function useTargetRect(selector?: string) {
@@ -100,32 +152,66 @@ function useTargetRect(selector?: string) {
   return rect;
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = () => setIsMobile(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return isMobile;
+}
+
 export function Tour() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const STEPS = isMobile ? MOBILE_STEPS : DESKTOP_STEPS;
   const [active, setActive] = useState(false);
   const [index, setIndex] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Start tour for first-time users (backed by DB so it persists across devices).
+  // Mark "seen" atomically so the tour never re-shows even if the user
+  // closes/refreshes mid-tour. Called the moment the tour becomes visible.
+  const markSeen = (uid: string) => {
+    localStorage.setItem(KEY(uid), 'shown');
+    supabase.from('profiles').update({ has_seen_tour: true } as any).eq('id', uid).then(() => {});
+  };
+
+  // Auto-start ONLY for brand-new accounts (profile created in the last 10 minutes).
+  // After that, the only way to see the tour is via Settings → Replay welcome tour.
   useEffect(() => {
     if (!user) return;
     const flag = localStorage.getItem(KEY(user.id));
-    if (flag) return; // fast path — already seen on this device
+    if (flag) return; // already shown on this device
 
-    // Check DB in case this is a new device for a returning user
     supabase
       .from('profiles')
-      .select('has_seen_tour')
+      .select('has_seen_tour, created_at')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         const seen = !!(data as any)?.has_seen_tour;
         if (seen) {
           localStorage.setItem(KEY(user.id), 'done');
-        } else {
-          timeoutRef.current = setTimeout(() => setActive(true), 800);
+          return;
         }
+        // Only auto-launch if profile is freshly created (signup just happened).
+        const createdAt = (data as any)?.created_at ? new Date((data as any).created_at).getTime() : 0;
+        const ageMs = Date.now() - createdAt;
+        const TEN_MIN = 10 * 60 * 1000;
+        if (!createdAt || ageMs > TEN_MIN) {
+          // Returning user with the flag never set (legacy). Don't pester them — mark as seen.
+          markSeen(user.id);
+          return;
+        }
+        timeoutRef.current = setTimeout(() => {
+          setActive(true);
+          markSeen(user.id);
+        }, 800);
       });
 
     return () => {
@@ -143,11 +229,8 @@ export function Tour() {
   const step = STEPS[index];
   const rect = useTargetRect(active ? step?.target : undefined);
 
-  const finish = (skipped = false) => {
-    if (user) {
-      localStorage.setItem(KEY(user.id), skipped ? 'skipped' : 'done');
-      supabase.from('profiles').update({ has_seen_tour: true } as any).eq('id', user.id);
-    }
+  const finish = (_skipped = false) => {
+    if (user) markSeen(user.id);
     setActive(false);
     setIndex(0);
   };
@@ -161,14 +244,14 @@ export function Tour() {
   // Tooltip position
   const tooltipStyle = useMemo<React.CSSProperties>(() => {
     if (!active) return {};
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 360;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 640;
+    const tipW = Math.min(340, vw - 24);
     if (!rect || step.placement === 'center' || !step.target) {
-      return { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' };
+      return { left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: tipW };
     }
     const pad = 12;
-    const tipW = 340;
-    const tipH = 220;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const tipH = 240;
     // Prefer below, else above
     const below = rect.bottom + pad + tipH < vh;
     const top = below ? rect.bottom + pad : Math.max(pad, rect.top - tipH - pad);
