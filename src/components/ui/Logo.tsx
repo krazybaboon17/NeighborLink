@@ -54,35 +54,28 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
           strokeWidth="1"
         />
 
-        {/* Handshake — two interlocking forearms meeting at the center */}
+        {/* Handshake — two clasped hands, bold and legible at any size */}
         <g
           stroke={BRAND_MAIN}
-          strokeWidth="3"
+          strokeWidth="3.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
         >
-          {/* Left forearm */}
-          <path d="M11 38 L24 32 L33 36" />
-          {/* Right forearm */}
-          <path d="M53 38 L40 32 L31 36" />
-          {/* Left hand grip */}
-          <path d="M24 32 L26 28 L32 28 L34 31" />
-          {/* Right hand grip */}
-          <path d="M40 32 L38 28 L32 28 L30 31" />
+          {/* Left forearm + hand */}
+          <path d="M10 40 L22 34" />
+          <path d="M22 34 C 26 30, 30 30, 34 34" />
+          {/* Right forearm + hand */}
+          <path d="M54 40 L42 34" />
+          <path d="M42 34 C 38 30, 34 30, 30 34" />
+          {/* Thumb crease left */}
+          <path d="M26 31 L29 33" strokeWidth="2.5" />
+          {/* Thumb crease right */}
+          <path d="M38 31 L35 33" strokeWidth="2.5" />
         </g>
 
-        {/* Accent clasp at the handshake center */}
-        <circle cx="32" cy="34" r="3.2" fill={BRAND_ACCENT} />
-        <circle cx="32" cy="34" r="1.2" fill="#fff" />
-
-        {/* Tiny spark — keeps the "community spark" feel */}
-        <g transform="translate(46 18)" opacity="0.95">
-          <path
-            d="M0 -3.4 L0.9 -0.9 L3.4 0 L0.9 0.9 L0 3.4 L-0.9 0.9 L-3.4 0 L-0.9 -0.9 Z"
-            fill={BRAND_ACCENT}
-          />
-        </g>
+        {/* Accent clasp dot — the "spark" of community */}
+        <circle cx="32" cy="34" r="2.8" fill={BRAND_ACCENT} stroke={BRAND_MAIN} strokeWidth="1.5" />
 
         <defs>
           <linearGradient id="badge-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
