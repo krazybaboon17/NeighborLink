@@ -16,6 +16,31 @@ import { lovable } from '@/integrations/lovable';
 import { motion } from 'framer-motion';
 import { FloatingBubbles } from '@/components/ui/FloatingBubbles';
 
+function CommunityMark({ className }: { className?: string }) {
+  // Three neighbors linked around a shared hearth — a community ring.
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      {/* connecting ring */}
+      <circle cx="24" cy="24" r="9" opacity="0.35" strokeDasharray="2 3" />
+      {/* shared hearth / home in the center */}
+      <path d="M21 25.5l3-3 3 3v3.5h-6z" fill="currentColor" stroke="none" opacity="0.9" />
+      {/* three neighbors around the ring */}
+      <g>
+        <circle cx="24" cy="9.5" r="2.6" fill="currentColor" stroke="none" />
+        <path d="M19.5 16.5c.8-2.4 2.6-3.8 4.5-3.8s3.7 1.4 4.5 3.8" />
+      </g>
+      <g>
+        <circle cx="9.5" cy="33" r="2.6" fill="currentColor" stroke="none" />
+        <path d="M5 40c.8-2.4 2.6-3.8 4.5-3.8S13.2 37.6 14 40" />
+      </g>
+      <g>
+        <circle cx="38.5" cy="33" r="2.6" fill="currentColor" stroke="none" />
+        <path d="M34 40c.8-2.4 2.6-3.8 4.5-3.8S42.2 37.6 43 40" />
+      </g>
+    </svg>
+  );
+}
+
 const signUpSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address').max(255),
   password: z.string().min(6, 'Password should be at least 6 characters').max(72, 'Password is too long (max 72 characters)'),
@@ -244,11 +269,11 @@ export default function Auth() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-              <span className="text-primary-foreground font-bold text-xl tracking-tight">T</span>
-            </div>
-            <span className="font-display text-xl font-semibold tracking-tight">Taskify</span>
+          <div className="inline-flex items-center gap-3 self-start rounded-2xl border border-border/70 bg-background/70 backdrop-blur-xl px-3 py-2 shadow-lg shadow-primary/5 ring-1 ring-inset ring-white/5">
+            <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 via-background to-secondary/15 border border-border/60">
+              <CommunityMark className="h-6 w-6 text-primary" />
+            </span>
+            <span className="font-display text-lg font-semibold tracking-tight pr-1">Taskify</span>
           </div>
 
           <div className="space-y-5">
@@ -295,8 +320,11 @@ export default function Auth() {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 500, damping: 15 }}
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-                  <span className="text-primary-foreground font-bold text-2xl">T</span>
+                <div className="inline-flex items-center gap-2.5 rounded-2xl border border-border/70 bg-background/70 backdrop-blur-xl px-3 py-2 shadow-lg shadow-primary/5 ring-1 ring-inset ring-white/5">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 via-background to-secondary/15 border border-border/60">
+                    <CommunityMark className="h-5 w-5 text-primary" />
+                  </span>
+                  <span className="font-display text-base font-semibold tracking-tight pr-1">Taskify</span>
                 </div>
               </motion.div>
               <CardTitle className="font-display text-2xl tracking-tight">Welcome to Taskify</CardTitle>
