@@ -125,22 +125,22 @@ export const Hero = () => {
             {/* Search box */}
             <form
               onSubmit={handleSearch}
-              className="bg-card rounded-[20px] p-2 flex items-center gap-2 max-w-xl"
+              className="bg-card rounded-[20px] p-2 flex flex-col sm:flex-row sm:items-center gap-2 max-w-xl"
               style={{ boxShadow: "0 20px 60px hsl(60 3% 17% / 0.08)" }}
             >
-              <div className="flex items-center flex-1 px-4">
-                <Search className="w-5 h-5 text-muted-foreground mr-3 shrink-0" aria-hidden="true" />
+              <div className="flex items-center flex-1 min-w-0 px-3 sm:px-4">
+                <Search className="w-5 h-5 text-muted-foreground mr-2 sm:mr-3 shrink-0" aria-hidden="true" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="What do you need help with?"
-                  className="w-full bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground"
+                  className="w-full min-w-0 bg-transparent border-0 outline-none py-3 text-base font-body placeholder:text-muted-foreground"
                 />
               </div>
               <button
                 type="submit"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-body font-semibold px-6 py-3.5 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 shrink-0"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-body font-semibold px-6 py-3.5 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25 shrink-0 w-full sm:w-auto"
               >
                 Find Helpers
               </button>
