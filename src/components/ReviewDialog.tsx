@@ -94,8 +94,8 @@ export function ReviewDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleSubmit} disabled={submitting || isChecking}>
+            {(submitting || isChecking) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Submit review
           </Button>
         </DialogFooter>
