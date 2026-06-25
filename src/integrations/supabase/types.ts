@@ -750,6 +750,7 @@ export type Database = {
         Returns: boolean
       }
       admin_delete_task: { Args: { p_task_id: string }; Returns: boolean }
+      admin_get_platform_stats: { Args: never; Returns: Json }
       admin_reject_verification: {
         Args: { verification_id: string }
         Returns: boolean
