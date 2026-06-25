@@ -36,6 +36,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
+  const { moderateText, isChecking: isModerating } = useContentModeration();
 
   const [fullName, setFullName] = useState('');
   const [bio, setBio] = useState('');
