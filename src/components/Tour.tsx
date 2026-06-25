@@ -15,7 +15,7 @@ type Step = {
   placement?: 'auto' | 'center';
 };
 
-const STEPS: Step[] = [
+const DESKTOP_STEPS: Step[] = [
   {
     id: 'welcome',
     title: 'Welcome to Taskify 👋',
@@ -66,6 +66,58 @@ const STEPS: Step[] = [
     id: 'done',
     title: "You're all set! 🎉",
     body: 'You can replay this tour anytime from Settings → Appearance.',
+    placement: 'center',
+  },
+];
+
+// Mobile version — nav lives behind a hamburger, so we keep everything
+// centered with descriptive copy + "take me there" buttons instead of
+// trying to point at hidden elements.
+const MOBILE_STEPS: Step[] = [
+  {
+    id: 'welcome',
+    title: 'Welcome to Taskify 👋',
+    body: 'Your local marketplace for getting things done. Here\'s a 30-second tour.',
+    placement: 'center',
+  },
+  {
+    id: 'browse',
+    title: 'Browse Tasks',
+    body: 'See what neighbors need help with — filter by category, distance, or verified posters.',
+    placement: 'center',
+    route: { path: '/tasks', label: 'Open Browse Tasks' },
+  },
+  {
+    id: 'post',
+    title: 'Post a Task',
+    body: 'Need a hand? Tap the menu, then Post Task. Pick a budget range — neighbors will send offers.',
+    placement: 'center',
+    route: { path: '/post-task', label: 'Post your first task' },
+  },
+  {
+    id: 'mytasks',
+    title: 'My Tasks',
+    body: 'Track tasks you posted and offers you sent. Approve completions and leave reviews here.',
+    placement: 'center',
+    route: { path: '/my-tasks', label: 'Open My Tasks' },
+  },
+  {
+    id: 'messages',
+    title: 'Messages',
+    body: 'Coordinate details and payment directly with neighbors. Taskify never touches your money — pay off-app.',
+    placement: 'center',
+    route: { path: '/conversations', label: 'Open Messages' },
+  },
+  {
+    id: 'profile',
+    title: 'Profile & Settings',
+    body: 'Tap your avatar in the menu to edit your bio, verify your identity, or tweak preferences.',
+    placement: 'center',
+  },
+  {
+    id: 'done',
+    title: "You're all set! 🎉",
+    body: 'Replay this tour anytime from Settings → Appearance.',
     placement: 'center',
   },
 ];
