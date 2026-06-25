@@ -244,11 +244,11 @@ export default function Auth() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-              <span className="text-primary-foreground font-bold text-xl tracking-tight">T</span>
-            </div>
-            <span className="font-display text-xl font-semibold tracking-tight">Taskify</span>
+          <div className="inline-flex items-center gap-3 self-start rounded-2xl border border-border/70 bg-background/70 backdrop-blur-xl px-3 py-2 shadow-lg shadow-primary/5 ring-1 ring-inset ring-white/5">
+            <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 via-background to-secondary/15 border border-border/60">
+              <CommunityMark className="h-6 w-6 text-primary" />
+            </span>
+            <span className="font-display text-lg font-semibold tracking-tight pr-1">Taskify</span>
           </div>
 
           <div className="space-y-5">
