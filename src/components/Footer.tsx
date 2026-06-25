@@ -27,7 +27,7 @@ export const Footer = () => {
               <Logo size="sm" />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              AI-powered community marketplace connecting neighbors for trusted, local task services.
+              Your local marketplace for getting things done — connecting neighbors for trusted help across town.
             </p>
             <div className="flex space-x-2">
               {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
