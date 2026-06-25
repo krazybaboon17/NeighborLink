@@ -118,6 +118,14 @@ export default function ProfilePage() {
 
     setSubmitting(true);
     try {
+      if (bio && bio.trim().length > 0) {
+        const check = await moderateText(bio, 'Profile bio');
+        if (!check.allowed) {
+          toast.warning(check.reason || 'Please rephrase your bio to keep things friendly for the community.');
+          setSubmitting(false);
+          return;
+        }
+      }
       let publicUrl = avatarUrl;
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
