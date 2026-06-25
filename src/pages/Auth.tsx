@@ -295,8 +295,11 @@ export default function Auth() {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 500, damping: 15 }}
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-                  <span className="text-primary-foreground font-bold text-2xl">T</span>
+                <div className="inline-flex items-center gap-2.5 rounded-2xl border border-border/70 bg-background/70 backdrop-blur-xl px-3 py-2 shadow-lg shadow-primary/5 ring-1 ring-inset ring-white/5">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 via-background to-secondary/15 border border-border/60">
+                    <CommunityMark className="h-5 w-5 text-primary" />
+                  </span>
+                  <span className="font-display text-base font-semibold tracking-tight pr-1">Taskify</span>
                 </div>
               </motion.div>
               <CardTitle className="font-display text-2xl tracking-tight">Welcome to Taskify</CardTitle>
