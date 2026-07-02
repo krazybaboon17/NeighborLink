@@ -4,51 +4,51 @@
 
 @layer base {
   :root {
-    /* Warm beige & brown palette */
-    --background: 36 40% 94%;          /* #F5EFE4 warm beige */
-    --foreground: 30 15% 15%;          /* deep espresso text */
+    /* Warm editorial palette — NeighborLink */
+    --background: 33 38% 95%;          /* #F9F5F0 warm cream */
+    --foreground: 60 3% 17%;           /* #2C2C2A text dark */
 
-    --card: 36 45% 97%;                /* creamy card */
-    --card-foreground: 30 15% 15%;
+    --card: 0 0% 100%;                 /* pure white cards */
+    --card-foreground: 60 3% 17%;
 
-    --popover: 36 45% 97%;
-    --popover-foreground: 30 15% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 60 3% 17%;
 
-    --primary: 29 53% 36%;             /* #8B5A2B saddle brown */
-    --primary-foreground: 36 45% 97%;
+    --primary: 11 56% 60%;             /* #D4735E terracotta */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 34 32% 88%;           /* soft tan */
-    --secondary-foreground: 30 15% 15%;
+    --secondary: 33 30% 92%;
+    --secondary-foreground: 60 3% 17%;
 
-    --muted: 34 28% 90%;
-    --muted-foreground: 30 10% 32%;
+    --muted: 33 25% 90%;
+    --muted-foreground: 60 2% 29%;     /* #4A4A48 warm gray */
 
-    --accent: 28 45% 55%;              /* warm caramel */
-    --accent-foreground: 36 45% 97%;
+    --accent: 105 11% 56%;             /* #8B9D83 sage */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 65% 45%;
+    --destructive: 0 65% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 32 22% 82%;
-    --input: 32 22% 82%;
-    --ring: 29 53% 36%;
+    --border: 33 20% 86%;
+    --input: 33 20% 86%;
+    --ring: 11 56% 60%;
 
     --radius: 1.25rem;
 
-    --card-shadow: 0 4px 16px hsl(30 20% 15% / 0.05), 0 1px 4px hsl(30 20% 15% / 0.04);
-    --card-shadow-hover: 0 20px 60px hsl(30 20% 15% / 0.14), 0 4px 16px hsl(30 20% 15% / 0.08);
+    --card-shadow: 0 4px 16px hsl(60 3% 17% / 0.04), 0 1px 4px hsl(60 3% 17% / 0.03);
+    --card-shadow-hover: 0 20px 60px hsl(60 3% 17% / 0.12), 0 4px 16px hsl(60 3% 17% / 0.06);
     --transition-smooth: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    --glass-bg: rgba(245, 239, 228, 0.78);
-    --glass-border: rgba(139, 90, 43, 0.12);
+    --glass-bg: rgba(249, 245, 240, 0.78);
+    --glass-border: rgba(212, 115, 94, 0.1);
 
-    --sidebar-background: 34 32% 90%;
-    --sidebar-foreground: 30 15% 15%;
-    --sidebar-primary: 29 53% 36%;
-    --sidebar-primary-foreground: 36 45% 97%;
-    --sidebar-accent: 34 28% 86%;
-    --sidebar-accent-foreground: 30 15% 15%;
-    --sidebar-border: 32 22% 82%;
-    --sidebar-ring: 29 53% 36%;
+    --sidebar-background: 33 30% 93%;
+    --sidebar-foreground: 60 3% 17%;
+    --sidebar-primary: 11 56% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 33 25% 88%;
+    --sidebar-accent-foreground: 60 3% 17%;
+    --sidebar-border: 33 20% 86%;
+    --sidebar-ring: 11 56% 60%;
   }
 
   .grain-overlay {
